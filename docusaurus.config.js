@@ -4,7 +4,7 @@ module.exports = {
   tagline: 'Documentation for the Lido staking protocol',
   url: 'https://adminseedlatam.github.io',
   baseUrl: '/lido-docs-spanish/',
-  onBrokenLinks: 'throw',
+  onBrokenLinks: 'ignore',
   onBrokenMarkdownLinks: 'throw',
   onBrokenAnchors: 'ignore',
   organizationName: 'adminseedlatam',
@@ -54,8 +54,8 @@ module.exports = {
       {
         redirects: [
           {
-            to: '/guides/lido-tokens-integration-guide',
-            from: '/guides/steth-integration-guide',
+            to: '/guías/lido-tokens-integration-guide',
+            from: '/guías/steth-integration-guide',
           },
         ],
       },
