@@ -1,123 +1,105 @@
-# Validator Keys
+# Claves del Validador
 
-Validator keys are added in several sequential steps. These steps are similar for each time new keys are added.
+Las claves del validador se agregan en varios pasos secuenciales. Estos pasos son similares cada vez que se añaden nuevas claves.
 
-## Generating signing keys
+## Generación de Claves de Firma
 
-Upon inclusion into the protocol, a Node Operator should generate and submit a set of [BLS12-381]
-public keys that will be used by the protocol for making ether deposits to the Ethereum
-[DepositContract](https://etherscan.io/address/0x00000000219ab540356cBB839Cbe05303d7705Fa).
-Along with the keys, a Node Operator submits a set of the corresponding signatures [as defined in the spec].
-The `DepositMessage` used for generating the signature must be the following:
+Una vez incluido en el protocolo, un Operador de Nodo debe generar y enviar un conjunto de claves públicas [BLS12-381]. Estas claves serán utilizadas por el protocolo para depositar ether en el [DepositContract de Ethereum](https://etherscan.io/address/0x00000000219ab540356cBB839Cbe05303d7705Fa). Junto con las claves, el Operador de Nodo envía un conjunto de firmas correspondientes [como se define en la especificación]. El `DepositMessage` utilizado para generar la firma debe cumplir con los siguientes parámetros:
 
-- `pubkey` must be derived from the private key used for signing the message;
-- `amount` must equal to 32 ether;
-- `withdrawal_credentials` must equal to the protocol credentials set by the DAO.
+- `pubkey`: Derivado de la clave privada utilizada para firmar el mensaje.
+- `amount`: Debe ser igual a 32 ether.
+- `withdrawal_credentials`: Debe coincidir con las credenciales de retiro establecidas por el DAO.
 
-### Withdrawal Credentials
+### Credenciales de Retiro
 
-Make sure to obtain correct withdrawal address by finding it inside the active withdrawal credentials by calling the contract via [`StakingRouter.getWithdrawalCredentials()`](/contracts/staking-router.md#getwithdrawalcredentials).
+Asegúrese de obtener la dirección de retiro correcta encontrándola dentro de las credenciales de retiro activas utilizando [`StakingRouter.getWithdrawalCredentials()`](/contracts/staking-router.md#getwithdrawalcredentials).
 
-For example withdrawal credentials `0x010000000000000000000000b9d7934878b5fb9610b3fe8a5e441e8fad7e293f` mean that the withdrawal address is `0xb9d7934878b5fb9610b3fe8a5e441e8fad7e293f`. For Mainnet, always verify the address is correct using an [explorer] - you will see that it was deployed from the Lido deployer.
+Por ejemplo, las credenciales de retiro `0x010000000000000000000000b9d7934878b5fb9610b3fe8a5e441e8fad7e293f` significan que la dirección de retiro es `0xb9d7934878b5fb9610b3fe8a5e441e8fad7e293f`. Para Mainnet, verifique siempre que la dirección sea correcta utilizando un [explorador] - verá que fue desplegada desde el desplegador de Lido.
 
 [bls12-381]: https://ethresear.ch/t/pragmatic-signature-aggregation-with-bls/2105
-[as defined in the spec]: https://github.com/ethereum/annotated-spec/blob/master/phase0/beacon-chain.md#depositmessage
-[explorer]: https://etherscan.io/address/0xb9d7934878b5fb9610b3fe8a5e441e8fad7e293f
+[como se define en la especificación]: https://github.com/ethereum/annotated-spec/blob/master/phase0/beacon-chain.md#depositmessage
+[explorador]: https://etherscan.io/address/0xb9d7934878b5fb9610b3fe8a5e441e8fad7e293f
 
-### Using staking-deposit-cli
+### Uso de staking-deposit-cli
 
-Use the latest release of [`staking-deposit-cli`].
+Utilice la última versión de [`staking-deposit-cli`].
 
-Example command usage:
+Ejemplo de uso del comando:
 
 ```sh
 ./deposit new-mnemonic --folder . --num_validators 123 --mnemonic_language english --chain mainnet --eth1_withdrawal_address 0x123
 ```
 
-Here, `chain` is one of the available chain names (run the command with the `--help` flag
-to see the possible values: `./deposit new-mnemonic --help`) and `eth1_withdrawal_address` is the withdrawal address from the protocol documentation.
+Aquí, `chain` es uno de los nombres de cadena disponibles (ejecute el comando con la bandera `--help` para ver los valores posibles: `./deposit new-mnemonic --help`) y `eth1_withdrawal_address` es la dirección de retiro según la documentación del protocolo.
 
-As a result of running this, the `validator_keys` directory will be created in the current working
-directory. It will contain a deposit data file named `deposit-data-*.json` and a number of private key
-stores named `keystore-*.json`, the latter encrypted with the password you were asked for when running
-the command.
+Como resultado de ejecutar esto, se creará el directorio `validator_keys` en el directorio de trabajo actual. Contendrá un archivo de datos de depósito llamado `deposit-data-*.json` y una serie de almacenes de claves privadas llamados `keystore-*.json`, estos últimos encriptados con la contraseña solicitada al ejecutar el comando.
 
-If you chose to use the UI for submitting the keys, you’ll need to pass the JSON data found in the
-deposit data file to the protocol (see the next section). If you wish, you can remove any other
-fields except `pubkey` and `signature` from the array items.
+Si opta por utilizar la interfaz de usuario para enviar las claves, deberá pasar los datos JSON encontrados en el archivo de datos de depósito al protocolo (ver la siguiente sección). Si lo desea, puede eliminar cualquier otro campo excepto `pubkey` y `signature` de los elementos del array.
 
-Never share the generated mnemonic and your private keys with anyone, including the protocol members
-and DAO holders.
+Nunca comparta la mnemotécnica generada ni sus claves privadas con nadie, incluidos los miembros del protocolo y los titulares del DAO.
 
 [`staking-deposit-cli`]: https://github.com/ethereum/staking-deposit-cli/releases
 
-## Validating the keys
+## Validación de las Claves
 
-Please, make sure to check the keys validity before submitting them on-chain.
+Por favor, asegúrese de verificar la validez de las claves antes de enviarlas a la cadena.
 
-Lido submitter has validation functionality built-in, keys will be checked before submitting.
+El subidor de Lido tiene funcionalidad de validación incorporada; las claves se verificarán antes de enviarlas.
 
-If you will be submitting keys manually via Lido contract, you can use Lido CLI. It's a Python package which you can install with pip:
+Si va a enviar claves manualmente a través del contrato de Lido, puede utilizar Lido CLI. Es un paquete Python que puede instalar con pip:
 
 ```sh
 pip install lido-cli
 lido-cli --rpc http://1.2.3.4:8545 validate_file_keys --file keys.json
 ```
 
-You would need an RPC endpoint - a local node / RPC provider (eg Alchemy/Infura).
+Necesitará un punto final RPC: un nodo local / proveedor de RPC (por ejemplo, Alchemy/Infura).
 
-## Submitting the keys
+## Envío de las Claves
 
-> Please note, that the withdrawal address should be added to the Lido Node Operators Registry before it can submit the signing keys. Adding an address to the Node Operators Registry happens via DAO voting. When providing withdrawal address to be added to the Node Operators Registry, keep in mind the following:
+> Tenga en cuenta que la dirección de retiro debe agregarse al Registro de Operadores de Nodo de Lido antes de poder enviar las claves de firma. Agregar una dirección al Registro de Operadores de Nodo sucede a través de votación del DAO. Al proporcionar la dirección de retiro para que se agregue al Registro de Operadores de Nodo, tenga en cuenta lo siguiente:
 >
-> - it is the address that will receive rewards;
-> - it is the address you will be using for submitting keys to Lido;
-> - you should be able to access it at any time in case of emergency;
-> - you can use multi-sig for it if you wish to;
-> - you will not be able to replace it by another address/multi-sig later.
+> - Es la dirección que recibirá las recompensas.
+> - Es la dirección que utilizará para enviar claves a Lido.
+> - Debe poder acceder a ella en cualquier momento en caso de emergencia.
+> - Puede usar multi-firma si lo desea.
+> - No podrá reemplazarla por otra dirección/multi-firma más tarde.
 
-After generating the keys, a Node Operator submits them to the protocol. To do this, they send a
-transaction from the Node Operator’s withdrawal address to the `NodeOperatorsRegistry` contract
-instance, calling [`addSigningKeys` function] and with the following arguments:
+Después de generar las claves, un Operador de Nodo las envía al protocolo. Para hacer esto, envían una transacción desde la dirección de retiro del Operador de Nodo al contrato `NodeOperatorsRegistry`, llamando a la función [`addSigningKeys`] con los siguientes argumentos:
 
 ```
-* `uint256 _nodeOperatorId` the zero-based sequence number of the operator in the list;
-* `uint256 _keysCount` the number of keys being submitted;
-* `bytes _publicKeys` the concatenated keys;
-* `bytes _signatures` the concatenated signatures.
+* `uint256 _nodeOperatorId`: el número de secuencia basado en cero del operador en la lista;
+* `uint256 _keysCount`: el número de claves que se envían;
+* `bytes _publicKeys`: las claves concatenadas;
+* `bytes _signatures`: las firmas concatenadas.
 ```
 
-The address of the `NodeOperatorsRegistry` contract instance can be obtained by calling the
-[`getOperators()` function] on the `Lido` contract instance. The ABI of the `NodeOperatorsRegistry`
-contract can be found on the corresponding contract page on Etherscan or in `***-abi.zip` of the latest release on the [lido-dao releases github page](https://github.com/lidofinance/lido-dao/releases).
+Puede obtener la dirección del contrato `NodeOperatorsRegistry` llamando a la función [`getOperators()`] en la instancia del contrato `Lido`. El ABI del contrato `NodeOperatorsRegistry` se puede encontrar en la página correspondiente del contrato en Etherscan o en `***-abi.zip` de la última versión en la [página de lanzamientos de lido-dao en GitHub](https://github.com/lidofinance/lido-dao/releases).
 
-Operator id for a given reward address can be obtained by successively calling
-[`NodeOperatorsRegistry.getNodeOperator`] with the increasing `_id` argument until you get the
-operator with the matching `rewardAddress`.
+El identificador del operador para una dirección de recompensa dada se puede obtener llamando sucesivamente a [`NodeOperatorsRegistry.getNodeOperator`] con el argumento `_id` creciente hasta que se obtenga el operador con la dirección de recompensa coincidente.
 
-Etherscan pages for the Holešky contracts:
+Páginas de Etherscan para los contratos Holešky:
 
 - [`Lido`](https://holesky.etherscan.io/address/0x3F1c547b21f65e10480dE3ad8E19fAAC46C95034#readProxyContract)
 - [`NodeOperatorsRegistry`](https://holesky.etherscan.io/address/0x595F64Ddc3856a3b5Ff4f4CC1d1fb4B46cFd2bAC)
 
-Etherscan pages for the Mainnet contracts:
+Páginas de Etherscan para los contratos de Mainnet:
 
 - [`Lido`](https://etherscan.io/address/0xae7ab96520de3a18e5e111b5eaab095312d7fe84#readProxyContract)
 - [`NodeOperatorsRegistry`](https://etherscan.io/address/0x55032650b14df07b85bf18a3a3ec8e0af2e028d5#readProxyContract)
 
-[`getoperators()` function]: https://github.com/lidofinance/lido-dao/blob/971ac8f/contracts/0.4.24/Lido.sol#L361
+[`getoperators()`]: https://github.com/lidofinance/lido-dao/blob/971ac8f/contracts/0.4.24/Lido.sol#L361
 [`nodeoperatorsregistry.getnodeoperator`]: https://github.com/lidofinance/lido-dao/blob/971ac8f/contracts/0.4.24/nos/NodeOperatorsRegistry.sol#L335
 
-### Using the batch key submitter UI
+### Uso de la Interfaz de Usuario para enviar múltiples claves
 
-Lido provides UIs for key submission: [Mainnet web interface for submitting the keys] and a [Testnet web interface for submitting the keys].
+Lido proporciona interfaces de usuario para la presentación de claves: [Interfaz web de Mainnet para enviar claves] y [Interfaz web de Testnet para enviar claves].
 
-![Submitter](/img/node-operators-manual/submitter.png)
+![Subidor](/img/node-operators-manual/submitter.png)
 
-If you’ve used the `staking-deposit-cli`, you can paste the content of the generated
-`deposit-data-*.json` file as-is.
+Si ha utilizado `staking-deposit-cli`, puede pegar el contenido del archivo generado `deposit-data-*.json` tal cual.
 
-Else, prepare a JSON data of the following structure and paste it to the textarea that will appear in the center of the screen:
+De lo contrario, prepare un JSON con la siguiente estructura y péguelo en el área de texto que aparecerá en el centro de la pantalla:
 
 ```json
 [
@@ -143,34 +125,34 @@ Else, prepare a JSON data of the following structure and paste it to the textare
   }
 ]
 ```
+```
 
-This tool will automatically split the keys into chunks and submit the transactions to your wallet for approval. Transactions will come one by one for signing. Unfortunately, we cannot send a large number of keys in a single transaction. Right now, the chunk size is 50 keys, it's close to the limit of gas per block.
+Esta herramienta dividirá automáticamente las claves en fragmentos y enviará las transacciones a su billetera para su aprobación. Las transacciones vendrán una por una para ser firmadas. Desafortunadamente, no podemos enviar un gran número de claves en una sola transacción. Actualmente, el tamaño del fragmento es de 50 claves, cerca del límite de gas por bloque.
 
-Connect your wallet, click `Validate` button, the interface would run required checks. And then click `Submit keys` button.
+Conecte su billetera, haga clic en el botón `Validar`, la interfaz realizará las comprobaciones requeridas. Luego, haga clic en el botón `Enviar claves`.
 
-We now support the following connectors:
+Actualmente, admitimos los siguientes conectores:
 
-- MetaMask and similar injected wallets
+- MetaMask y billeteras inyectadas similares
 - Wallet Connect
 - Gnosis Safe
 - Ledger HQ
 
-If you want to use Gnosis, there are two ways to connect:
+Si desea usar Gnosis, hay dos formas de conectar:
 
-- Add this app as a [custom app] in your safe.
-- [Use WalletConnect] to connect to your safe.
+- Agregue esta aplicación como una [aplicación personalizada] en su caja fuerte.
+- [Use WalletConnect] para conectarse a su caja fuerte.
 
-When you submit a form, the keys are saved in your browser. This tool checks the new key submits against the previously saved list to avoid duplication. Therefore it is important to use one browser for submitting.
+Al enviar un formulario, las claves se guardan en su navegador. Esta herramienta verifica los nuevos envíos de claves contra la lista previamente guardada para evitar duplicaciones. Por lo tanto, es importante usar un solo navegador para enviar.
 
-[mainnet web interface for submitting the keys]: https://operators.lido.fi/submitter
-[testnet web interface for submitting the keys]: https://operators.testnet.fi/submitter
-[custom app]: https://help.gnosis-safe.io/en/articles/4022030-add-a-custom-safe-app
+[interfaz web de mainnet para enviar claves]: https://operators.lido.fi/submitter
+[interfaz web de testnet para enviar claves]: https://operators.testnet.fi/submitter
+[aplicación personalizada]: https://help.gnosis-safe.io/en/articles/4022030-add-a-custom-safe-app
 [use walletconnect]: https://help.gnosis-safe.io/en/articles/4356253-walletconnect-safe-app
 
-## Importing the keys to a Lighthouse validator client
+## Importación de las Claves a un Cliente Validador de Lighthouse
 
-If you’ve used the forked `staking-deposit-cli` to generate the keys, you can import them to a
-Lighthouse validator client by running this command:
+Si ha utilizado `staking-deposit-cli` bifurcado para generar las claves, puede importarlas a un cliente validador de Lighthouse ejecutando este comando:
 
 ```sh
 docker run --rm -it \
@@ -185,48 +167,50 @@ docker run --rm -it \
  --directory /root/validator_keys
 ```
 
-## Checking the keys of all Lido Node Operators
+## Verificación de las Claves de Todos los Operadores de Nodo de Lido
 
-Key checking works with on-chain data. Make sure key submission transactions are confirmed before checking the keys.
+La verificación de claves funciona con datos en cadena. Asegúrese de que las transacciones de envío de claves se confirmen antes de verificar las claves.
 
-Never vote for increasing the key limits of Node Operators before verifying new keys are present and valid.
+Nunca vote por aumentar los límites de claves de los Operadores de Nodo antes de verificar que las claves nuevas estén presentes y sean válidas.
 
 ### Lido CLI
 
-Make sure Python with pip is installed and then run:
+Asegúrese de que Python con pip esté instalado y luego ejecute:
 
 ```sh
 pip install lido-cli
 lido-cli --rpc http://1.2.3.4:8545 validate_network_keys --details
 ```
 
-This operation checks all Lido keys for validity. This is a CPU-intensive process, for example, a modern desktop with 6 cores, 12 threads and great cooling processes 1k keys in 1—2 seconds.
+Esta operación verifica todas las claves de Lido para su validez. Este es un proceso intensivo en CPU; por ejemplo, un escritorio moderno con 6 núcleos, 12 hilos y un buen sistema de enfriamiento procesa 1,000 claves en 1-2 segundos.
 
-You would need an RPC endpoint - a local node / RPC provider (eg Alchemy/Infura).
+Necesitará un punto final RPC: un nodo local / proveedor de RPC (por ejemplo, Alchemy/Infura).
 
-### Lido Node Operator Dashboard
+### Panel de Operadores de Nodo de Lido
 
-You can also check the uploaded keys on [Mainnet Lido Node Operator Dashboard] or [Testnet Lido Node Operator Dashboard].
+También puede verificar las claves cargadas en el [Panel de Operadores de Nodo de Lido de Mainnet] o en el [Panel de Operadores de Nodo de Lido de Testnet].
 
-This UI shows a number of submitted, approved and valid keys for each Node Operator, along with all invalid keys in case there are any.
+Esta interfaz muestra el número de claves enviadas, aprobadas y válidas para cada Operador de Nodo, junto con todas las claves inválidas en caso de haber alguna.
 
-It is updated every 30 minutes via cron, but update period may change in the future.
+Se actualiza cada 30 minutos mediante cron, pero el período de actualización puede cambiar en el futuro.
 
-[mainnet lido node operator dashboard]: https://operators.lido.fi
-[testnet lido node operator dashboard]: https://operators.testnet.fi
+[panel de operadores de nodo de lido de mainnet]: https://operators.lido.fi
+[panel de operadores de nodo de lido de testnet]: https://operators.testnet.fi
 
-### Results
+### Resultados
 
-#### You don't see invalid keys
+#### No se ven claves inválidas
 
-If the new keys are present and valid, Node Operators can vote for increasing the key limit for the Node Operator.
+Si las nuevas claves están presentes y son válidas, los Operadores de Nodo pueden votar para aumentar el límite de claves para el Operador de Nodo.
 
-#### You spot invalid keys
+#### Se detectan claves inválidas
 
-It is urgent to notify Lido team and other Node Operators as soon as possible. For example, in the group chat.
+Es urgente notificar al equipo de Lido y a otros Operadores de Nodo lo antes posible. Por ejemplo, en el chat grupal.
 
-## Increasing the Staking Limits with an Easy Track motion
+## Aumento de los Límites de Staking con una Propuesta de Easy Track
 
-Once new keys are present and valid, a motion can be proposed to increase the staking limit for the Node Operator.
+Una vez que las nuevas claves estén presentes y sean válidas, se puede proponer una moción para aumentar el límite de staking para el Operador de Nodo.
 
-[Node Operators Guide to Easy Track](https://docs.lido.fi/guides/easy-track-guide#node-operators-guide-to-easy-track)
+[Guía de Operadores de Nodo para Easy Track](https://docs.lido.fi/guides/easy-track-guide#node-operators-guide-to-easy-track)
+
+

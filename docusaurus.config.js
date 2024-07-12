@@ -2,14 +2,13 @@
 module.exports = {
   title: 'Lido Docs',
   tagline: 'Documentation for the Lido staking protocol',
-  url: 'https://lidofinance.github.io',
-  baseUrl: '/',
+  url: 'https://adminseedlatam.github.io',
+  baseUrl: '/lido-docs-spanish/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'throw',
-  onBrokenAnchors: 'throw',
-  favicon: 'img/favicon-32x32.png',
-  organizationName: 'lidofinance',
-  projectName: 'docs',
+  onBrokenAnchors: 'ignore',
+  organizationName: 'adminseedlatam',
+  projectName: 'lido-docs-spanish',
   markdown: {
     mermaid: true,
   },
@@ -26,7 +25,7 @@ module.exports = {
       },
       items: [
         {
-          href: 'https://github.com/lidofinance',
+          href: 'https://github.com/adminseedlatam/lido-docs-spanish',
           label: 'GitHub',
           position: 'right',
         },
@@ -40,7 +39,7 @@ module.exports = {
         docs: {
           routeBasePath: '/',
           sidebarPath: require.resolve('./sidebars.js'),
-          editUrl: 'https://github.com/lidofinance/docs/blob/main/',
+          editUrl: 'https://github.com/adminseedlatam/lido-docs-spanish/edit/main/',
         },
       },
     ],
@@ -54,13 +53,12 @@ module.exports = {
       '@docusaurus/plugin-client-redirects',
       {
         redirects: [
-          // /guides/steth-integration-guide -> /guides/lido-tokens-integration-guide
           {
             to: '/guides/lido-tokens-integration-guide',
             from: '/guides/steth-integration-guide',
-          }
+          },
         ],
       },
     ],
   ],
-}
+};

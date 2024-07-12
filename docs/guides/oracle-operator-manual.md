@@ -1,108 +1,106 @@
-# Oracle Operator Manual
+# Manual del Operador del Oracle
 
-This document is intended for those who wish to participate in the Lido protocol as entity that runs - an entity who runs a daemons synchronizing state from Beacon Layer to Execution Layer of the protocol.
-Due to the lack of native communication between these two networks, Lido employs a network of oracles to synchronize the system at regular intervals.
+Este documento está destinado a aquellos que desean participar en el protocolo Lido como entidad que ejecuta un demonio para sincronizar el estado desde la Capa Beacon hasta la Capa de Ejecución del protocolo. Debido a la falta de comunicación nativa entre estas dos redes, Lido emplea una red de oráculos para sincronizar el sistema en intervalos regulares.
 
 ## TL;DR
 
-1. Generate an Ethereum address.
-2. Launch and sync an [archive](https://ethereum.org/en/developers/docs/nodes-and-clients/#archive-node) (archive data for at least 2 weeks) Execution Layer node with JSON-RPC endpoint enabled.
-3. Launch and sync an [archive](https://ethereum.org/en/developers/docs/nodes-and-clients/#archive-node) Consensus Layer node with API endpoint enabled.
-4. Launch and sync a [Keys API Service](https://github.com/lidofinance/lido-keys-api).
-5. Launch the accounting and ejector modules of Oracle.
-6. [**Optional**] Add alerts to Oracle's Prometheus metrics.
-7. In case of mainnet share your address and intention to join the Oracle set with public. You need to publish it on Twitter and also write a message with a twitter link under Onboarding post on [the Research forum](https://research.lido.fi/).
-8. Propose your Oracle's ethereum address to Lido Team to vote on your address being added to the Oracle Members.
+1. Genera una dirección Ethereum.
+2. Inicia y sincroniza un nodo de Capa de Ejecución (archivado durante al menos 2 semanas) con el endpoint JSON-RPC habilitado.
+3. Inicia y sincroniza un nodo de Capa de Consenso (archivado) con el endpoint de API habilitado.
+4. Inicia el servicio de la API de Keys.
+5. Inicia los módulos de contabilidad y ejector del Oracle.
+6. **Opcional:** Añade alertas a las métricas de Prometheus del Oracle.
+7. En caso de mainnet, comparte tu dirección e intención de unirte al conjunto del Oracle de forma pública. Debes publicarlo en Twitter y también escribir un mensaje con el enlace de Twitter bajo la publicación de Onboarding en [el foro de Investigación](https://research.lido.fi/).
+8. Proporciona tu dirección Ethereum del Oracle al equipo de Lido para que vote por agregar tu dirección al conjunto de miembros del Oracle.
 
-## Intro
+## Introducción
 
-The Lido Oracle mechanism comprises three main components. The first component is the Oracle smart-contract suite, which receives update reports from the oracles and passes them on to the Lido contract to execute the necessary actions based on the reported changes. The second component is the off-chain oracle daemon, run by each oracle node and responsible for monitoring the protocol state and generating update reports. The third component is the network of computer nodes that run by oracle member, which collectively provide the necessary information to the Oracle smart contract to calculate the new state of the protocol.
+El mecanismo Oracle de Lido comprende tres componentes principales. El primer componente es el conjunto de contratos inteligentes de Oracle, que recibe informes de actualización de los oráculos y los transmite al contrato Lido para ejecutar las acciones necesarias basadas en los cambios reportados. El segundo componente es el demonio oráculo fuera de la cadena, ejecutado por cada nodo oráculo y responsable de monitorear el estado del protocolo y generar informes de actualización. El tercer componente es la red de nodos informáticos que ejecutan los miembros del oráculo, que proporcionan colectivamente la información necesaria para que el contrato inteligente Oracle calcule el nuevo estado del protocolo.
 
-Based on the update reports received from the oracles, the Lido smart contract performs state transitions such as updating user balances, processing withdrawal requests, and distributing rewards to node operators. Thus, the Lido Oracle mechanism acts as a synchronization device that bridges the protocol across the execution and consensus layers. It ensures that the protocol is updated in a timely and accurate manner and allows for smooth and efficient operation of the entire Lido system.
+Basándose en los informes de actualización recibidos de los oráculos, el contrato inteligente Lido realiza transiciones de estado como actualizar los saldos de los usuarios, procesar solicitudes de retiro y distribuir recompensas a los operadores de nodos. Así, el mecanismo Oracle de Lido actúa como un dispositivo de sincronización que conecta el protocolo a través de las capas de ejecución y consenso. Garantiza que el protocolo se actualice de manera oportuna y precisa, permitiendo el funcionamiento fluido y eficiente de todo el sistema Lido.
 
-The two core contracts in the Lido Oracle suite are called [AccountingOracle](/contracts/accounting-oracle) and [ValidatorsExitBus](/contracts/validators-exit-bus-oracle). Together, these contracts collect information submitted by oracles about the state of validators and their balances, the amount of funds accumulated on protocol vaults, the number of withdrawal requests the protocol is able to process, and the validators are expected to be voluntary exited to finalize more withdrawal requests. This information is then used for these crucial processes:
+Los dos contratos principales en el suite Oracle de Lido se llaman [AccountingOracle](/contracts/accounting-oracle) y [ValidatorsExitBus](/contracts/validators-exit-bus-oracle). Juntos, estos contratos recopilan información presentada por los oráculos sobre el estado de los validadores y sus saldos, la cantidad de fondos acumulados en las bóvedas del protocolo, el número de solicitudes de retiro que el protocolo puede procesar y los validadores que se espera que salgan voluntariamente para finalizar más solicitudes de retiro. Esta información se utiliza luego para procesos cruciales como:
 
-- rebasing user balances,
-- distributing node operator rewards,
-- processing withdrawal requests,
-- making decision which validators should initiate voluntary exit,
-- distributing stake,
-- putting the protocol into the bunker mode.
+- Rebasar los saldos de los usuarios.
+- Distribuir recompensas a los operadores de nodos.
+- Procesar solicitudes de retiro.
+- Decidir qué validadores deben iniciar la salida voluntaria.
+- Distribuir la participación.
+- Poner el protocolo en modo búnker.
 
-## Oracle phases
+## Fases del Oracle
 
-In order to send the report data by the oracle operator to both `AccountingOracle` and `ValidatorsExitBusOracle`, it is necessary that:
+Para enviar los datos del informe por parte del operador del oráculo tanto a `AccountingOracle` como a `ValidatorsExitBusOracle`, es necesario que:
 
-- this operator participates in the oracle committee, and
-- a consensus for the corresponding report must be reached
+- Este operador participe en el comité del oráculo, y
+- Se debe alcanzar un consenso para el informe correspondiente.
 
-A process of sending the report data can be divided into 3 major stages:
+El proceso de enviar los datos del informe se puede dividir en 3 etapas principales:
 
-### Phase 1. Submitting a report hash and reaching consensus
+### Fase 1. Envío de un hash de informe y alcanzar consenso
 
-At the first stage, the oracles operators collect a report for a certain `refSlot` and send the hash to the `HashConsensus` contract.
+En la primera etapa, los operadores del oráculo recopilan un informe para un determinado `refSlot` y envían el hash al contrato `HashConsensus`.
 
-The diagram below shows:
-`ReportProcessor` - `AccountingOracle` or `ValidatorsExitBusOracle` contract.
-`HashConsensus` -  a contract which manages oracle members committee and allows the members to reach consensus on the particular data hash for each reporting frame.
+El diagrama siguiente muestra:
+`ReportProcessor` - Contrato `AccountingOracle` o `ValidatorsExitBusOracle`.
+`HashConsensus` - Un contrato que gestiona el comité de miembros del oráculo y permite a los miembros alcanzar consenso sobre el hash de datos particular para cada marco de informe.
 
-You can read more about HashConsensus [here](/contracts/hash-consensus).
+Puedes leer más sobre `HashConsensus` [aquí](/contracts/hash-consensus).
 
 ```mermaid
 graph LR;
 
-  O1[Oracle 1] --submitReport--> HashConsensus;
-  O2[Oracle N] --submitReport--> HashConsensus;
+  O1[Oráculo 1] --submitReport--> HashConsensus;
+  O2[Oráculo N] --submitReport--> HashConsensus;
 
-  subgraph oracles
+  subgraph oráculos
   O1
   O2
   end
 
-  HashConsensus-->|event ReportReceived| B{Consensus reached?}
-  B -->|Yes| cns[/submitReportForProcessing/]-->ReportProcessor
+  HashConsensus-->|evento ReportReceived| B{¿Consenso alcanzado?}
+  B -->|Sí| cns[/submitReportForProcessing/]-->ReportProcessor
   B -->|No| prev[/check prevConsensusLost/]
 ```
 
-### Phase 2. Submitting a report data
+### Fase 2. Envío de datos del informe
 
-When the consensus is reached, one of the oracles operators submits report data and triggers the core protocol state update (including the token rebase, distribution of node operator rewards, finalization of withdrawal requests, and deciding whether to go in the bunker mode) or emits `ValidatorExitRequest` events to inform node operators about new voluntary exit requests needed to perform.
+Cuando se alcanza el consenso, uno de los operadores del oráculo envía los datos del informe y activa la actualización del estado central del protocolo (incluido el rebase del token, la distribución de recompensas a los operadores de nodos, la finalización de solicitudes de retiro y la decisión de entrar en el modo búnker) o emite eventos `ValidatorExitRequest` para informar a los operadores de nodos sobre las nuevas solicitudes de salida voluntaria necesarias para realizar.
 
 ```mermaid
 graph LR;
 
-  O1[Oracle 1] --submitReportData--> ReportContract;
-  ReportContract --> B{Consensus reached?}
-  B-->|Yes| handleConsensusReportData
-
+  O1[Oráculo 1] --submitReportData--> ReportContract;
+  ReportContract --> B{¿Consenso alcanzado?}
+  B-->|Sí| handleConsensusReportData
 ```
 
-### Phase 3. Submitting a report extra data
+### Fase 3. Envío de datos adicionales del informe
 
-This step is required for `AccountingOracle`, involving reward distribution for staking modules on this phase.
+Este paso es necesario para `AccountingOracle`, que implica la distribución de recompensas para módulos de staking en esta fase.
 
 ```mermaid
 graph LR;
 
-  O1[Oracle 1] -->B{extra data?};
-  B-->Yes
+  O1[Oráculo 1] -->B{¿datos adicionales?};
+  B-->Sí
   B-->No
 
-  Yes -->|submitReportExtraDataList| AccountingOracle
+  Sí -->|submitReportExtraDataList| AccountingOracle
   No -->|submitReportExtraDataEmpty| AccountingOracle
 
-  subgraph oracle
+  subgraph oráculo
   O1
   B
-  Yes
+  Sí
   No
   end
 
 ```
 
-## Committee membership
+## Membresía del Comité
 
-The current Oracle set consists of 9 participants:
+El conjunto actual de Oracle consta de 9 participantes:
 
 - Chorus One `0x140bd8fbdc884f48da7cb1c09be8a2fadfea776e`
 - Staking Facilities `0x404335bce530400a5814375e7ec1fb55faff3ea2`
@@ -114,74 +112,75 @@ The current Oracle set consists of 9 participants:
 - Kyber Network [0xA7410857ABbf75043d61ea54e07D57A6EB6EF186](https://research.lido.fi/t/expansion-of-lidos-ethereum-oracle-set/2836/52)
 - ChainLayer [0xc79F702202E3A6B0B6310B537E786B9ACAA19BAf](https://research.lido.fi/t/expansion-of-lidos-ethereum-oracle-set/2836/69)
 
-The quorum is 5/9. This means that the report finalization can only occur when there are 5 identical reports from the 5 different oracle members.
+El quórum es 5/9. Esto significa que la finalización del informe solo puede ocurrir cuando hay 5 informes idénticos de 5 miembros de oráculos diferentes.
 
-See [Expansion of Lido on Ethereum Oracle set](https://research.lido.fi/t/expansion-of-lidos-ethereum-oracle-set/2836) post for more details.
+Consulta [Expansion of Lido on Ethereum Oracle set](https://research.lido.fi/t/expansion-of-lidos-ethereum-oracle-set/2836) para más detalles.
 
-## Prerequisites
+## Requisitos Previos
 
-### Execution Client Node
+### Nodo Cliente de Ejecución
 
-To prepare the report, Oracle fetches up to 10 days old events, makes historical requests for balance data and makes simulated reports on historical blocks. This requires an [archive](https://ethereum.org/en/developers/docs/nodes-and-clients/#archive-node) execution node.
-Oracle needs two weeks of archived data.
+Para preparar el informe, el Oracle recupera hasta 10 días de eventos antigu
 
-| Client                                          | Tested | Notes                                                                                                                                                                                 |
-|-------------------------------------------------|--------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [Geth](https://geth.ethereum.org/)              |        | `--gcmode=archive` <br/> `--syncmode=snap` <br/><br/>OR<br/><br/>`--gcmode=archive`<br/>`--syncmode=full`                                                                             |
-| [Nethermind](https://nethermind.io/)            |        | Not tested yet                                                                                                                                                                        |
-| [Besu](https://besu.hyperledger.org/en/stable/) |        | Use <br/>`--rpc-max-logs-range=100000` <br/> `--sync-mode=FULL` <br/> `--data-storage-format="FOREST"` <br/> `--pruning-enabled` <br/>`--pruning-blocks-retained=100000` <br/> params |
-| [Erigon](https://github.com/ledgerwatch/erigon) |        | Use <br/> `--prune=htc` <br/> `--prune.h.before=100000` <br/> `--prune.t.before=100000` <br/> `--prune.c.before=100000` <br/> params                                                  |
+os, realiza solicitudes históricas de datos de saldo y genera informes simulados en bloques históricos. Esto requiere un nodo de ejecución archivado con al menos dos semanas de datos archivados.
 
-### Consensus Client Node
+| Cliente                                          | Probado | Notas                                                                                                                                                                                 |
+|--------------------------------------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [Geth](https://geth.ethereum.org/)               |         | `--gcmode=archive` <br/> `--syncmode=snap` <br/><br/>O<br/><br/>`--gcmode=archive`<br/>`--syncmode=full`                                                                              |
+| [Nethermind](https://nethermind.io/)             |         | No probado aún                                                                                                                                                                         |
+| [Besu](https://besu.hyperledger.org/en/stable/)  |         | Usar <br/> `--rpc-max-logs-range=100000` <br/> `--sync-mode=FULL` <br/> `--data-storage-format="FOREST"` <br/> `--pruning-enabled` <br/>`--pruning-blocks-retained=100000` <br/> parámetros |
+| [Erigon](https://github.com/ledgerwatch/erigon)  |         | Usar <br/> `--prune=htc` <br/> `--prune.h.before=100000` <br/> `--prune.t.before=100000` <br/> `--prune.c.before=100000` <br/> parámetros                                                 |
 
-To calculate some metrics for bunker mode Oracle needs [archive](https://ethereum.org/en/developers/docs/nodes-and-clients/#archive-node) consensus node.
+### Nodo Cliente de Consenso
 
-| Client                                            | Tested | Notes                                                                                                                                               |
-|---------------------------------------------------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| [Lighthouse](https://lighthouse.sigmaprime.io/)   |        | Use `--reconstruct-historic-states` param                                                                                                           |
-| [Lodestar](https://nethermind.io/)                |        | Not tested yet                                                                                                                                      |
-| [Nimbus](https://nimbus.guide/quick-start.html)   |        | Not tested yet                                                                                                                                      |
-| [Prysm](https://github.com/ledgerwatch/erigon)    |        | Use <br/> `--grpc-max-msg-size=104857600` <br/> `--enable-historical-state-representation=true` <br/> `--slots-per-archive-point=1024` <br/> params |
-| [Teku](https://docs.teku.consensys.net)           |        | Use <br/> `--data-storage-mode=archive` <br/>`--data-storage-archive-frequency=1024`<br/> `--reconstruct-historic-states=true`<br/> params          |
+Para calcular algunas métricas para el modo búnker, Oracle necesita un nodo de consenso archivado.
 
-### Keys API Service
+| Cliente                                            | Probado | Notas                                                                                                                                               |
+|----------------------------------------------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| [Lighthouse](https://lighthouse.sigmaprime.io/)    |         | Usar el parámetro `--reconstruct-historic-states`.                                                                                                           |
+| [Lodestar](https://nethermind.io/)                 |         | No probado aún                                                                                                                                      |
+| [Nimbus](https://nimbus.guide/quick-start.html)    |         | No probado aún                                                                                                                                      |
+| [Prysm](https://github.com/ledgerwatch/erigon)     |         | Usar <br/> `--grpc-max-msg-size=104857600` <br/> `--enable-historical-state-representation=true` <br/> `--slots-per-archive-point=1024` <br/> parámetros |
+| [Teku](https://docs.teku.consensys.net)            |         | Usar <br/> `--data-storage-mode=archive` <br/>`--data-storage-archive-frequency=1024`<br/> `--reconstruct-historic-states=true`<br/> parámetros          |
 
-This is a separate service that uses Execution Client to fetch all lido keys. It stores the latest state of lido keys in database.
+### Servicio de API de Keys
 
-[Lido Keys API repository.](https://github.com/lidofinance/lido-keys-api)
+Este es un servicio separado que utiliza el cliente de ejecución para recuperar todas las claves de Lido. Almacena el estado más reciente de las claves de Lido en la base de datos.
 
-## The oracle daemon
+[Repositorio de Lido Keys API](https://github.com/lidofinance/lido-keys-api)
 
-The Oracle daemon is a Python application that contains two modules:
+## El daemon del Oracle
 
-- Accounting module
-- Ejector module
+El daemon Oracle es una aplicación en Python que contiene dos módulos:
 
-The oracle source code is available at [https://github.com/lidofinance/lido-oracle](https://github.com/lidofinance/lido-oracle).
+- Módulo de contabilidad
+- Módulo ejector
 
-Modules fetch the reportable slot, and if this slot is finalized, calculate and send the report to AccountingOracle and ExitBusOracle smart contracts.
+El código fuente del Oracle está disponible en [https://github.com/lidofinance/lido-oracle](https://github.com/lidofinance/lido-oracle).
 
-### Environment variables
+Los módulos obtienen el slot reportable, y si este slot está finalizado, calculan y envían el informe a los contratos inteligentes AccountingOracle y ExitBusOracle.
 
-The oracle daemon requires the following environment variables:
+### Variables de entorno
 
-**Required**
+El daemon Oracle requiere las siguientes variables de entorno:
 
-- `EXECUTION_CLIENT_URI` - list of Execution Client uris separated with comma. The second and next uris will be used as fallback.
-- `CONSENSUS_CLIENT_URI` - list of Consensus Client uris separated with comma. The second and next uris will be used as fallback.
-- `KEYS_API_URI` - list of Key API client uris separated with comma. The second and next uris will be used as fallback.
-- `LIDO_LOCATOR_ADDRESS` - Lido Locator smart contract address.
+**Requeridas**
 
-**Optional**
+- `EXECUTION_CLIENT_URI` - lista de URI del cliente de ejecución separados por coma. El segundo y siguientes URI se usarán como respaldo.
+- `CONSENSUS_CLIENT_URI` - lista de URI del cliente de consenso separados por coma. El segundo y siguientes URI se usarán como respaldo.
+- `KEYS_API_URI` - lista de URI del cliente de API de Keys separados por coma. El segundo y siguientes URI se usarán como respaldo.
+- `LIDO_LOCATOR_ADDRESS` - dirección del contrato inteligente Lido Locator.
 
-**One of:**
+**Opcional**
 
-- `MEMBER_PRIV_KEY` - Private key of the Oracle member account.
-- `MEMBER_PRIV_KEY_FILE` - A path to the file contained the private key of the Oracle member account.
+**Uno de:**
 
-Full list could be found [here](https://github.com/lidofinance/lido-oracle#env-variables).
+- `MEMBER_PRIV_KEY` - Clave privada de la cuenta de miembro del Oracle.
+- `MEMBER_PRIV_KEY_FILE` - Ruta al archivo que contiene la clave privada de la cuenta de miembro del Oracle.
 
-### Lido Locator address
+Se puede encontrar una lista completa [aquí](https://github.com/lidofinance/lido-oracle#env-variables).
+
+### Dirección del Lido Locator
 
 **Mainnet**
 **[0xC1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb](https://etherscan.io/address/0xC1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb)**
@@ -189,9 +188,9 @@ Full list could be found [here](https://github.com/lidofinance/lido-oracle#env-v
 **Holešky**
 **[0x28FAB2059C713A7F9D8c86Db49f9bb0e96Af1ef8](https://holesky.etherscan.io/address/0x28FAB2059C713A7F9D8c86Db49f9bb0e96Af1ef8)**
 
-### Running the daemon
+### Ejecución del daemon
 
-Startup accounting module
+Iniciar el módulo de contabilidad
 
 ```shell
 docker run -d --name lido-oracle-accounting \
@@ -200,10 +199,10 @@ docker run -d --name lido-oracle-accounting \
   --env "KEYS_API_URI=$KEYS_API_URI" \
   --env "LIDO_LOCATOR_ADDRESS=$LOCATOR_ADDRESS" \
   --env "MEMBER_PRIV_KEY=$MEMBER_PRIV_KEY" \
-  lidofinance/oracle@<image-hash> accounting
+  lidofinance/oracle@<hash de la imagen> accounting
 ```
 
-Startup ejector module
+Iniciar el módulo ejector
 
 ```shell
 docker run -d --name lido-oracle-ejector \
@@ -212,14 +211,14 @@ docker run -d --name lido-oracle-ejector \
   --env "KEYS_API_URI=$KEYS_API_URI" \
   --env "LIDO_LOCATOR_ADDRESS=$LOCATOR_ADDRESS" \
   --env "MEMBER_PRIV_KEY=$MEMBER_PRIV_KEY" \
-  lidofinance/oracle@<image-hash> ejector
+  lidofinance/oracle@<hash de la imagen> ejector
 ```
 
-**Latest image hash**
+**Hash de la imagen más reciente**
 [https://docs.lido.fi/guides/tooling/#oracle](https://docs.lido.fi/guides/tooling/#oracle)
 
-This will start the oracle in daemon mode. You can also run it in a one-off mode, for example if you’d prefer to trigger oracle execution as a `cron` job. In this case, set the `DAEMON` environment variable to 0.
+Esto iniciará el Oracle en modo daemon. También puedes ejecutarlo en modo puntual, por ejemplo, si prefieres activar la ejecución del Oracle como un trabajo `cron`. En este caso, establece la variable de entorno `DAEMON` en 0.
 
-### Metrics and Alerts
+### Métricas y Alertas
 
-How to set up alerts and details about metrics could be found [here](https://github.com/lidofinance/lido-oracle#alerts).
+Cómo configurar alertas y detalles sobre métricas se pueden encontrar [aquí](https://github.com/lidofinance/lido-oracle#alerts).

@@ -1,59 +1,57 @@
-# Lido tokens integration guide
+# Guía de integración de tokens de Lido
 
-This document is intended for developers looking to integrate Lido's stETH or wstETH tokens into their dApps or services, with a focus on money markets, DEXes and blockchain bridges.
+Este documento está destinado a desarrolladores interesados en integrar los tokens stETH o wstETH de Lido en sus dApps o servicios, con un enfoque en mercados de dinero, DEXes y puentes blockchain.
 
 :::info
-The integration might be implemented on the level of smart contracts (on-chain) or [Lido on Ethereum SDK](/docs/integrations/sdk.md#lido-ethereum-sdk) (off-chain).
+La integración puede implementarse a nivel de contratos inteligentes (on-chain) o utilizando el [Lido Ethereum SDK](/docs/integrations/sdk.md#lido-ethereum-sdk) (off-chain).
 :::
 
 ## Lido
 
-Lido is a family of liquid staking protocols across multiple blockchains, with headquarters on Ethereum.
-Liquid refers to the ability of a user’s stake to become liquid. Upon the user's deposit Lido issues stToken, which represents the deposited tokens along with all the rewards & penalties accrued through the deposit's staking. Unlike the staked funds, this stToken is liquid — it can be freely transferred between parties, making it usable across different DeFi applications while still receiving daily staked rewards. It is paramount to preserve this property when integrating stTokens into any DeFi protocol.
+Lido es una familia de protocolos de participación líquida en múltiples blockchains, con sede en Ethereum.
+El término "líquido" se refiere a la capacidad del stake del usuario para convertirse en líquido. Al depositar, Lido emite el stToken, que representa los tokens depositados junto con todas las recompensas y penalizaciones acumuladas por el staking del depósito. A diferencia de los fondos congelados, este stToken es líquido: puede transferirse libremente entre partes, lo que lo hace utilizable en diferentes aplicaciones DeFi y aún así recibir recompensas de staking diarias. Es fundamental preservar esta propiedad al integrar stTokens en cualquier protocolo DeFi.
 
-This guide refers to Lido on Ethereum (hereinafter referred to as Lido).
+Esta guía se refiere a Lido en Ethereum (en adelante, Lido).
 
-## Lido tokens
+## Tokens de Lido
 
-### stTokens: stETH and wstETH
+### stTokens: stETH y wstETH
 
-Staking ether with Lido gives an equivalent amount of [stETH](#steth).
-The user's stETH balance represents the amount of ether withdrawable directly from the Lido protocol.
+Hacer staking de ether con Lido proporciona una cantidad equivalente de [stETH](#steth).
+El balance de stETH del usuario representa la cantidad de ether que se puede retirar directamente del protocolo Lido.
 
-For easier DeFi integrations, `stETH` has a non-rebasable value-accruing (non-rebasable) counterpart called ['wrapped stETH'](#wsteth)
-(or just `wstETH`).
+Para integraciones DeFi más simples, `stETH` tiene un valor no rebaseable que aumenta (no rebaseable) llamado ['wrapped stETH'](#wsteth)
+(o simplemente `wstETH`).
 
-Lido's ERC-20 compatible stTokens are widely adopted across the Ethereum ecosystem:
+Los stTokens compatibles con ERC-20 de Lido son ampliamente adoptados en el ecosistema Ethereum:
 
-- The most important on-chain [liquidity venues](https://dune.com/lido/wsteth-liquidity) include:
-  - [stETH/ETH liquidity pool on Curve](https://curve.fi/#/ethereum/pools/steth)
-  - [wstETH/ETH pool on Uniswap V3](https://app.uniswap.org/explore/pools/ethereum/0x109830a1AAaD605BbF02a9dFA7B0B92EC2FB7dAa)
-  - [wstETH/ETH Composable stable pool on Balancer v2](https://app.balancer.fi/#/ethereum/pool/0x93d199263632a4ef4bb438f1feb99e57b4b5f0bd0000000000000000000005c2)
-- wstETH is listed as a collateral token on the following AAVE v3 markets:
-  - [Ethereum mainnet](https://app.aave.com/reserve-overview/?underlyingAsset=0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0&marketName=proto_mainnet_v3)
+- Los lugares de [liquidez más importantes on-chain](https://dune.com/lido/wsteth-liquidity) incluyen:
+  - [Pool de liquidez stETH/ETH en Curve](https://curve.fi/#/ethereum/pools/steth)
+  - [Pool wstETH/ETH en Uniswap V3](https://app.uniswap.org/explore/pools/ethereum/0x109830a1AAaD605BbF02a9dFA7B0B92EC2FB7dAa)
+  - [Pool estable componible wstETH/ETH en Balancer v2](https://app.balancer.fi/#/ethereum/pool/0x93d199263632a4ef4bb438f1feb99e57b4b5f0bd0000000000000000000005c2)
+- wstETH está listado como token colateral en los siguientes mercados de AAVE v3:
+  - [Mainnet de Ethereum](https://app.aave.com/reserve-overview/?underlyingAsset=0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0&marketName=proto_mainnet_v3)
   - [Arbitrum](https://app.aave.com/reserve-overview/?underlyingAsset=0x5979d7b546e38e414f7e9822514be443a4800529&marketName=proto_arbitrum_v3)
   - [Scroll](https://app.aave.com/reserve-overview/?underlyingAsset=0xf610a9dfb7c89644979b4a0f27063e9e7d7cda32&marketName=proto_scroll_v3)
   - [Base](https://app.aave.com/reserve-overview/?underlyingAsset=0xc1cba3fcea344f92d9239c08c0568f6f2f0ee452&marketName=proto_base_v3)
   - [Optimism](https://app.aave.com/reserve-overview/?underlyingAsset=0x1f32b1c2345538c0c6f582fcb022739c4a194ebb&marketName=proto_optimism_v3)
   - [Polygon PoS](https://app.aave.com/reserve-overview/?underlyingAsset=0x03b54a6e9a984069379fae1a4fc4dbae93b3bccd&marketName=proto_polygon_v3)
-- wstETH is [listed as a collateral token on Maker](https://daistats.com/#/collateral)
-- there are various [Mellow LRT](https://app.mellow.finance/restake) projects built on top of the (w)stETH
-- stETH is listed as a collateral token on the AAVE v2 [Ethereum mainnet](https://app.aave.com/reserve-overview/?underlyingAsset=0xae7ab96520de3a18e5e111b5eaab095312d7fe84&marketName=proto_mainnet) market
-- steCRV (the Curve stETH/ETH LP token) is [listed as a collateral token on Maker](https://daistats.com/#/collateral)
-- Blast L2 integrated [stETH](https://docs.blastfutures.com/get-started/introduction/what-is-blast#how-blast-works) as a rebasable ether (being staked implicitly as a part of the L1->L2 ether bridging flow)
-- there are multiple liquidity strategies built on top of Lido's stTokens, including [Yearn](https://yearn.fi/vaults/1/0xdCD90C7f6324cfa40d7169ef80b12031770B4325) and [Harvest Finance](https://harvest.finance/)
+- wstETH está [listado como token colateral en Maker](https://daistats.com/#/collateral)
+- hay varios proyectos [Mellow LRT](https://app.mellow.finance/restake) construidos sobre (w)stETH
+- stETH está listado como token colateral en el mercado AAVE v2 [Mainnet de Ethereum](https://app.aave.com/reserve-overview/?underlyingAsset=0xae7ab96520de3a18e5e111b5eaab095312d7fe84&marketName=proto_mainnet)
+- steCRV (el token LP de Curve stETH/ETH) está [listado como token colateral en Maker](https://daistats.com/#/collateral)
+- Blast L2 integró [stETH](https://docs.blastfutures.com/get-started/introduction/what-is-blast#how-blast-works) como ether rebaseable (siendo stakeado implícitamente como parte del flujo de puenteo de ether de L1 a L2)
+- existen múltiples estrategias de liquidez construidas sobre los stTokens de Lido, incluyendo [Yearn](https://yearn.fi/vaults/1/0xdCD90C7f6324cfa40d7169ef80b12031770B4325) y [Harvest Finance](https://harvest.finance/)
 
-#### Integration utilities: Rate and price feeds
+#### Utilidades de integración: Feeds de tasa y precio
 
-The current sentiment for the money markets and DeFi integrations in general is to consider Liquid Staked Tokens being backed by their native exchange rates against ETH.
-This approach implies 1 stETH = 1 ETH pricing invariant to be used.
+El sentimiento actual para los mercados de dinero e integraciones DeFi en general es considerar que los Tokens de Stake Líquido están respaldados por sus tasas de cambio nativas frente a ETH.
+Este enfoque implica un invariante de precios de 1 stETH = 1 ETH que se debe utilizar.
 
-Real world applications include [AAVE v3](https://github.com/bgd-labs/aave-proposals/blob/main/src/AaveV2-V3PriceFeedsUpdate_20230613/PRICE-FEEDS-UPDATE-20230613.md#motivation)
-markets and [Mellow LRT](https://etherscan.io/address/0x1Dc89c28e59d142688D65Bd7b22C4Fd40C2cC06d) pricing approaches.
+Las aplicaciones del mundo real incluyen [AAVE v3](https://github.com/bgd-labs/aave-proposals/blob/main/src/AaveV2-V3PriceFeedsUpdate_20230613/PRICE-FEEDS-UPDATE-20230613.md#motivation)
+y enfoques de precios [Mellow LRT](https://etherscan.io/address/0x1Dc89c28e59d142688D65Bd7b22C4Fd40C2cC06d).
 
-More in depth analysis is available [here](https://www.comp.xyz/t/franklin-dao-request-for-comment-on-market-pricing-vs-exchange-rate-pricing-for-lsts-and-potential-oracle-implementations/5130).
-
-There are following `wstETH/stETH` rate feeds available to use in conjunction with (w)stETH:
+Hay feeds de tasa `wstETH/stETH` disponibles para usar en conjunto con (w)stETH:
 
 - [Ethereum Mainnet](https://etherscan.io/address/0x94336dF517036f2Bf5c620a1BC75a73A37b7bb16#readContract)
 - [Arbitrum](https://data.chain.link/feeds/arbitrum/mainnet/wsteth-steth%20exchangerate)
@@ -61,147 +59,143 @@ There are following `wstETH/stETH` rate feeds available to use in conjunction wi
 - [Scroll](https://data.chain.link/feeds/scroll/mainnet/wsteth-steth%20exchangerate)
 - [Base](https://data.chain.link/feeds/base/base/wsteth-steth%20exchangerate)
 - [Polygon PoS](https://data.chain.link/feeds/polygon/mainnet/wsteth-steth)
-- [ZKSync Era](https://data.chain.link/feeds/zksync/zksync/wsteth-steth%20exchangerate)
+- [Era ZKSync](https://data.chain.link/feeds/zksync/zksync/wsteth-steth%20exchangerate)
 :::note
-The Ethereum Mainnet Chainlink-compatible feed is deployed and used by the Mellow LRT vaults, being a wrapper for `wstETH.getStETHByWstETH(10 ** decimals)`
+El feed compatible con Chainlink en Ethereum Mainnet está desplegado y es utilizado por los vaults de Mellow LRT, siendo un envoltorio para `wstETH.getStETHByWstETH(10 ** decimals)`
 :::
 
-These feeds might be used to compose a target feed, e.g., for the `wstETH/USD` pair, see the following examples of AAVE v3 markets:
+Estos feeds pueden utilizarse para componer un feed objetivo, por ejemplo, para el par `wstETH/USD`, consulte los ejemplos de los mercados AAVE v3:
 
 - [Ethereum Mainnet `WstETHSynchronicityPriceAdapter`](https://etherscan.io/address/0x8b6851156023f4f5a66f68bea80851c3d905ac93#code)
 - [Optimism `CLSynchronicityPriceAdapterPegToBase`](https://optimistic.etherscan.io/address/0x80f2c02224a2e548fc67c0bf705ebfa825dd5439)
 - [Arbitrum `CLSynchronicityPriceAdapterPegToBase`](https://arbiscan.io/address/0x945fd405773973d286de54e44649cc0d9e264f78)
 
-
 ### LDO
 
-[LDO](#ldo-1) is a Lido governance ERC-20 compliant token derived from the [MiniMe Token](https://github.com/Giveth/minime).
-Thus, LDO holder balances are queryable for an arbitrary block number, an essential security feature for the Lido voting mechanics.
+[LDO](#ldo-1) es un token ERC-20 de gobernanza de Lido derivado del [MiniMe Token](https://github.com/Giveth/minime).
+Por lo tanto, los saldos de los titulares de LDO son consultables para cualquier número de bloque, una característica de seguridad esencial para los mecanismos de votación de Lido.
 
 ### unstETH
 
-A non-fungible token (NFT) is used to represent a withdrawal request position [in the protocol-level withdrawals queue](/contracts/withdrawal-queue-erc721) when a stToken holder decides to redeem it for ether via the protocol.
+Un token no fungible (NFT) se utiliza para representar una posición de solicitud de retiro [en la cola de retiros a nivel de protocolo](/contracts/withdrawal-queue-erc721) cuando un titular de stToken decide canjearlo por ether a través del protocolo.
 
 :::note
-Unlike the other Lido's tokens (`stETH`, `wstETH`, and `LDO`), [unstETH](#withdrawals-unsteth) is non-fungible,
-and implements the ERC-721 token standard instead of ERC-20.
+A diferencia de los otros tokens de Lido (`stETH`, `wstETH` y `LDO`), [unstETH](#withdrawals-unsteth) es no fungible y utiliza el estándar de token ERC-721 en lugar del ERC-20.
 :::
 
 ## stETH vs. wstETH
 
-There are two versions of Lido's stTokens, namely stETH and wstETH.
-Both are fungible tokens but they reflect the accrued staking rewards differently. stETH implements rebasing mechanics which means the stETH balance updates regularly. On the contrary, the wstETH balance does not change on its own but rather increases in value against stETH.
+Existen dos versiones de los tokens stTokens de Lido, llamados stETH y wstETH.
+Ambos son tokens fungibles pero reflejan las recompensas de staking acumuladas de manera diferente. stETH implementa una mecánica de rebase, lo que significa que el saldo de stETH se actualiza regularmente. Por el contrario, el saldo de wstETH no cambia por sí solo, sino que aumenta su valor frente a stETH.
 
 :::info
-At any moment, any amount of stETH can be converted to wstETH via a trustless wrapper and vice versa, thus tokens effectively share liquidity.
+En cualquier momento, cualquier cantidad de stETH se puede convertir en wstETH y viceversa mediante un wrapper sin confianza, por lo que los tokens comparten efectivamente liquidez.
 :::
 
-For instance, undercollateralized wstETH positions on Maker can be liquidated by unwrapping wstETH and swapping it for ether on Curve.
+Por ejemplo, las posiciones de wstETH subcolateralizadas en Maker pueden ser liquidadas desenrollando wstETH e intercambiándolas por ether en Curve.
 
 ## stETH
 
-### What is stETH
+### ¿Qué es stETH?
 
-stETH is a rebasable ERC-20 token that represents ether staked with Lido. Unlike staked ether, it is liquid and can be transferred, traded, or used in DeFi applications. The total supply of stETH reflects the amount of ether deposited into protocol combined with staking rewards, minus potential validator penalties. stETH tokens are minted upon ether deposit at 1:1 ratio. Since withdrawals from the Consensus Layer have been introduced, it is also possible to redeem ether by burning stETH at the same 1:1 ratio (in rare cases it won't preserve 1:1 ratio though).
+stETH es un token ERC-20 rebaseable que representa ether con stake en Lido. A diferencia del ether con stake, es líquido y puede transferirse, negociarse o utilizarse en aplicaciones DeFi. El suministro total de stETH refleja la cantidad de ether depositado en el protocolo combinado con las recompensas de staking, menos posibles penalizaciones de validadores. Los tokens stETH se emiten al depositar ether en una proporción de 1:1. Desde que se introdujeron los retiros de la capa de consenso, también es posible canjear ether quemando stETH en la misma proporción de 1:1 (aunque en casos raros no preservará la proporción 1:1).
 
-Please note, Lido has implemented staking rate limits aimed at reducing the post-Merge staking surge's impact on the staking queue & Lido’s socialized rewards distribution model. Read more about it [here](#staking-rate-limits).
+Ten en cuenta que Lido ha implementado límites de tasa de staking para reducir el impacto del aumento de staking posterior a la fusión en la cola de staking y el modelo de distribución de recompensas socializadas de Lido. Lee más al respecto [aquí](#staking-rate-limits).
 
-stETH is a rebasable ERC-20 token. Normally, the stETH token balances get recalculated daily when the Lido oracle reports the Consensus Layer ether balance update. The stETH balance update happens automatically on all the addresses holding stETH at the moment of rebase. The rebase mechanics have been implemented via shares (see [shares](#steth-internals-share-mechanics)).
+stETH es un token ERC-20 rebaseable. Normalmente, los saldos de tokens stETH se recalculan diariamente cuando el oráculo de Lido informa la actualización del saldo de ether de la capa de consenso. La actualización del saldo de stETH ocurre automáticamente en todas las direcciones que poseen stETH en el momento del rebase. La mecánica de rebase se ha implementado mediante shares (ver [shares](#steth-internals-share-mechanics)).
 
-### Note on ERC-20 compliance
+### Nota sobre la conformidad ERC-20
 
-stETH does not strictly comply with ERC-20. The only exception is that it does not emit `Transfer()` on rebase as [ERC-20](https://eips.ethereum.org/EIPS/eip-20#events) standard requires.
+stETH no cumple estrictamente con ERC-20. La única excepción es que no emite `Transfer()` en el rebase como lo requiere el estándar [ERC-20](https://eips.ethereum.org/EIPS/eip-20#events).
 
-### Accounting oracle
+### Oráculo de contabilidad
 
-Normally, stETH rebases happen daily when the Lido oracle reports the Consensus Layer ether balance update. The rebase can be positive or negative, depending on the validators' performance. In case Lido's validators get slashed or penalized, the stETH balances can decrease according to penalty sizes. However, daily rebases have never been negative by the time of writing.
+Normalmente, los rebases de stETH ocurren diariamente cuando el oráculo de Lido informa la actualización del saldo de ether de la capa de consenso. El rebase puede ser positivo o negativo, según el desempeño de los validadores. En caso de que los validadores de Lido sean castigados o penalizados, los saldos de stETH pueden disminuir según el tamaño de las penalizaciones. Sin embargo, hasta la fecha de escritura, los rebases diarios nunca han sido negativos.
 
-The accounting oracle has sanity checks on both max APR reported (the APR cannot exceed 27%, which means a daily rebase is limited to `(27/365)%`) and total staked amount drop (staked ether decrease reported cannot exceed 5%).
+El oráculo de contabilidad tiene controles de integridad tanto en el APR máximo reportado (el APR no puede exceder el 27%, lo que significa que un rebase diario está limitado a `(27/365)%`) como en la disminución del monto total stakeado (la disminución de ether stakeado reportada no puede exceder el 5%).
 
-Currently, Oracle network includes 9 independent oracles, oracle daemons hosted by established node operators selected by the DAO.
-As soon as five out of nine oracle daemons report the same data, reaching the consensus, the report goes to the Lido smart contract, and the rebase occurs.
+Actualmente, la red de oráculos incluye 9 oráculos independientes, demonios de oráculo alojados por operadores de nodos establecidos seleccionados por el DAO.
+Tan pronto como cinco de los nueve demonios de oráculo informen los mismos datos, alcanzando el consenso, el informe se envía al contrato inteligente de Lido y ocurre el rebase.
 
-#### Oracle corner cases
+#### Casos especiales del oráculo
 
-- In case oracle daemons do not report Consensus Layer balance update or do not reach quorum, the oracle does not submit the daily report, and the daily rebase doesn't occur until the quorum is reached.
-- Oracle report might be delayed, but it will include values actual for the reporting refSlot. So, even if reported 2 hours late, it will include only rebase values for the original period.
-- In case the quorum hasn't been reached, the oracle can skip the daily report. The report will happen as soon as the quorum for one of the next periods will be reached, and it will include the incremental balance update for all periods since the last successful oracle report.
-- Oracle daemons only report the finalized epochs. In case of no finality on the Consensus Layer, the daemons won't submit their reports, and the daily rebase won't occur.
-- In case sanity checks on max APR or total staked amount drop fail, the oracle report cannot be finalized, and the rebase cannot happen.
+- En caso de que los demonios del oráculo no informen la actualización del saldo de la capa de consenso o no alcancen el quórum, el oráculo no envía el informe diario y el rebase diario no ocurre hasta que se alcance el quórum.
+- El informe del oráculo puede retrasarse, pero incluirá valores actuales para el refSlot de informe. Así que, incluso si se informa 2 horas tarde, solo incluirá los valores de rebase para el período original.
+- En caso de que no se alcance el quórum, los demonios del oráculo pueden omitir el informe diario. El informe se realizará tan pronto como se alcance el quórum para uno de los siguientes períodos, e incluirá la actualización incremental del saldo para todos los períodos desde el último informe exitoso del oráculo.
+- Los demonios del oráculo solo informan los epochs finalizados. En caso de falta de finalidad en la capa de consenso, los demonios no enviarán sus informes y el rebase diario no ocurrirá.
+- En caso de que fallen los controles de integridad del APR máximo o la disminución del monto total stakeado, el informe del oráculo no puede finalizarse y el rebase no puede ocurrir.
 
-### stETH internals: share mechanics
+### Internos de stETH: Mecánica de shares
 
-Daily rebases result in stETH token balances changing. This mechanism is implemented via shares.
-The `share` is a basic unit representing the stETH holder's share in the total amount of ether controlled by the protocol. When a new deposit happens, the new shares get minted to reflect what share of the protocol-controlled ether has been added to the pool. When the Consensus Layer oracle report comes in, the price of 1 share in stETH is being recalculated. Shares aren't normalized, so the contract also stores the sum of all shares to calculate each account's token balance.
-Shares balance by stETH balance can be calculated by this formula:
+Los rebases diarios resultan en cambios en los saldos de tokens stETH. Este mecanismo se implementa mediante shares.
+El `share` es una unidad básica que representa la participación del titular de stETH en la cantidad total de ether controlado por el protocolo. Cuando ocurre un nuevo depósito, se emiten nuevos shares para reflejar qué parte del ether controlado por el protocolo se ha agregado al pool. Cuando llega el informe del oráculo de la capa de consenso, se recalcula el precio de 1 share en stETH. Los shares no están normalizados, por lo que el contrato también almacena la suma de todos los shares para calcular el saldo de tokens de cada cuenta.
+El saldo de shares por saldo de stETH se puede calcular mediante esta fórmula:
 
 ```js
 shares[account] = balanceOf(account) * totalShares / totalPooledEther
 ```
 
-#### 1-2 wei corner case
+#### Caso especial de 1-2 wei
 
-stETH balance calculation includes integer division, and there is a common case when the whole stETH balance can't be transferred from the account while leaving the last 1-2 wei on the sender's account. The same thing can actually happen at any transfer or deposit transaction. In the future, when the stETH/share rate will be greater, the error can become a bit bigger. To avoid it, one can use `transferShares` to be precise.
+El cálculo del saldo de stETH incluye división entera, y hay un caso común en el que todo el saldo de stETH no se puede transferir de la cuenta mientras se deja los últimos 1-2 wei en la cuenta del remitente. Lo mismo puede ocurrir en cualquier transacción de transferencia o depósito. En el futuro, cuando la tasa stETH/share sea mayor, el error puede ser un poco mayor. Para evitarlo, se puede usar `transferShares` para ser preciso.
 
-Example:
+Ejemplo:
 
-1. User A transfers 1 stETH to User B.
-2. Under the hood, stETH balance gets converted to shares, integer division happens and rounding down applies.
-3. The corresponding amount of shares gets transferred from User A to User B.
-4. Shares balance gets converted to stETH balance for User B.
-5. In many cases, the actually transferred amount is 1-2 wei less than expected.
+1. El usuario A transfiere 1 stETH al usuario B.
+2. Bajo el capó, el saldo de stETH se convierte en shares, se aplica la división entera y se redondea hacia abajo.
+3. La cantidad correspondiente de shares se transfiere de A a B.
+4. El saldo de shares se convierte en saldo de stETH para B.
+5. En muchos casos, la cantidad realmente transferida es 1-2 wei menos de lo esperado.
 
-The issue is documented here: [lido-dao/issues/442](https://github.com/lidofinance/lido-dao/issues/442)
-
+El problema está documentado aquí: [lido-dao/issues/442](https://github.com/lidofinance/lido-dao/issues/442)
 ### Bookkeeping shares
 
-Although user-friendly, stETH rebases add a whole level of complexity to integrating stETH into other dApps and protocols. When integrating stETH as a token into any dApp, it's highly recommended to store and operate shares rather than stETH public balances directly, because stETH balances change both upon transfers, mints/burns, and rebases, while shares balances can only change upon transfers and mints/burns.
+Aunque es amigable para el usuario, los rebases de stETH añaden un nivel completo de complejidad a la integración de stETH en otras dApps y protocolos. Cuando se integra stETH como un token en cualquier dApp, se recomienda encarecidamente almacenar y operar con shares en lugar de los saldos públicos de stETH directamente, porque los saldos de stETH cambian tanto en las transferencias, mint/burns y rebases, mientras que los saldos de shares solo pueden cambiar en las transferencias y mint/burns.
 
-To figure out the shares balance, `getSharesByPooledEth(uint256)` function can be used. It returns the value not affected by future rebases and it can be converted back into stETH by calling `getPooledEthByShares` function.
+Para calcular el saldo de shares, se puede usar la función `getSharesByPooledEth(uint256)`. Devuelve el valor que no se ve afectado por los futuros rebases y se puede convertir de vuelta a stETH llamando a la función `getPooledEthByShares`.
 
-> See all available stETH methods [here](https://github.com/lidofinance/docs/blob/main/docs/contracts/lido.md#view-methods).
+> Consulta todos los métodos disponibles de stETH [aquí](https://github.com/lidofinance/docs/blob/main/docs/contracts/lido.md#view-methods).
 
-Any operation on stETH can be performed on shares directly, with no difference between share and stETH.
+Cualquier operación en stETH se puede realizar directamente en shares, sin diferencia entre share y stETH.
 
-The preferred way of operating stETH should be:
+La forma preferida de operar con stETH debería ser:
 
-1) get stETH token balance;
-2) convert stETH balance into shares balance and use it as a primary balance unit in your dApp;
-3) when any operation on the balance should be done, do it on the shares balance;
-4) when users interact with stETH, convert the shares balance back to stETH token balance.
+1) Obtener el saldo del token stETH;
+2) Convertir el saldo de stETH en saldo de shares y usarlo como unidad de saldo principal en tu dApp;
+3) Cuando se realice cualquier operación en el saldo, hazlo en el saldo de shares;
+4) Cuando los usuarios interactúen con stETH, convierte el saldo de shares de vuelta al saldo del token stETH.
 
-Please note that 10% APR on shares balance and 10% APR on stETH token balance will ultimately result in different output values over time, because shares balance is stable, while stETH token balance changes eventually.
+Ten en cuenta que un APR del 10% en el saldo de shares y un APR del 10% en el saldo del token stETH darán como resultado valores de salida diferentes con el tiempo, porque el saldo de shares es estable, mientras que el saldo del token stETH cambia eventualmente.
 
-There are two convenience methods to work with shares available for the stETH token:
+Hay dos métodos de conveniencia disponibles para trabajar con shares en el token stETH:
 
-- `transferShares` (when `msg.sender` spends their own balance)
-- `transferSharesFrom` (when `msg.sender` spends the approved allowance)
+- `transferShares` (cuando `msg.sender` gasta su propio saldo)
+- `transferSharesFrom` (cuando `msg.sender` gasta la asignación aprobada)
 
-If using the rebasable stETH token is not an option for your integration, it is recommended to use wstETH instead of stETH. See how it works [here](#wsteth).
+Si el uso del token stETH rebaseable no es una opción para tu integración, se recomienda usar wstETH en lugar de stETH. Mira cómo funciona [aquí](#wsteth).
 
-### Transfer shares function for stETH
+### Función de transferencia de shares para stETH
 
-The [LIP-11](https://github.com/lidofinance/lido-improvement-proposals/blob/develop/LIPS/lip-11.md) introduced the `transferShares` function which allows to transfer stETH in a "rebase-agnostic" manner: transfer in terms of [shares](#steth-internals-share-mechanics) amount.
+El [LIP-11](https://github.com/lidofinance/lido-improvement-proposals/blob/develop/LIPS/lip-11.md) introdujo la función `transferShares` que permite transferir stETH de manera "agnóstica al rebase": transferir en términos de cantidad de [shares](#steth-internals-share-mechanics).
 
-Normally, one transfers stETH using ERC-20 `transfer` and `transferFrom` functions which accept as an input the amount of stETH, not the amount of the underlying shares.
-Sometimes it's better operate with shares directly to avoid possible rounding issues. Rounding issues usually could appear after a token rebase.
-This feature is aimed to provide an additional level of precision when operating with stETH.
-Read more about the function in the [LIP-11](https://github.com/lidofinance/lido-improvement-proposals/blob/develop/LIPS/lip-11.md).
+Normalmente, uno transfiere stETH utilizando las funciones ERC-20 `transfer` y `transferFrom`, que aceptan como entrada la cantidad de stETH, no la cantidad de shares subyacentes. A veces es mejor operar directamente con shares para evitar posibles problemas de redondeo. Los problemas de redondeo generalmente podrían aparecer después de un rebase del token.
+Esta característica está destinada a proporcionar un nivel adicional de precisión al operar con stETH.
+Lee más sobre la función en el [LIP-11](https://github.com/lidofinance/lido-improvement-proposals/blob/develop/LIPS/lip-11.md).
 
-Also, V2 upgrade introduced a `transferSharesFrom` to completely match ERC-20 set of transfer methods.
+Además, la actualización V2 introdujo `transferSharesFrom` para que coincida completamente con el conjunto de métodos de transferencia ERC-20.
 
-### Fees
+### Tarifas
 
-Lido collects a percentage of the staking rewards as a protocol fee. The exact fee size is defined by the DAO and can be changed in the future via DAO voting. To collect the fee, the protocol mints new stETH token shares and assigns them to the fee recipients. Currently, the fee collected by Lido protocol is 10% of staking rewards with half of it going to the node operators and the other half going to the protocol treasury.
+Lido recoge un porcentaje de las recompensas de staking como tarifa del protocolo. El tamaño exacto de la tarifa lo define el DAO y puede cambiarse en el futuro mediante votación del DAO. Para recoger la tarifa, el protocolo emite nuevos shares del token stETH y los asigna a los destinatarios de la tarifa. Actualmente, la tarifa recolectada por el protocolo Lido es del 10% de las recompensas de staking, con la mitad destinada a los operadores de nodos y la otra mitad al tesoro del protocolo.
 
-Since the total amount of Lido pooled ether tends to increase, the combined value of all holders' shares denominated in stETH increases respectively. Thus, the rewards effectively spread between each token holder proportionally to their share in the protocol TVL. So Lido mints new shares to the fee recipient so that the total cost of the newly-minted shares exactly corresponds to the fee taken (calculated in basis points):
+Dado que el total de ether de Lido en el pool tiende a aumentar, el valor combinado de todos los shares de los titulares denominados en stETH aumenta respectivamente. Por lo tanto, las recompensas se distribuyen efectivamente entre cada titular de token en proporción a su participación en el TVL del protocolo. Así, Lido emite nuevos shares al destinatario de la tarifa de manera que el costo total de los shares recién emitidos corresponda exactamente a la tarifa tomada (calculada en puntos básicos):
 
 ```
 shares2mint * newShareCost = (_totalRewards * feeBasis) / 10000
 newShareCost = newTotalPooledEther / (prevTotalShares + shares2mint)
 ```
 
-which follows:
+lo que sigue:
 
 ```
                         _totalRewards * feeBasis * prevTotalShares
@@ -209,61 +203,52 @@ shares2mint = --------------------------------------------------------------
                 (newTotalPooledEther * 10000) - (feeBasis * _totalRewards)
 ```
 
-### How to get APR?
+### ¿Cómo obtener el APR?
 
-Please refer to [this page](https://docs.lido.fi/integrations/api/#last-lido-apr-for-steth) for the correct Lido V2 APR calculation.
+Consulta [esta página](https://docs.lido.fi/integrations/api/#last-lido-apr-for-steth) para la correcta calculación del APR de Lido V2.
 
-It is worth noting that with withdrawals enabled, the APR calculation method for Lido has changed significantly.
-When Lido V2 protocol finalizes withdrawal requests, the Lido contract excludes funds from TVL and assigns to burn underlying locked requests’ stETH shares in return. In other words, withdrawal finalization decreases both TVL and total shares.
-The old V1 formula isn’t suitable anymore because it catches TVL changes, but skips total shares changes.
+Es importante señalar que con los retiros habilitados, el método de cálculo del APR para Lido ha cambiado significativamente. Cuando el protocolo Lido V2 finaliza las solicitudes de retiro, el contrato Lido excluye fondos del TVL y asigna para quemar shares de stETH bloqueados en retorno. En otras palabras, la finalización del retiro disminuye tanto el TVL como los shares totales.
+La fórmula antigua de V1 ya no es adecuada porque captura los cambios del TVL, pero no los cambios en los shares totales.
 
-### Do stETH rewards compound?
+### ¿Los premios de stETH se componen?
 
-Yes, stETH rewards do compound.
+Sí, los premios de stETH se componen.
 
-All rewards that are withdrawn from the Consensus Layer or received as MEV or EL priority fees (that aren't used to fulfill withdrawal requests) are finally restaked to set up new validators and receive more rewards at the end. So, we can say that stETH becomes fully auto-compounding after V2 release.
+Todos los premios que se retiran de la Capa de Consenso o se reciben como tarifas MEV o EL de prioridad (que no se utilizan para cumplir solicitudes de retiro) se reestacan finalmente para configurar nuevos validadores y recibir más premios al final. Por lo tanto, podemos decir que stETH se convierte completamente en auto-compound después del lanzamiento de V2.
 
 ## wstETH
 
-Due to the rebasing nature of stETH, the stETH balance on the holder's address is not constant, it changes daily as oracle report comes in.
-Although rebasable tokens are becoming a common thing in DeFi recently, many dApps do not support rebasing. For example, Maker, UniSwap, and SushiSwap are not designed for rebasable tokens. Listing stETH on these apps can result in holders not receiving their daily staking rewards which effectively defeats the benefits of liquid staking. To integrate with such dApps, there's another form of Lido stTokens called wstETH (wrapped staked ether).
+Debido a la naturaleza de rebasing de stETH, el saldo de stETH en la dirección del titular no es constante, cambia diariamente a medida que llega el informe del oráculo.
+Aunque los tokens rebaseables están siendo comunes en DeFi recientemente, muchas dApps no admiten tokens rebaseables. Por ejemplo, Maker, UniSwap y SushiSwap no están diseñados para tokens rebaseables. Listar stETH en estas aplicaciones puede resultar en que los titulares no reciban sus recompensas diarias de staking, lo que efectivamente anula los beneficios del staking líquido. Para integrarse con estas dApps, existe otra forma de stTokens de Lido llamada wstETH (ether con stake envuelto).
+### ¿Qué es wstETH?
 
-### What is wstETH
+wstETH es un token ERC20 que representa la participación de una cuenta en el suministro total de stETH (envoltura de token stETH con saldos estáticos). Para wstETH, 1 wei en [participaciones](#steth-internals-share-mechanics) es equivalente a 1 wei en saldo. El saldo de wstETH solo puede modificarse mediante transferencias, creación y quema de tokens. El saldo de wstETH no se rebasea; en cambio, el precio de wstETH denominado en stETH cambia.
 
-wstETH is an ERC20 token that represents the account's share of the stETH total supply (stETH token wrapper with static balances). For wstETH, 1 wei in [shares](#steth-internals-share-mechanics) equals to 1 wei in balance. The wstETH balance can only be changed upon transfers, minting, and burning. wstETH balance does not rebase, wstETH's price denominated in stETH changes instead.
-At any given time, anyone holding wstETH can convert any amount of it to stETH at a fixed rate, and vice versa. The rate is the same for everyone at any given moment. Normally, the rate gets updated once a day, when stETH undergoes a rebase. The current rate can be obtained by calling `wstETH.stEthPerToken()` or `wstETH.getStETHByWstETH(10 ** decimals)`.
+En cualquier momento, cualquier persona que posea wstETH puede convertir cualquier cantidad de este a stETH a una tasa fija, y viceversa. La tasa es la misma para todos en cualquier momento dado. Normalmente, la tasa se actualiza una vez al día, cuando stETH experimenta un rebase. La tasa actual se puede obtener llamando a `wstETH.stEthPerToken()` o `wstETH.getStETHByWstETH(10 ** decimals)`.
 
-### Wrap & Unwrap
+### Envolver y Desenvolver
 
-When wrapping stETH to wstETH, the desired amount of stETH is locked on the WstETH contract balance, and the wstETH is minted according to the [share bookkeeping](#bookkeeping-shares) formula.
+Cuando se envuelve stETH a wstETH, la cantidad deseada de stETH se bloquea en el saldo del contrato WstETH, y se emite wstETH según la fórmula de [contabilidad de participaciones](#bookkeeping-shares).
 
-When unwrapping, wstETH gets burnt and the corresponding amount of stETH gets unlocked.
+Al desenvolver, se quema wstETH y se desbloquea la cantidad correspondiente de stETH. Por lo tanto, la cantidad de stETH desbloqueada al desenvolver puede diferir de la cantidad inicialmente envuelta (dado que ocurrió un rebase entre el envoltorio y desenvoltorio de stETH).
 
-Thus, the amount of stETH unlocked when unwrapping is different from what has been initially wrapped (given a rebase happened between wrapping and unwrapping stETH).
+#### Atajo wstETH
 
-#### wstETH shortcut
+Es importante notar que el contrato WstETH incluye un atajo para convertir ether a wstETH automáticamente, lo cual permite saltarse efectivamente el paso de envoltura y apostar ether directamente por wstETH. Ten en cuenta que al usar este atajo, [los límites de tasa de apostado](#staking-rate-limits) aún se aplican.
 
-Note, that the WstETH contract includes a shortcut to convert ether to wstETH under the hood, which allows you to effectively skip the wrapping step and stake ether for wstETH directly. Keep in mind that when using the shortcut, [the staking rate limits](#staking-rate-limits) still apply.
+### Contabilidad de Recompensas
 
-### Rewards accounting
+Dado que wstETH representa la participación del titular en la cantidad total de ether controlado por Lido, los rebases no afectan los saldos de wstETH pero sí cambian el precio de wstETH denominado en stETH.
 
-Since wstETH represents the holder's share in the total amount of Lido-controlled ether, rebases don't affect wstETH balances but change the wstETH price denominated in stETH.
+**Ejemplo básico**:
 
-**Basic example**:
+1. Un usuario envuelve 1 stETH y recibe 0.9803 wstETH (1 stETH = 0.9803 wstETH).
+2. Ocurre un rebase, el precio de wstETH aumenta un 5%.
+3. El usuario desenvuelve 0.9803 wstETH y recibe 1.0499 stETH (1 stETH = 0.9337 wstETH).
 
-1. User wraps 1 stETH and gets 0.9803 wstETH (1 stETH = 0.9803 wstETH)
-2. A rebase happens, the wstETH price goes up by 5%
-3. User unwraps 0.9803 wstETH and gets 1.0499 stETH (1 stETH = 0.9337 wstETH)
+### wstETH en las Redes L2
 
-### Holešky or Sepolia wstETH for testing
-
-The most recent testnet version of the Lido protocol lives on the Holešky testnet ([see the full list of contracts deployed here](https://docs.lido.fi/deployed-contracts/holesky)). Just like on mainnet, Holešky wstETH for testing purposes can be obtained by approving the desired amount of stETH to the WstETH contract on Holešky, and then calling `wrap` method on it. The corresponding amount of Holešky stETH will be locked on the WstETH contract, and the wstETH tokens will be minted to your account. Holešky ether can also be converted to wstETH directly using the [wstETH shortcut](#wsteth-shortcut) – just send your Holešky ether to WstETH contract on Holešky, and the corresponding amount of wstETH will be minted to your account.
-
-The minimal version of the protocol is also deployed on the Sepolia testnet ([see the full list of contracts deployed here](https://docs.lido.fi/deployed-contracts/sepolia)). The process of getting wstETH is the same as described above for Holešky. Note that the protocol setup on Sepolia has no UIs and various services available on Holešky and Mainnet. For instance, the in-protocol [withdrawals](/docs/contracts/withdrawal-queue-erc721.md) aren't available (paused indefinitely), please use the Holešky testnet deployment if possible.
-
-### wstETH on L2s
-
-Currently, wstETH token is [present on](/docs/deployed-contracts/index.md#lido-on-l2):
+Actualmente, el token wstETH está [presente en](/docs/deployed-contracts/index.md#lido-on-l2):
 
 - [Arbitrum](https://arbiscan.io/address/0x5979D7b546E38E414F7E9822514be443A4800529)
 - [Optimism](https://optimistic.etherscan.io/address/0x1F32b1c2345538c0c6f582fCB022739c4A194Ebb)
@@ -274,110 +259,100 @@ Currently, wstETH token is [present on](/docs/deployed-contracts/index.md#lido-o
 - [Mantle](https://explorer.mantle.xyz/address/0x458ed78EB972a369799fb278c0243b25e5242A83)
 - [Polygon PoS](https://polygonscan.com/token/0x03b54a6e9a984069379fae1a4fc4dbae93b3bccd)
 
-with bridging implemented via [the canonical bridges recommended approach](/docs/token-guides/wsteth-bridging-guide.md).
+con puentes implementados a través del [enfoque recomendado de puentes canónicos](/docs/token-guides/wsteth-bridging-guide.md).
 
-:::note
-Unlike on the Ethereum mainnet, wstETH on L2s is a plain ERC-20 token and cannot be unwrapped to unlock stETH on the corresponding L2 network as of now.
+:::info
+A diferencia de la red principal de Ethereum, en las redes L2, wstETH es simplemente un token ERC-20 y no puede desenvolverse para desbloquear stETH en la red L2 correspondiente hasta ahora.
 :::
 
-Without the shares bookkeeping, the token cannot provide the `wstETH/stETH` rate and the rewards accrued on-chain.
-Use the [wstETH/stETH rate feeds](./lido-tokens-integration-guide.md#integration-utilities-rate-and-price-feeds) listed above.
+Sin la contabilidad de participaciones, el token no puede proporcionar la tasa `wstETH/stETH` ni las recompensas acumuladas en cadena. Utiliza los [feeds de tasas y precios](./lido-tokens-integration-guide.md#integration-utilities-rate-and-price-feeds) de wstETH/stETH listados arriba.
 
 ## LDO
 
-### What is LDO
+### ¿Qué es LDO?
 
-LDO is a governance token used for the Lido DAO's voting process ([both off-chain and on-chain](https://lido.fi/governance#regular-process)).
-The token is widely available in DeFi and CeFi ecosystems.
+LDO es un token de gobernanza utilizado para el proceso de votación del DAO de Lido ([tanto fuera de cadena como en cadena](https://lido.fi/governance#regular-process)). El token está ampliamente disponible en los ecosistemas DeFi y CeFi.
 
-LDO has internal mechanics of the balance snapshots ([`balanceOfAt`](https://etherscan.io/address/0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32#readContract#F5) and [`totalSupplyAt`](https://etherscan.io/address/0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32#readContract#F10)) to allow voting power not being manipulated within the time of the ongoing vote.
+LDO tiene mecanismos internos de instantáneas de saldo ([`balanceOfAt`](https://etherscan.io/address/0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32#readContract#F5) y [`totalSupplyAt`](https://etherscan.io/address/0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32#readContract#F10)) para permitir que el poder de voto no sea manipulado durante el tiempo de la votación en curso.
 
-### Note on ERC-20 compliance
+### Nota sobre la conformidad con ERC-20
 
-Although the LDO is fully compliant with ERC-20, it is worth noting that the token doesn't revert a transaction on all of the
-failure paths inside both `transfer` and `transferFrom` methods returning the `false` status instead.
+Aunque LDO cumple completamente con ERC-20, es importante destacar que el token no revierte una transacción en todos los caminos de fallo dentro de los métodos `transfer` y `transferFrom`, devolviendo en su lugar el estado `false`.
 
-:::note
-It's critical to check the return status for external integrations as the ERC-20 token standard [requires](https://eips.ethereum.org/EIPS/eip-20#methods) to prevent various attack vectors (e.g. token deposits in vaults):
+:::info
+Es crítico verificar el estado de retorno para integraciones externas, ya que el estándar de token ERC-20 [requiere](https://eips.ethereum.org/EIPS/eip-20#methods) prevenir varios vectores de ataque (por ejemplo, depósitos de tokens en bóvedas):
 
-> Callers MUST handle `false` from `returns (bool success)`. Callers MUST NOT assume that `false` is never returned!
+> Los llamadores DEBEN manejar `false` de los `returns (bool success)`. ¡Los llamadores NO DEBEN asumir que `false` nunca se devuelve!
 :::
 
 ## ERC20Permit
 
-wstETH and stETH Ethereum Mainnet tokens implement the ERC20 Permit extension allowing approvals to be made via signatures, as defined in [EIP-2612](https://eips.ethereum.org/EIPS/eip-2612).
-stETH is also compatible with smart contract signatures, implementing [EIP-1271](https://eips.ethereum.org/EIPS/eip-1271) that is used as a part of the Account Abstraction.
+Los tokens wstETH y stETH en la red principal de Ethereum implementan la extensión ERC20 Permit que permite realizar aprobaciones mediante firmas, como se define en [EIP-2612](https://eips.ethereum.org/EIPS/eip-2612). stETH también es compatible con firmas de contratos inteligentes, implementando [EIP-1271](https://eips.ethereum.org/EIPS/eip-1271) que se utiliza como parte de la Abstracción de Cuenta.
 
-The `permit` method allows users to modify the allowance using a signed message, instead of through `msg.sender`.
-By not relying on `approve` method, you can build interfaces that will approve and use wstETH in one tx.
+El método `permit` permite a los usuarios modificar la asignación utilizando un mensaje firmado, en lugar de a través de `msg.sender`. Al no depender del método `approve`, puedes construir interfaces que aprueben y utilicen wstETH en una sola transacción.
 
-## Staking rate limits
+## Límites de Tasa de Apostado
 
-In order to handle the staking surge in case of some unforeseen market conditions, the Lido protocol implemented staking rate limits aimed at reducing the surge's impact on the staking queue & Lido’s socialized rewards distribution model.
-There is a sliding window limit that is parametrized with `_maxStakingLimit` and `_stakeLimitIncreasePerBlock`. This means it is only possible to submit this much ether to the Lido staking contracts within a 24-hours timeframe. Currently, the daily staking limit is set at 150,000 ether.
+Para manejar la afluencia de apostado en caso de algunas condiciones de mercado imprevistas, el protocolo Lido implementó límites de tasa de apostado destinados a reducir el impacto de la afluencia en la cola de apostado y en el modelo de distribución de recompensas socializadas de Lido.
 
-You can picture this as a health globe from Diablo 2 with a maximum of `_maxStakingLimit` and regenerating with a constant speed per block.
-When you deposit ether to the protocol, the level of health is reduced by its amount and the current limit becomes smaller and smaller.
-When it hits the ground, the transaction gets reverted.
+Existe un límite de ventana deslizante parametrizado con `_maxStakingLimit` y `_stakeLimitIncreasePerBlock`. Esto significa que solo es posible enviar esta cantidad de ether a los contratos de apostado de Lido dentro de un marco de tiempo de 24 horas. Actualmente, el límite diario de apostado está establecido en 150,000 ether.
 
-To avoid that, you should check if `getCurrentStakeLimit() >= amountToStake`, and if it's not you can go with an alternative route.
-The staking rate limits are denominated in ether, thus, it makes no difference if the stake is being deposited for stETH or using [the wstETH shortcut](#wsteth-shortcut), the limits apply in both cases.
+Puedes imaginar esto como una esfera de salud de Diablo 2 con un máximo de `_maxStakingLimit` y regenerando a una velocidad constante por bloque. Cuando depositas ether en el protocolo, el nivel de salud se reduce por su cantidad y el límite actual se vuelve cada vez más pequeño. Cuando llega a cero, la transacción se revierte.
 
-### Alternative routes
+Para evitar esto, debes verificar si `getCurrentStakeLimit() >= amountToStake`, y si no es así, puedes optar por una ruta alternativa. Los límites de tasa de apostado están denominados en ether, por lo que no importa si el apostado se realiza para stETH o utilizando [el atajo wstETH](#wst
 
-1. Wait for staking limits to regenerate to higher values and retry depositing ether to Lido later.
-2. Consider swapping ETH for stETH on DEXes like Curve or Balancer. At specific market conditions, stETH may effectively be purchased from there with a discount due to stETH price fluctuations.
+eth-shortcut), los límites se aplican en ambos casos.
 
-## Withdrawals (unstETH)
+### Rutas Alternativas
 
-Lido V2 introduced the possibility to withdraw ETH from the Lido on Ethereum protocol (i.e., primary market).
+1. Espera a que los límites de apostado se regeneren a valores más altos y vuelve a intentar depositar ether en Lido más tarde.
+2. Considera intercambiar ETH por stETH en DEXes como Curve o Balancer. En condiciones de mercado específicas, stETH puede adquirirse efectivamente allí con un descuento debido a las fluctuaciones en el precio de stETH.
 
-:::note
-As in-protocol withdrawals have asynchronous nature and sophisticated execution flow, in general,
-using secondary markets (exchanges and swap aggregators) might be more UX-friendly and convenient option to consider
-for integrations.
+## Retiros (unstETH)
+
+Lido V2 introdujo la posibilidad de retirar ETH del protocolo Lido en Ethereum (es decir, mercado primario).
+
+:::info
+Dado que los retiros en el protocolo tienen una naturaleza asincrónica y un flujo de ejecución sofisticado, en general, utilizar mercados secundarios (intercambios y agregadores de swaps) podría ser una opción más amigable y conveniente desde el punto de vista de la experiencia de usuario para las integraciones.
 :::
 
-A high-level upgrade overview can be found in [the blog post](https://blog.lido.fi/introducing-lido-v2/).
-Withdrawals flow is organized as a FIFO queue that accepts the requests with stETH attached and these requests are finalized with oracle reports as soon as ether to fulfill the request is available.
+Puedes encontrar una visión general de la actualización en [la publicación del blog](https://blog.lido.fi/introducing-lido-v2/). El flujo de retiros está organizado como una cola FIFO que acepta las solicitudes con stETH adjunto y estas solicitudes se finalizan con informes de oráculo tan pronto como el ether para cumplir con la solicitud esté disponible.
 
-So to obtain ether from the protocol, you'll need to proceed with the following steps:
+Para obtener ether del protocolo, debes seguir estos pasos:
 
-- request the withdrawal, locking your steth in the queue and receiving an NFT, that represents your position in the queue
-- wait, until the request is finalized by the oracle report and becomes claimable
-- claim your ether, burning the NFT
+- Solicitar el retiro, bloqueando tu stETH en la cola y recibiendo un NFT que representa tu posición en la cola.
+- Esperar a que la solicitud se finalice mediante el informe del oráculo y se pueda reclamar.
+- Reclamar tu ether, quemando el NFT.
 
-Request size should be at least **100 wei** (in stETH) and at most **1000 stETH**. Larger amounts should be withdrawn in multiple requests, which can be batched via in-protocol API. Once requested, withdrawal cannot be canceled. The withdrawal NFT can be transferred to a different address, and the new owner will be able to claim the requested withdrawal once finalized.
+El tamaño de la solicitud debe ser al menos **100 wei** (en stETH) y como máximo **1000 stETH**. Cantidades mayores deben retirarse en varias solicitudes, que pueden agruparse a través de la API en protocolo. Una vez solicitado, el retiro no se puede cancelar. El NFT de retiro se puede transferir a una dirección diferente, y el nuevo propietario podrá reclamar el retiro solicitado una vez que se finalice.
 
-The amount of claimable ETH is determined once the withdrawal request is finalized. The rate stETH/ETH of the request finalization can't get higher than it's been at the moment of request creation. The user will be able to claim:
+La cantidad de ETH reclamable se determina una vez que se finaliza la solicitud de retiro. La tasa stETH/ETH de la finalización de la solicitud no puede ser más alta que la que estaba en el momento de la creación de la solicitud. El usuario podrá reclamar:
 
-- normally – the ETH amount corresponding to the stETH amount at the moment of the request's placement
+- Normalmente: la cantidad de ETH correspondiente a la cantidad de stETH en el momento de la colocación de la solicitud.
 
-**OR**
+**O**
 
-- discounted - lowered ETH amount corresponding to the oracle-reported share rate in case the protocol had undergone significant losses (slashings and penalties)
+- Con descuento: cantidad de ETH reducida correspondiente a la tasa informada por el oráculo en caso de que el protocolo haya sufrido pérdidas significativas (multas y penalizaciones).
 
-The second option is unlikely, and we haven't ever seen the conditions for it on mainnet so far.
+La segunda opción es poco probable, y hasta ahora no hemos visto las condiciones para ello en la red principal.
 
-The end-user contract to deal with the withdrawals is `WithdrawalQueueERC721.sol`, which implements the ERC721 standard. NFT represents the position in the withdrawal queue and may be claimed after the finalization of the request.
+El contrato de usuario final para manejar los retiros es `WithdrawalQueueERC721.sol`, que implementa el estándar ERC721. El NFT representa la posición en la cola de retiros y puede ser reclamado después de que se finalice la solicitud.
 
-Let's follow these steps in detail:
+### Solicitar retiro y emitir NFT
 
-### Request withdrawal and mint NFT
-
-You have several options for requesting withdrawals, they require you to have stETH or wstETH on your address:
+Tienes varias opciones para solicitar retiros, las cuales requieren que tengas stETH o wstETH en tu dirección:
 
 #### stETH
 
-- Call `requestWithdrawalsWithPermit(uint256[] _amounts, address _owner, PermitInput _permit)` and get the ids of created positions, where `msg.sender` will be used to transfer tokens from and the `_owner` will be the address that can claim or transfer NFT (defaults to `msg.sender` if it’s not provided)
-- Alternatively, sending stETH on behalf of `WithdrawalQueueERC721.sol` contract can be approved in a separate upfront transaction (`stETH.approve(withdrawalQueueERC721.address, allowance)`), and the `requestWithdrawals(uint256[] _amounts, address _owner)` method called afterwards
+- Llama a `requestWithdrawalsWithPermit(uint256[] _amounts, address _owner, PermitInput _permit)` y obtén los IDs de las posiciones creadas, donde `msg.sender` se usará para transferir tokens y `_owner` será la dirección que puede reclamar o transferir el NFT (predeterminadamente `msg.sender` si no se proporciona).
+- Alternativamente, puedes aprobar el contrato `WithdrawalQueueERC721.sol` para stETH en una transacción separada (`stETH.approve(withdrawalQueueERC721.address, allowance)`) y luego llamar al método `requestWithdrawals(uint256[] _amounts, address _owner)`.
 
 #### wstETH
 
-- Call `requestWithdrawalsWstETHWithPermit(uint256[] _amounts, address _owner, PermitInput _permit)` and get the ids of created positions, where `msg.sender` will be used to transfer tokens from, and the `_owner` will be the address that can claim or transfer NFT (defaults to `msg.sender` if it’s not provide)
-- Alternatively, sending wstETH on behalf of `WithdrawalQueueERC721.sol` contract can be approved in a separate upfront transaction (`wstETH.approve(withdrawalQueueERC721.address, allowance)`), and the `requestWithdrawalsWstETH(uint256[] _amounts, address _owner)` method called afterwards
+- Llama a `requestWithdrawalsWstETHWithPermit(uint256[] _amounts, address _owner, PermitInput _permit)` y obtén los IDs de las posiciones creadas, donde `msg.sender` se usará para transferir tokens y `_owner` será la dirección que puede reclamar o transferir el NFT (predeterminadamente `msg.sender` si no se proporciona).
+- Alternativamente, puedes aprobar el contrato `WithdrawalQueueERC721.sol` para wstETH en una transacción separada (`wstETH.approve(withdrawalQueueERC721.address, allowance)`) y luego llamar al método `requestWithdrawalsWstETH(uint256[] _amounts, address _owner)`.
 
-`PermitInput` structure is defined as follows:
+La estructura `PermitInput` está definida de la siguiente manera:
 
 ```solidity
 struct PermitInput {
@@ -389,119 +364,123 @@ struct PermitInput {
 }
 ```
 
-After request, [ERC721](https://eips.ethereum.org/EIPS/eip-721) NFT is minted to `_owner` address and can be transferred to the other owner who will have all the rights to claim the withdrawal.
+Después de la solicitud, se emite un NFT [ERC721](https://eips.ethereum.org/EIPS/eip-721) a la dirección `_owner` y puede transferirse al otro propietario, quien tendrá todos los derechos para reclamar el retiro.
 
-Additionally, this NFT implements the [ERC4906](https://eips.ethereum.org/EIPS/eip-4906) standard and it's recommended to rely on
+Además, este NFT implementa el estándar [ERC4906](https://eips.ethereum.org/EIPS/eip-4906) y se recomienda utilizar
 
 ```solidity
 event BatchMetadataUpdate(uint256 _fromTokenId, uint256 _toTokenId);
 ```
 
-to update the NFT metadata if you're integrating it somewhere where it should be displayed correctly.
+para actualizar los metadatos del NFT si se integra en algún lugar donde deba mostrarse correctamente.
 
-:::note
-Withdrawal transactions made with `requestWithdrawalsWithPermit` or `requestWithdrawalsWstETHWithPermit` might fail due to being front-run by stealing the user-provided signature to execute `token.permit` method. It does not impose any fund loss risks nor blocks the capability to withdraw, but it affects the UX. For the details, see [this issue](https://github.com/lidofinance/lido-dao/issues/803).
+:::info
+Las transacciones de retiro realizadas con `requestWithdrawalsWithPermit` o `requestWithdrawalsWstETHWithPermit` pueden fallar debido a ser "front-run" al robar la firma proporcionada por el usuario para ejecutar el método `token.permit`. Esto no impone riesgos de pérdida de fondos ni bloquea la capacidad de retirar, pero afecta la experiencia del usuario. Para más detalles, consulta [este problema](https://github.com/lidofinance/lido-dao/issues/803).
 
-It's recommended to mitigate the issue, e.g. by utilizing the approach used in [Lido staking widget](https://github.com/lidofinance/ethereum-staking-widget). Shortly, the idea is as follows. If the initial `...WithPermit` transaction fails, immediately resent the request but via `requestWithdrawals/requestWithdrawalsWstETH` method this time, seamlessly relying on the allowance already provided as a result of the griefing transaction.
-For the specific example, see [the following code](https://github.com/lidofinance/ethereum-staking-widget/blob/ba65f2180ad0ab43b5f3bdcfeee118e6ceeabe7f/features/withdrawals/hooks/contract/useRequest.ts#L319C6-L319C6).
+Se recomienda mitigar el problema, por ejemplo, utilizando el enfoque utilizado en el [widget de apuestas de Lido](https://github.com/lidofinance/ethereum-staking-widget). En resumen, si la transacción inicial `...WithPermit` falla, reenvía inmediatamente la solicitud pero a través del método `requestWithdrawals/requestWithdrawalsWstETH`, utilizando sin problemas la asignación ya proporcionada como resultado de la transacción de "griefing".
+Para el ejemplo específico, consulta [el siguiente código](https://github.com/lidofinance/ethereum-staking-widget/blob/ba65f2180ad0ab43b5f3bdcfeee118e6ceeabe7f/features/withdrawals/hooks/contract/useRequest.ts#L319C6-L319C6).
 
-Any other viable approach for mitigation might be used as well. As one more example, deploy a wrapper smart contract that tries `requestWithdrawalsWithPermit/requestWithdrawalsWithPermitWstETH` and if [catches](https://docs.soliditylang.org/en/latest/control-structures.html#try-catch) the revert error, continues with `requestWithdrawals/requestWithdrawalsWstETH`, checking the allowance is enough.
+También se pueden usar otros enfoques viables para la mitigación. Como otro ejemplo, despliega un contrato inteligente envolvente que intente `requestWithdrawalsWithPermit/requestWithdrawalsWithPermitWstETH` y, si [captura](https://docs.soliditylang.org/en/latest/control-structures.html#try-catch) el error de revertir, continúa con `requestWithdrawals/requestWithdrawalsWstETH`, verificando que la asignación sea suficiente.
 :::
 
-### Checking the state of withdrawal
+### Verificación del estado del retiro
 
-- You can check all the withdrawal requests for the owner by calling `getWithdrawalRequests(address _owner)` which returns an array of NFT ids.
-- To check the state of the particular NFTs you can call `getWithdrawalStatus(uint256[] _requestIds)` which returns an array of [`WithdrawalRequestStatus`](https://github.com/lidofinance/lido-dao/blob/feature/shapella-upgrade/contracts/0.8.9/WithdrawalQueueBase.sol#L67-L81) struct.
+- Puedes verificar todas las solicitudes de retiro para el propietario llamando a `getWithdrawalRequests(address _owner)`, que devuelve una matriz de IDs de NFT.
+- Para verificar el estado de NFTs particulares, puedes llamar a `getWithdrawalStatus(uint256[] _requestIds)`, que devuelve una matriz de la estructura [`WithdrawalRequestStatus`](https://github.com/lidofinance/lido-dao/blob/feature/shapella-upgrade/contracts/0.8.9/WithdrawalQueueBase.sol#L67-L81).
 
 ```solidity
-    struct WithdrawalRequestStatus {
-        /// @notice stETH token amount that was locked on withdrawal queue for this request
-        uint256 amountOfStETH;
-        /// @notice amount of stETH shares locked on withdrawal queue for this request
-        uint256 amountOfShares;
-        /// @notice address that can claim or transfer this request
-        address owner;
-        /// @notice timestamp of when the request was created, in seconds
-        uint256 timestamp;
-        /// @notice true, if request is finalized
-        bool isFinalized;
-        /// @notice true, if request is claimed. Request is claimable if (isFinalized && !isClaimed)
-        bool isClaimed;
-    }
+struct WithdrawalRequestStatus {
+    /// @notice Cantidad de stETH bloqueada en la cola de retiros para esta solicitud
+    uint256 amountOfStETH;
+    /// @notice Cantidad de acciones stETH bloqueadas en la cola de retiros para esta solicitud
+    uint256 amountOfShares;
+    /// @notice Dirección que puede reclamar o transferir esta solicitud
+    address owner;
+    /// @notice Marca de tiempo de cuando se creó la solicitud, en segundos
+    uint256 timestamp;
+    /// @notice Verdadero, si la solicitud está finalizada
+    bool isFinalized;
+    /// @notice Verdadero, si la solicitud está reclamada. La solicitud es reclamable si (isFinalized && !isClaimed)
+    bool isClaimed;
+}
 ```
 
->NOTE: Since stETH is an essential token if the user requests a withdrawal using wstETH directly, the amount will be nominated in stETH on request creation.
+>NOTA: Dado que stETH es un token esencial si el usuario solicita un retiro usando wstETH directamente, la cantidad se designará en stETH en la creación de la solicitud.
 
-You can call `getClaimableEther(uint256[] _requestIds, uint256[] _hints)` to get the exact amount of eth that is reserved for the requests, where `_hints` can be found by calling `findCheckpointHints(__requestIds, 1, getLastCheckpointIndex())`. It will return a non-zero value only if the request is claimable (`isFinalized && !isClaimed`)
+Puedes llamar a `getClaimableEther(uint256[] _requestIds, uint256[] _hints)` para obtener la cantidad exacta de ether reservado para las solicitudes, donde `_hints` se puede encontrar llamando a `findCheckpointHints(__requestIds, 1, getLastCheckpointIndex())`. Devolverá un valor distinto de cero solo si la solicitud es reclamable (`isFinalized && !isClaimed`).
 
-### Claiming
+### Reclamación
 
-To claim ether you need to call:
+Para reclamar ether, debes llamar a:
 
-- `claimWithdrawal(uint256 _requestId)` with the NFT Id on behalf of the NFT owner
-- `claimWithdrawals(uint256[] _requestIDs, uint256[] _hints)` if you want to claim multiple withdrawals in batches or optimize on hint search
-  - hints = `findCheckpointHints(uint256[] calldata _requestIDs, 1, lastCheckpoint)`
-  - lastCheckpoint = `getLastCheckpointIndex()`
+- `claimWithdrawal(uint256 _requestId)` con el ID del NFT en nombre del propietario del NFT.
+- `claimWithdrawals(uint256[] _requestIDs, uint256[] _hints)` si deseas reclamar múltiples retiros en lotes u optimizar en la búsqueda de pistas
+  - `hints = findCheckpointHints(uint256[] calldata _requestIDs, 1, lastCheckpoint)`
+  - `lastCheckpoint = getLastCheckpointIndex()`
 
-## General integration examples
+## Ejemplos de integración general
 
-### stETH/wstETH as collateral
+### stETH/wstETH como garantía
 
-stETH/wstETH as DeFi collateral is beneficial for several reasons:
+stETH/wstETH como garantía DeFi es beneficioso por varias razones:
 
-- stETH/wstETH is almost as safe as ether, price-wise: barring catastrophic scenarios, its value tends to hold the ETH 1:1 well;
-- stETH/wstETH is a productive token: getting rewards on collateral effectively lowers the cost of borrowing;
-- stETH/wstETH is a very liquid token with billions of liquidity locked in liquidity pools (see [above](#sttokens-steth-and-wsteth))
+- stETH/wstETH es casi tan seguro como ether, en términos de precio: excepto en escenarios catastróficos, su valor tiende a mantenerse bien respecto a ETH 1:1.
+- stETH/wstETH es un token productivo: obtener recompensas por la garantía efectivamente reduce el costo de endeudamiento.
+- stETH/wstETH es un token muy líquido con miles de millones de liquidez bloqueada en pools de liquidez (ver [arriba](#sttokens-steth-and-wsteth)).
 
-Lido's staked tokens have been listed on major liquidity protocols:
+Los tokens staked de Lido se han listado en importantes protocolos de liquidez:
 
-- On Maker, [wstETH collateral (scroll down to Dai from WSTETH-A section)](https://daistats.com/#/collateral) can be used to mint DAI stablecoin. See [Lido's blog post](https://blog.lido.fi/makerdao-integrates-lidos-staked-eth-steth-as-collateral-asset/) for more details.
-- On AAVE v3, multiple tokens can be borrowed against wstETH on various chains (see the list of the [markets](#sttokens-steth-and-wsteth))
+- En Maker, [colateral de wstETH (desplácese hacia abajo a la sección Dai de la sección WSTETH-A)](https://daistats.com/#/collateral) se puede usar para emitir la moneda estable DAI. Consulta la [publicación en el blog de Lido](https://blog.lido.fi/makerdao-integrates-lidos-staked-eth-steth-as-collateral-asset/) para más detalles.
+- En AAVE v3, se pueden pedir prestados varios tokens contra wstETH en varias cadenas (ver la lista de [mercados](#sttokens-steth-and-wsteth))
 
-Robust price sources are required for listing on most money markets, with ChainLink price feeds being the industry standard.
-The default option to use is exchange [rate feeds](./lido-tokens-integration-guide.md#sttokens-steth-and-wsteth) with an option to compose arbitrary feeds:
+Se requieren fuentes de precios sólidas para listar en la mayoría de los mercados de dinero, siendo los feeds de precios de ChainLink el estándar de la industria.
+La opción predeterminada es utilizar los [feeds de tasas de cambio](./lido-tokens-integration-guide.md#sttokens-steth-and-wsteth) con la opción de componer feeds arbitrarios:
 
 ```python
 'wstETH/X price feed' = 'wstETH/stETH rate feed' × 'ETH/X price feed'
 ```
 
-### Wallet integrations
+### Integraciones de billetera
 
-Lido's Ethereum staking services have been successfully integrated into the most popular DeFi wallets, including Ledger, Metamask, MyEtherWallet, ImToken and others.
-Having stETH integrated can provide wallet users with a great user experience of direct staking from the wallet UI itself.
+Los servicios de participación en Ethereum de Lido se han integrado con éxito en las billeteras DeFi más populares, incluyendo Ledger, Metamask, MyEtherWallet, ImToken y otras.
+Tener integrado stETH puede proporcionar a los usuarios de billeteras una gran experiencia de usuario para participar directamente desde la interfaz de usuario de la b
 
-When adding stETH support to a DeFi wallet, it is important to preserve stETH's rebasing nature.
-Note that stETH balance changes on each rebase without any incoming or outgoing user transfers and does not emit ERC-20 'Transfer' events.
-As a consequence, avoid storing cached stETH balance for extended periods of time (over 24 hours).
+illetera.
 
-The integration might be implemented leveraging the [Lido on Ethereum SDK](/docs/integrations/sdk.md#lido-ethereum-sdk)
+Al agregar soporte para stETH a una billetera DeFi, es importante preservar la naturaleza de rebasing de stETH.
+Ten en cuenta que el saldo de stETH cambia en cada rebase sin transferencias entrantes o salientes del usuario y no emite eventos de transferencia ERC-20.
+Como consecuencia, evita almacenar el saldo en caché de stETH durante períodos prolongados (más de 24 horas).
 
-### Cross chain bridging
+La integración se puede implementar utilizando el [Lido en Ethereum SDK](/docs/integrations/sdk.md#lido-ethereum-sdk).
 
-The Lido's wstETH gets bridged to various L2's and sidechains.
-The process of a new network adoption in a future-proof way is outlined as a part of the separate [bridging guide](/docs/token-guides/wsteth-bridging-guide.md).
+### Puenteado entre cadenas
 
-Most cross-chain token bridges have no mechanics to handle rebases.
-This means bridging stETH to other chains will prevent stakers from collecting their staking rewards.
+El wstETH de Lido se puentea a varios L2 y sidechains.
+El proceso de adopción de una nueva red de manera resistente al futuro se describe como parte de la [guía de puenteado separada](/docs/token-guides/wsteth-bridging-guide.md).
+
+La mayoría de los puentes de tokens entre cadenas no tienen mecanismos para manejar rebases.
+Esto significa que el puenteo de stETH a otras cadenas impedirá que los validadores recojan sus recompensas de participación.
 
 :::warning
-In the most common case, the rewards will naturally go to the bridge smart contract becoming locked there and never make it to the stakers.
+En el caso más común, las recompensas irán naturalmente al contrato inteligente del puente y quedarán bloqueadas allí, sin llegar a los validadores.
 :::
 
-While working on full-blown bridging solutions, the Lido contributors encourage the users to only bridge the non-rebasable representation of staked ether, namely wstETH.
+Mientras se trabaja en soluciones completas de puenteado, los contribuyentes de Lido alientan a los usuarios a puentear solo la representación no rebaseable del ether con stake, es decir, wstETH.
 
-## Risks
+## Riesgos
 
-There exist a number of potential risks when staking using liquid staking protocols.
+Existen varios riesgos potenciales al participar en protocolos de participación líquida.
 
-### Smart contract security
+### Seguridad del contrato inteligente
 
-  There is an inherent risk that Lido could contain a smart contract vulnerability or bug. The Lido code is open-source, audited, and covered by an extensive bug bounty program to minimize this risk. To mitigate smart contract risks, all of the core Lido contracts are audited. Audit reports can be found here. Besides, Lido is covered with a massive Immunefi bug bounty program.
+Existe el riesgo inherente de que Lido pueda contener una vulnerabilidad o error en el contrato inteligente. El código de Lido es de código abierto, auditado y está cubierto por un extenso programa de recompensas por errores para minimizar este riesgo. Para mitigar los riesgos de los contratos inteligentes, todos los contratos centrales de Lido están auditados. Los informes de auditoría se pueden encontrar aquí. Además, Lido está cubierto con un extenso programa de recompensas por errores de Immunefi.
 
-### Slashing risk
-  Validators risk staking penalties, with up to 100% of staked funds at risk if validators fail. To minimize this risk, Lido stakes across multiple professional and reputable node operators with heterogeneous setups, with additional mitigation in the form of self-coverage.
+### Riesgo de sanción
 
-### stToken price risk
-  Users risk an exchange price of stTokens which is lower than inherent value due to withdrawal restrictions on Lido, making arbitrage and risk-free market-making impossible. The Lido DAO is driven to mitigate the above risks to the extent possible. Despite this, they may still exist and, as such, it is our duty to communicate them.
+Los validadores corren el riesgo de sufrir penalizaciones por participación, con hasta el 100% de los fondos participados en riesgo si los validadores fallan. Para minimizar este riesgo, Lido participa en múltiples operadores de nodos profesionales y reputados con configuraciones heterogéneas, con cobertura adicional en forma de auto-cobertura.
 
-The Lido DAO is driven to mitigate the above risks to the extent possible. Despite this, they may still exist.
+### Riesgo de precio de stToken
+
+Los usuarios corren el riesgo de un precio de stTokens en el intercambio que sea inferior al valor inherente debido a restricciones de retiro en Lido, lo que hace imposible el arbitraje y la creación de mercado sin riesgo. La DAO de Lido se esfuerza por mitigar los riesgos mencionados en la medida de lo posible. Sin embargo, estos pueden existir y, como tal, es nuestro deber comunicarlos.
+
+La DAO de Lido se esfuerza por mitigar los riesgos mencionados en la medida de lo posible. Sin embargo, estos pueden existir.

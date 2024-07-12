@@ -1,46 +1,46 @@
-# Introduction
+# Introducción
 
-[Lido V2](https://blog.lido.fi/introducing-lido-v2/) protocol upgrade adds support for [Ethereum Withdrawals](https://ethereum.org/en/staking/withdrawals/) and introduces additional responsibilities for Node Operators.
+La actualización del protocolo [Lido V2](https://blog.lido.fi/introducing-lido-v2/) añade soporte para [Retiros de Ethereum](https://ethereum.org/en/staking/withdrawals/) e introduce responsabilidades adicionales para los Operadores de Nodo de Lido.
 
-Lido Withdrawals are happening in four stages:
+Los retiros de Lido ocurren en cuatro etapas:
 
-1. stETH holders request a withdrawal
-2. Lido Oracles decide which Lido validators should be exited to fulfil the request and publish the list on-chain
-3. Lido Node Operators exit these validators
-4. stETH holders claim their ETH
+1. Los poseedores de stETH solicitan un retiro.
+2. Los Oráculos de Lido deciden qué validadores de Lido deben ser retirados para cumplir con la solicitud y publican la lista en la cadena.
+3. Los Operadores de Nodo de Lido retiran estos validadores.
+4. Los poseedores de stETH reclaman su ETH.
 
-This means that Node Operators need a way to react quickly to protocol requests.
+Esto significa que los Operadores de Nodo necesitan una manera de reaccionar rápidamente a las solicitudes del protocolo.
 
-The suggested method is to generate and sign exit messages ahead of time which will be sent out when needed by a special new daemon called the Validator Ejector.
+El método sugerido es generar y firmar mensajes de salida anticipadamente, los cuales serán enviados cuando sea necesario por un nuevo daemon especial llamado "Validator Ejector".
 
-To understand for which validators to generate and sign exit messages, another new app called Keys API is introduced.
+Para entender para qué validadores generar y firmar mensajes de salida, se introduce otra nueva aplicación llamada "Keys API".
 
-## Requirements
+## Requisitos
 
-First, is running Lido tooling required?
+¿Es necesario ejecutar herramientas de Lido?
 
-Lido tooling is not required to use, but is recommended.
+No es necesario utilizar las herramientas de Lido, pero se recomienda hacerlo.
 
-The only requirement for Node Operators is to exit their validators in time after requested by the protocol.
+El único requisito para los Operadores de Nodo es retirar sus validadores a tiempo después de que lo solicite el protocolo.
 
-For details, check out [Validator Exits Policy](https://hackmd.io/@lido/HJYFjmf6s) and [Research Forum Discussion](https://research.lido.fi/t/lido-validator-exits-policy-draft-for-discussion).
+Para más detalles, consulta la [Política de Salida de Validadores](https://hackmd.io/@lido/HJYFjmf6s) y la [Discusión del Foro de Investigación](https://research.lido.fi/t/lido-validator-exits-policy-draft-for-discussion).
 
-## Lido Tooling
+## Herramientas de Lido
 
-### Keys API (KAPI for short)
+### Keys API (KAPI)
 
-KAPI is a service which stores and serves up-to-date information about Lido validators.
+KAPI es un servicio que almacena y proporciona información actualizada sobre los validadores de Lido.
 
-It provides a very important function: it provides two endpoints, using which a Node Operator understands for which validators to generate and sign exit messages in advance.
+Proporciona una función muy importante: ofrece dos endpoints mediante los cuales un Operador de Nodo puede entender para qué validadores generar y firmar mensajes de salida con anticipación.
 
-Under the hood, KAPI also automatically filters out validators which are exited already or are currently exiting.
+Bajo la capucha, KAPI también filtra automáticamente los validadores que ya han sido retirados o que están actualmente en proceso de retirada.
 
-### Validator Ejector (Ejector for short)
+### Validator Ejector (Ejector)
 
-Ejector is a daemon service which monitors `ValidatorsExitBusOracle` events and initiates an exit when required.
+Ejector es un servicio daemon que monitorea los eventos de `ValidatorsExitBusOracle` e inicia un retiro cuando sea necesario.
 
-In messages mode, on start, it loads exit messages in form of individual .json files from a specified folder or an external storage and validates their format, structure and signature.
+En el modo de mensajes, al iniciarse, carga los mensajes de salida en forma de archivos individuales .json desde una carpeta especificada o un almacenamiento externo, y valida su formato, estructura y firma.
 
-It then loads events from a configurable amount of latest finalized blocks, checks if exits should be made and after that periodically fetches fresh events.
+Luego, carga eventos de una cantidad configurable de bloques finalizados más recientes, verifica si deben realizarse salidas y después periódicamente obtiene eventos frescos.
 
-In webhook mode, it simply fetches a remote endpoint when an exit should be made, allowing to implement JIT approach by offloading exiting logic to an external service and using the Ejector as a secure exit events reader.
+En el modo de webhook, simplemente obtiene un punto final remoto cuando se debe realizar un retiro, permitiendo implementar un enfoque JIT (Just In Time) descargando la lógica de salida a un servicio externo y utilizando Ejector como lector seguro de eventos de salida.

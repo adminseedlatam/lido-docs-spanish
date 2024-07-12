@@ -1,64 +1,61 @@
-# Execution Layer Rewards Configuration
+# Configuración de Recompensas de Capa de Ejecución
 
-Node Operators who run validators for Lido are required to set the fee recipient for the relevant validators to the protocol-managed [`LidoExecutionLayerRewardsVault`](/contracts/lido-execution-layer-rewards-vault) which manages [Execution Layer Rewards](/contracts/lido#gettotalelrewardscollected). This address differs depending on the network (Mainnet, testnet, etc.) and is _not_ the same as the [Withdrawal Credentials](/contracts/staking-router#getwithdrawalcredentials) address.
+Los Operadores de Nodo que ejecutan validadores para Lido deben configurar el receptor de tarifas para los validadores relevantes al [`LidoExecutionLayerRewardsVault`](/contracts/lido-execution-layer-rewards-vault) gestionado por el protocolo, que administra las [Recompensas de Capa de Ejecución](/contracts/lido#gettotalelrewardscollected). Esta dirección de contrato inteligente varía según la red (Mainnet, testnet, etc.) y **no** es la misma que la dirección de [Credenciales de Retiro](/contracts/staking-router#getwithdrawalcredentials).
 
-This smart contract address can also be retrieved by [querying the `elRewardsVault()`](/contracts/lido-locator#elrewardsvault) method in the `LidoLocator` contract.
+Esta dirección de contrato inteligente también se puede obtener consultando el método [`elRewardsVault()`](/contracts/lido-locator#elrewardsvault) en el contrato `LidoLocator`.
 
-The address is also available in the [Deployed Contracts] docs page, labeled as `Execution Layer Rewards Vault`.
+También puede encontrar la dirección en la página de [Contratos Desplegados], etiquetada como `Execution Layer Rewards Vault`.
 
-[deployed contracts]: /deployed-contracts
+[contratos desplegados]: /deployed-contracts
 
-## Fee recipient options for various Beacon Chain clients
+## Opciones de receptor de tarifas para varios clientes de Beacon Chain
 
-Beacon chain clients offer a variety of methods for configuring the fee recipient.
-For some clients the fee recipient option should be applied with other options, see reference pages for specific client. Please note that most clients also support setting the fee recipient on a per-validator key basis (e.g. for Teku this can be achieved via [the proposer config](https://docs.teku.consensys.net/en/latest/Reference/CLI/CLI-Syntax/#validators-proposer-config). Consult the docs for each client for specific instructions.
+Los clientes de Beacon Chain ofrecen una variedad de métodos para configurar el receptor de tarifas. Algunos clientes permiten configurar el receptor de tarifas a nivel de clave por validador (por ejemplo, para Teku esto se puede lograr a través de [la configuración del proponedor](https://docs.teku.consensys.net/en/latest/Reference/CLI/CLI-Syntax/#validators-proposer-config)). Consulte la documentación para cada cliente para obtener instrucciones específicas.
 
-| Consensus client | CLI option                                              | CLI reference page                |
-| ---------------- | ------------------------------------------------------- | --------------------------------- |
-| Teku             | `--validators-proposer-default-fee-recipient=<ADDRESS>` | [Teku CLI options]                |
-| Lighthouse       | `--suggested-fee-recipient=<ADDRESS>`                   | [Lighthouse Fee Recipient Config] |
-| Nimbus           | `--suggested-fee-recipient=<ADDRESS>`                   | [Nimbus Fee Recipient Info]       |
-| Prysm            | `--suggested-fee-recipient=<ADDRESS>`                   | [Prysm CLI options]               |
-| Lodestar         | `--chain.defaultFeeRecipient=<ADDRESS>`                 | [Lodestar CLI options]            |
+| Cliente de Consenso | Opción CLI                                               | Página de referencia CLI                |
+| ------------------- | --------------------------------------------------------- | --------------------------------------- |
+| Teku                | `--validators-proposer-default-fee-recipient=<DIRECCIÓN>` | [Opciones CLI de Teku]                  |
+| Lighthouse          | `--suggested-fee-recipient=<DIRECCIÓN>`                   | [Configuración de Receptor de Tarifas de Lighthouse] |
+| Nimbus              | `--suggested-fee-recipient=<DIRECCIÓN>`                   | [Información de Receptor de Tarifas de Nimbus] |
+| Prysm               | `--suggested-fee-recipient=<DIRECCIÓN>`                   | [Opciones CLI de Prysm]                 |
+| Lodestar            | `--chain.defaultFeeRecipient=<DIRECCIÓN>`                 | [Opciones CLI de Lodestar]              |
 
-[teku cli options]: https://docs.teku.consensys.net/en/latest/Reference/CLI/CLI-Syntax/#validators-proposer-default-fee-recipient
-[nimbus fee recipient info]: https://nimbus.guide/suggested-fee-recipient.html
-[lighthouse fee recipient config]: https://lighthouse-book.sigmaprime.io/suggested-fee-recipient.html?highlight=fee%20recipient#suggested-fee-recipient
-[lodestar cli options]: https://chainsafe.github.io/lodestar/reference/cli/
-[prysm cli options]: https://docs.prylabs.network/docs/execution-node/fee-recipient
+[opciones cli de teku]: https://docs.teku.consensys.net/en/latest/Reference/CLI/CLI-Syntax/#validators-proposer-default-fee-recipient
+[información de receptor de tarifas de nimbus]: https://nimbus.guide/suggested-fee-recipient.html
+[configuración de receptor de tarifas de lighthouse]: https://lighthouse-book.sigmaprime.io/suggested-fee-recipient.html?highlight=fee%20recipient#suggested-fee-recipient
+[opciones cli de lodestar]: https://chainsafe.github.io/lodestar/reference/cli/
+[opciones cli de prysm]: https://docs.prylabs.network/docs/execution-node/fee-recipient
 
-## MEV-Boost related options for various Beacon Chain clients
+## Opciones relacionadas con MEV-Boost para varios clientes de Beacon Chain
 
-| Consensus client | CLI option                                           | CLI reference page           |
-| ---------------- | ---------------------------------------------------- | ---------------------------- |
-| Teku             | `--builder-endpoint=<URL>`                           | [Teku MEV integration]       |
-| Lighthouse       | BN: `--builder=<URL>` VC: `--builder-proposals`      | [Lighthouse MEV integration] |
-| Nimbus           | `--payload-builder=true --payload-builder-url=<URL>` | [Nimbus MEV integration]     |
-| Prysm            | `--http-mev-relay=<URL>`                             | [Prysm MEV integration]      |
-| Lodestar         | BN: `--builder --builder.urls=<URL>` VC: `--builder` | [Lodestar MEV integration]   |
+| Cliente de Consenso | Opción CLI                                           | Página de referencia CLI           |
+| ------------------- | ---------------------------------------------------- | ---------------------------------- |
+| Teku                | `--builder-endpoint=<URL>`                           | [Integración MEV de Teku]          |
+| Lighthouse          | BN: `--builder=<URL>` VC: `--builder-proposals`      | [Integración MEV de Lighthouse]    |
+| Nimbus              | `--payload-builder=true --payload-builder-url=<URL>` | [Integración MEV de Nimbus]        |
+| Prysm               | `--http-mev-relay=<URL>`                             | [Integración MEV de Prysm]         |
+| Lodestar            | BN: `--builder --builder.urls=<URL>` VC: `--builder` | [Integración MEV de Lodestar]      |
 
-[teku mev integration]: https://docs.teku.consensys.net/en/latest/Reference/CLI/CLI-Syntax/#builder-endpoint
-[nimbus mev integration]: https://nimbus.guide/external-block-builder.html
-[lighthouse mev integration]: https://lighthouse-book.sigmaprime.io/builders.html
-[lodestar mev integration]: https://chainsafe.github.io/lodestar/usage/mev-integration/
-[prysm mev integration]: https://docs.prylabs.network/docs/prysm-usage/parameters
+[integración mev de teku]: https://docs.teku.consensys.net/en/latest/Reference/CLI/CLI-Syntax/#builder-endpoint
+[integración mev de nimbus]: https://nimbus.guide/external-block-builder.html
+[integración mev de lighthouse]: https://lighthouse-book.sigmaprime.io/builders.html
+[integración mev de lodestar]: https://chainsafe.github.io/lodestar/usage/mev-integration/
+[integración mev de prysm]: https://docs.prylabs.network/docs/prysm-usage/parameters
 
-## Relays and MEV-Boost options
+## Relés y opciones de MEV-Boost
 
-List of possible relays that have been approved by DAO can be fetched by [querying the `get_relays()`](/contracts/mev-boost-relays-allowed-list#get_relays) method in `MevBoostRelayAllowedList` contract.
+La lista de relés aprobados por el DAO se puede obtener consultando el método [`get_relays()`](/contracts/mev-boost-relays-allowed-list#get_relays) en el contrato `MevBoostRelayAllowedList`.
 
 ### Mainnet
 
 ```shell
-./mev-boost -mainnet -relay-check -relay <comma-separated relay urls>
+./mev-boost -mainnet -relay-check -relay <urls de relé separados por comas>
 ```
 
 ### Holešky
 
 ```shell
-./mev-boost -holesky -relay-check -relay <comma-separated relay urls>
+./mev-boost -holesky -relay-check -relay <urls de relé separados por comas>
 ```
 
-Full list of MEV-boost CLI options can be found here [MEV-Boost CLI Options]
-
-[mev-boost cli options]: https://github.com/flashbots/mev-boost#mev-boost-cli-arguments
+Puede encontrar la lista completa de opciones del CLI MEV-Boost [aquí](https://github.com/flashbots/mev-boost#mev-boost-cli-arguments).

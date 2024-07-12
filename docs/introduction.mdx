@@ -7,143 +7,145 @@ import Grid from '@site/src/components/Grid'
 import SolanaIcon from '@site/src/assets/SolanaIcon'
 import PolygonIcon from '@site/src/assets/PolygonIcon'
 
-# Introduction
+# Introducción
 
-This documentation is intended to introduce the general user to the project, as well as to serve as a guide for anyone who may be developing software using Lido.
+Esta documentación tiene como objetivo presentar el proyecto al usuario general, así como servir de guía para cualquiera que esté desarrollando software utilizando Lido.
 
-&emsp;❔ Get started with [FAQ](https://lido.fi/faq)
+&emsp;❔ Comienza con [FAQ](https://lido.fi/faq)
 
-&emsp;🐞 Follow the [bug bounty](https://immunefi.com/bounty/lido/) program
+&emsp;🐞 Sigue el programa de [recompensas por errores](https://immunefi.com/bounty/lido/)
 
-&emsp;💰 Access grants with [LEGO](https://lego.lido.fi)
+&emsp;💰 Accede a subvenciones con [LEGO](https://lego.lido.fi)
 
-&emsp;🌐 Everything about [Lido Node Operators](https://operatorportal.lido.fi/)
+&emsp;🌐 Todo sobre los [Operadores de Nodo de Lido](https://operatorportal.lido.fi/)
 
-&emsp;🔗 Integrate your DApp following this [guide](https://docs.lido.fi/guides/steth-integration-guide)
+&emsp;🔗 Integra tu DApp siguiendo esta [guía](https://docs.lido.fi/guides/steth-integration-guide)
 
-&emsp;🔈 Participate in [governance](https://research.lido.fi/) forum
+&emsp;🔈 Participa en el foro de [gobernanza](https://research.lido.fi/)
 
-&emsp;🏷️ Audit [source code](https://github.com/lidofinance)
+&emsp;🏷️ Audita el [código fuente](https://github.com/lidofinance)
 
-&emsp;🤝 Support, partnerships and more in [Discord](https://discord.gg/vgdPfhZ), [Telegram](https://t.me/lidofinance)
+&emsp;🤝 Soporte, asociaciones y más en [Discord](https://discord.gg/vgdPfhZ), [Telegram](https://t.me/lidofinance)
 
-&emsp;✅ Updates in [blog](https://blog.lido.fi/) and [Twitter](https://twitter.com/lidofinance)
+&emsp;✅ Actualizaciones en el [blog](https://blog.lido.fi/) y [Twitter](https://twitter.com/lidofinance)
 
-&emsp;ℹ️ Find support at [help center](https://help.lido.fi/)
+&emsp;ℹ️ Encuentra soporte en el [centro de ayuda](https://help.lido.fi/)
 
-## What is Lido
+## ¿Qué es Lido?
 
-Lido is the leading liquid staking solution - providing a simple way to get rewards on your digital tokens. By staking with Lido your tokens remain liquid and can be used across a range of DeFi applications, getting extra rewards.
+Lido es la solución líder de staking líquido, proporcionando una manera sencilla de obtener recompensas con tus tokens digitales. Al hacer staking con Lido, tus tokens permanecen líquidos y pueden ser utilizados en una variedad de aplicaciones DeFi, obteniendo recompensas adicionales.
 
-1. **Staking pool**. Protocol to manage deposits, staking rewards, and withdrawals. A separate one for every supported network.
-2. `st[token]`. Unlike staked tokens, the Lido `st[token]` are freely transferable instead of locked as in the case of native staking. Lido lets users operate with staked tokens by leveraging collateral, lending, farming, and other kinds of DeFi protocols.
-3. **DAO**. Lido liquid protocols management entity, responsible for picking node operators, configuring the protocol parameters and much more.
+1. **Pool de staking**. Protocolo para gestionar depósitos, recompensas de staking y retiros. Un protocolo separado para cada red soportada.
+2. `st[token]`. A diferencia de los tokens en staking, los `st[token]` de Lido son transferibles libremente en lugar de estar bloqueados como en el caso del staking nativo. Lido permite a los usuarios operar con tokens en staking aprovechando el colateral, préstamos, farming y otros tipos de protocolos DeFi.
+3. **DAO**. Entidad de gestión de los protocolos líquidos de Lido, responsable de seleccionar operadores de nodo, configurar los parámetros del protocolo y mucho más.
 
-> 📝 To dive into the details of governance design and implementation, proceed to [DAO](lido-dao.md)
+> 📝 Para profundizar en los detalles del diseño e implementación de la gobernanza, procede a [DAO](lido-dao.md)
 
-4. **Node Operators**. entities that manage a secure and stable infrastructure for running validator clients for the benefit of the protocols. They’re dedicated staking providers who can ensure the safety of funds belonging to the protocol users and correctness of validator operations.
+4. **Operadores de Nodo**. Entidades que gestionan una infraestructura segura y estable para ejecutar clientes validadores en beneficio de los protocolos. Son proveedores de staking dedicados que pueden garantizar la seguridad de los fondos pertenecientes a los usuarios del protocolo y la corrección de las operaciones de los validadores.
 
-Ethereum is and remains a primary focus of Lido. That’s affected the organisational structure - the governance is implemented through ERC20 `LDO` token. Currently Lido supports also the Polygon PoS network - when staking native tokens with Lido, users will receive a `st[token]`, which represents their `[token]` which represents their deposit and the rewards aggregated over time (penalties too).
+Ethereum es y sigue siendo el enfoque principal de Lido. Eso ha afectado la estructura organizativa: la gobernanza se implementa a través del token ERC20 `LDO`. Actualmente, Lido también soporta la red Polygon PoS. Al hacer staking de tokens nativos con Lido, los usuarios recibirán un `st[token]`, que representa su `[token]`, el cual representa su depósito y las recompensas acumuladas con el tiempo (también las penalizaciones).
 
 <Grid>
 
 <GridLink
   to="https://docs.polygon.lido.fi"
-  title="Lido on Polygon (stMATIC)"
-  subtitle="For the Lido on Polygon protocol documentation please proceed to a separate portal."
+  title="Lido en Polygon (stMATIC)"
+  subtitle="Para la documentación del protocolo Lido en Polygon, por favor visita un portal separado."
   Icon={<PolygonIcon />}
 />
 
 </Grid>
 
-## Liquid staking
+## Staking líquido
 
-### Problem statement
+### Planteamiento del problema
 
-Traditionally, staking in Proof-of-Stake (PoS) protocol based projects has been about locking one’s tokens in one project for a long time and expecting a fixed, predetermined staking reward in return. While it guarantees the return on staked tokens much like a bond, it also limits the opportunities of generating higher returns on those tokens from the DeFi ecosystem. If you’ve staked all of your crypto holdings, you can’t invest or trade in more profitable crypto pairs on exchanges.
+Tradicionalmente, el staking en proyectos basados en protocolos de Prueba de Participación (PoS) ha consistido en bloquear los tokens de uno en un proyecto durante mucho tiempo y esperar una recompensa de staking fija y predeterminada a cambio. Si bien garantiza el retorno de los tokens en staking, al igual que un bono, también limita las oportunidades de generar mayores retornos en esos tokens dentro del ecosistema DeFi. Si has hecho staking con todas tus tenencias de criptomonedas, no puedes invertir ni comerciar en pares de criptomonedas más rentables en los intercambios.
 
-### Solution
+### Solución
 
-Liquid staking allows using the `st[token]` in other trading opportunities to let the user get the best of both worlds - a reward on your staked tokens, as well as the returns from new trading opportunities. Liquid staking introduces various fundamental benefits by:
-- Making staking process simple - no need to worry about hardware setup and maintenance;
-- Making it possible to get rewards on as small a deposit as users want (i.e, Ethereum requires minimum 32 `ETH` staked);
-- Providing the `st[token]` a building block for other applications and protocols (e.g., as collateral in lending or other trading DeFi solutions). Liquid staking gives an opportunity to maximize the potential while having the best of both worlds;
-- Providing an alternative to or even encompassing exchange staking, solo staking, and other semi-custodial and decentralised protocols.
+El staking líquido permite utilizar los `st[token]` en otras oportunidades de trading, permitiendo al usuario obtener lo mejor de ambos mundos: una recompensa por tus tokens en staking, así como los retornos de nuevas oportunidades de trading. El staking líquido introduce varios beneficios fundamentales al:
+- Hacer el proceso de staking sencillo - no hay necesidad de preocuparse por la configuración y mantenimiento del hardware;
+- Hacer posible obtener recompensas con un depósito tan pequeño como el usuario desee (por ejemplo, Ethereum requiere un mínimo de 32 `ETH` en staking);
+- Proporcionar los `st[token]` como bloques de construcción para otras aplicaciones y protocolos (por ejemplo, como colateral en préstamos u otras soluciones DeFi de trading). El staking líquido da la oportunidad de maximizar el potencial mientras se obtiene lo mejor de ambos mundos;
+- Proporcionar una alternativa a o incluso abarcar el staking en intercambios, staking en solitario y otros protocolos semi-custodiales y descentralizados.
 
-### Comparison with other staking options
+### Comparación con otras opciones de staking
 
-**Solo staking** is great, but it comes with some disadvantages. Setting up a validator node requires a pristine technical understanding, brings with it a minimum deposit of 32 ETH in Ethereum case, slashing and offline penalties can get very severe if the staking is managed improperly and finally the staked amount is locked up for a significant period.
+El **staking en solitario** es excelente, pero viene con algunas desventajas. Configurar un nodo validador requiere un conocimiento técnico impecable, implica un depósito mínimo de 32 ETH en el caso de Ethereum, las penalizaciones por slashing y estar fuera de línea pueden ser muy severas si el staking se gestiona incorrectamente y finalmente, la cantidad en staking se bloquea por un período significativo.
 
-Solo staking is similar to other option **SaaS staking** in that you are having your own validator keys. Nevertheless, with SaaS you must trust a third-party (usually centralised), which may act maliciously, attacked or simply regulated. Going back to the Ethereum example, there remains a requirement for a minimum amount of 32 `ETH` staked.
+El staking en solitario es similar a otra opción, el **staking SaaS**, en que tienes tus propias claves de validador. Sin embargo, con SaaS debes confiar en un tercero (usualmente centralizado), que puede actuar maliciosamente, ser atacado o simplemente ser regulado. Volviendo al ejemplo de Ethereum, sigue existiendo el requisito de un monto mínimo de 32 `ETH` en staking.
 
-Alternatively, it may be possible to produce staking through **centralised exchanges**. Needless to say, crypto tokens and CeFi are not suited well together from the fundamental standpoint. It is also worth mentioning the economic aspect - by staking within some centralised entities, the user does not receive a corresponding token in return and, thus, loses the opportunity to perform any subsequent activity within DeFi or the same centralised entity, where tokens were staked. Yes, APR, when staking on centralised exchanges might be higher, but with a significant amount aggregated within the centralised entity comes a huge potential influence to the ecosystem that was fundamentally designed decentralised.
+Alternativamente, puede ser posible hacer staking a través de **intercambios centralizados**. No hace falta decir que los tokens criptográficos y CeFi no se adaptan bien juntos desde un punto de vista fundamental. También vale la pena mencionar el aspecto económico: al hacer staking dentro de algunas entidades centralizadas, el usuario no recibe un token correspondiente a cambio y, por lo tanto, pierde la oportunidad de realizar cualquier actividad subsecuente dentro de DeFi o la misma entidad centralizada donde se hizo staking. Sí, el APR al hacer staking en intercambios centralizados podría ser más alto, pero con una cantidad significativa agregada dentro de la entidad centralizada viene una gran influencia potencial en el ecosistema que fue diseñado fundamentalmente como descentralizado.
 
-Through the use of a **liquid staking** solution such as Lido, users can eliminate these inconveniences and benefit from non-custodial staking backed by the actively maintained validators set. Liquid staking is unlocking the potential of PoS by giving users the ability to not only stake their tokens, but have the liquidity to use those tokens in DeFi projects that way not only increasing rewards for the individual, but growing the staking participation in general.
+Mediante el uso de una solución de **staking líquido** como Lido, los usuarios pueden eliminar estas inconveniencias y beneficiarse del staking no custodial respaldado por el conjunto de validadores mantenido activamente. El staking líquido está desbloqueando el potencial de PoS al dar a los usuarios la capacidad de no solo hacer staking con sus tokens, sino tener la liquidez para usar esos tokens en proyectos DeFi, de esa manera no solo aumentando las recompensas para el individuo, sino incrementando la participación en el staking en general.
 
-## Lido on Ethereum APR
+## APR de Lido en Ethereum
 :::note
- APR provides only the current estimation of the rewards without any upfront forecasts.
+ APR proporciona solo una estimación actual de las recompensas sin ninguna previsión anticipada.
 :::
 
-> User's APR (Lido staking APR) = Protocol APR * (1 - Protocol fee)
+> APR del usuario (APR de staking de Lido) = APR del protocolo * (1 - Comisión del protocolo)
 
 
-### Protocol APR
+### APR del Protocolo
 
-By Protocol APR we mean gross annual percentage rate — the overall Consensus Layer (CL) and Execution Layer (EL) rewards received by Lido validators to total pooled ETH estimated as moving average of the last 7 days.
+Por APR del Protocolo nos referimos a la tasa bruta anual porcentual, las recompensas generales de la Capa de Consenso (CL) y la Capa de Ejecución (EL) recibidas por los validadores de Lido respecto al total de ETH agrupados, estimadas como promedio móvil de los últimos 7 días.
 
-### Consensus Layer
+### Capa de Consenso
 
-Validators receive rewards when they perform consensus layer validators’ duties:
+Los validadores reciben recompensas cuando realizan las funciones de validadores de la capa de consenso:
 
-- attest blocks
-- propose blocks
-- participate in sync committees.
+- atestiguar bloques
+- proponer bloques
+- participar en comités de sincronización.
 
-The value of the rewards in each epoch is calculated from a base reward. This is the base unit representing the average reward received by a validator under optimal conditions per epoch. Base rewards are inversely proportional to the square root of the total staked ether in Ethereum, that's why the amount of reward per validator decreases as the overall number of validators on Ethereum grows.
+El valor de las recompensas en cada época se calcula a partir de una recompensa base. Esta es la unidad base que representa la recompensa promedio recibida por un validador en condiciones óptimas por época. Las recompensas base son inversamente proporcionales a la raíz cuadrada del total de ether en staking en Ethereum, por lo que la cantidad de recompensa por validador disminuye a medida que el número total de validadores en Ethereum crece.
 
-In addition to rewards, penalties and slashing can be applied to validators on the CL.
+Además de las recompensas, se pueden aplicar penalizaciones y slashing a los validadores en la CL.
 
-A penalty is a form of reducing the validator’s stake, which is not online or doesn’t meet certain specifications criteria when attesting the blocks.
+Una penalización es una forma de reducir la participación del validador, que no está en línea o no cumple con ciertos criterios de especificaciones al atestiguar los bloques.
 
-Being slashed means that the misbehaving validator is forced to exit the beacon chain at a point in the future, receiving a [number of penalties until it leaves](https://docs.prylabs.network/docs/how-prysm-works/validator-lifecycle#slashing-state). As a result of it, APR can also reduce.
+Ser slashed significa que el validador que se comporta incorrectamente es obligado a salir de la cadena beacon en un punto futuro, recibiendo un [número de penalizaciones hasta que se retire](https://docs.prylabs.network/docs/how-prysm-works/validator-lifecycle#slashing-state). Como resultado, el APR también puede reducirse.
 
-> **Performance of Lido validators**
-The better the underlying operator sets are, the more robust, resilient, and performant the underlying protocol. Check [Operator Statistics and Metrics](https://operatorportal.lido.fi/operator-statistics-and-metrics).
+> **Rendimiento de los validadores de Lido**
+Cuanto mejores sean los conjuntos de operadores subyacentes, más robusto, resiliente y eficiente será el protocolo subyacente. Consulta [Estad
 
-Learn more about rewards and penalties - [ethereum.org](https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/rewards-and-penalties/)
+ísticas y Métricas de Operadores](https://operatorportal.lido.fi/operator-statistics-and-metrics).
 
-### Execution Layer
-Validators began to receive EL rewards after [the Merge](https://ethereum.org/en/roadmap/merge/). EL rewards consist of four parts:
+Aprende más sobre recompensas y penalizaciones - [ethereum.org](https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/rewards-and-penalties/)
 
-- **Priority fee**
-Priority fee refers to optional additional fees (for example it may refer to EIP-1559) paid directly to validators in order to incentivize them to include the given transaction in a block. Also it depends on network demand: as higher network demand, as higher could be priority fee.
+### Capa de Ejecución
+Los validadores comenzaron a recibir recompensas de EL después de [la Fusión](https://ethereum.org/en/roadmap/merge/). Las recompensas de EL consisten en cuatro partes:
 
-- **Maximal Extractable Value (MEV) rewards**
-MEV refers to the maximum value that can be extracted by the validator from block production in excess of the standard block reward and gas fees by including, excluding, and changing the order of transactions in a block.
+- **Tarifa de prioridad**
+La tarifa de prioridad se refiere a tarifas adicionales opcionales (por ejemplo, puede referirse a EIP-1559) pagadas directamente a los validadores para incentivarlos a incluir la transacción dada en un bloque. También depende de la demanda de la red: cuanto mayor sea la demanda de la red, mayor podría ser la tarifa de prioridad.
 
-### Rewards socialization model
+- **Recompensas de Valor Máximo Extraíble (MEV)**
+MEV se refiere al valor máximo que puede ser extraído por el validador de la producción de bloques en exceso de la recompensa estándar del bloque y las tarifas de gas al incluir, excluir y cambiar el orden de las transacciones en un bloque.
 
-With Lido, you receive staking rewards within 24 hours of your deposit being made, without waiting for validator activation.
+### Modelo de socialización de recompensas
 
-### Protocol fee
+Con Lido, recibes recompensas de staking dentro de las 24 horas posteriores a la realización de tu depósito, sin esperar la activación del validador.
 
-> Lido applies a 10% fee on staking rewards that are split between node operators and the DAO Treasury. The fee can be changed by the DAO pending a successful vote.
+### Comisión del Protocolo
 
-### More about APR calculation
+> Lido aplica una comisión del 10% sobre las recompensas de staking que se divide entre los operadores de nodo y el Tesoro de la DAO. La comisión puede ser cambiada por la DAO tras una votación exitosa.
 
-Please refer to the [API doc page](/integrations/api#simple-moving-average-lido-apr-for-7-last-days) for further details.
+### Más sobre el cálculo de APR
 
-## Security
+Por favor, consulta la [página de la API](/integrations/api#simple-moving-average-lido-apr-for-7-last-days) para más detalles.
 
-The security of Lido is highest priority beginning at the time of its initial deployment, but still users should investigate risks involved with Lido before engaging with it. We are constantly working on security improvements:
+## Seguridad
 
-- Using of DAO for governance decisions & to manage risk factors.
-- Having multiple audits finished (see [more](https://github.com/lidofinance/audits)).
-- Having a committee of elected, best-in-class validators to minimise staking risk.
-- Allowing staking across multiple validators (i.e. current Ethereum staking mechanism only allows to choose only a single validator)
-- Using of non-custodial staking service to eliminate counterparty risk.
+La seguridad de Lido es la máxima prioridad desde el momento de su despliegue inicial, pero aún así, los usuarios deben investigar los riesgos involucrados con Lido antes de interactuar con él. Estamos trabajando constantemente en mejoras de seguridad:
 
-In the [scorecard](https://scorecard.lido.fi/) you may find an  outlined set of attributes that we think are important for the decentralisation of the protocol, and how Lido is faring against these targets.
+- Uso de la DAO para decisiones de gobernanza y gestión de factores de riesgo.
+- Tener múltiples auditorías terminadas (ver [más](https://github.com/lidofinance/audits)).
+- Tener un comité de validadores elegidos, de primer nivel, para minimizar el riesgo de staking.
+- Permitir el staking a través de múltiples validadores (es decir, el mecanismo de staking actual de Ethereum solo permite elegir un único validador)
+- Uso de un servicio de staking no custodial para eliminar el riesgo de contraparte.
 
-> 📝 As for now, scorecard has only Ethereum related content.
+En el [scorecard](https://scorecard.lido.fi/) puedes encontrar un conjunto de atributos que consideramos importantes para la descentralización del protocolo y cómo está Lido en comparación con estos objetivos.
+
+> 📝 Por ahora, el scorecard solo tiene contenido relacionado con Ethereum.
