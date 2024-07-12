@@ -42,7 +42,7 @@ There is a dedicated contract responsible for `stETH` tokens burning.
 The burning itself is a part of the core protocol procedures:
 
 - deduct underlying finalized withdrawal request `stETH`, see [`Lido.handleOracleReport`](/contracts/lido#handleoraclereport)
-- penalize delinquent node operators by halving their rewards, see [Validator exits and penalties](/guides/oracle-spec/penalties)
+- penalize delinquent node operators by halving their rewards, see [Validator exits and penalties](/guías/oracle-spec/penalties)
 
 These responsibilities are controlled by the `REQUEST_BURN_SHARES_ROLE` role which is assigned to both
 [`Lido`](/contracts/lido) and [`NodeOperatorsRegistry`](/contracts/node-operators-registry) contracts.

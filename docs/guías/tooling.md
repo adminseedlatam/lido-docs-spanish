@@ -11,7 +11,7 @@ Oracle daemon for Lido decentralized staking service.
 - **Commit hash**: [lidofinance/lido-oracle@4467895](https://github.com/lidofinance/lido-oracle/tree/44678954915b8291c949904c63de5e4e4983b427)
 - **Last update date**: 17 May, 2023
 - [**Repository**](https://github.com/lidofinance/lido-oracle/tree/3.0.0)
-- [**Documentation**](/guides/oracle-operator-manual)
+- [**Documentation**](/guías/oracle-operator-manual)
 
 ## Validator Ejector
 
@@ -22,7 +22,7 @@ Daemon service which loads LidoOracle events for validator exits and sends out e
 - **Commit hash**: [lidofinance/validator-ejector@cae145c](https://github.com/lidofinance/validator-ejector/commit/cae145cde6e0c41726335dcbb761395fd54c26de)
 - **Last update date**: 17 April, 2024
 - [**Repository**](https://github.com/lidofinance/validator-ejector/tree/1.6.0#readme)
-- [**Documentation**](/guides/validator-ejector-guide)
+- [**Documentation**](/guías/validator-ejector-guide)
 
 ## Council daemon
 
@@ -33,7 +33,7 @@ The Lido Council Daemon monitors deposit contract keys.
 - Commit hash: [lidofinance/lido-council-daemon@e675a48](https://github.com/lidofinance/lido-council-daemon/commit/e675a4856502b9f67e606f0c5f07d712288d5945)
 - **Last update date**: 30 March, 2024
 - [**Repository**](https://github.com/lidofinance/lido-council-daemon/tree/2.1.2)
-- [**Documentation**](/guides/deposit-security-manual)
+- [**Documentation**](/guías/deposit-security-manual)
 
 ## Keys API
 
@@ -44,4 +44,4 @@ Lido keys HTTP API.
 - **Commit hash**: [lidofinance/lido-keys-api@33141b1](https://github.com/lidofinance/lido-keys-api/commit/33141b195563769151f3d1054acdf785d92db381)
 - **Last update date**: 28 February, 2024
 - [**Repository**](https://github.com/lidofinance/lido-keys-api/tree/1.0.2)
-- [**Documentation**](/guides/kapi-guide)
+- [**Documentation**](/guías/kapi-guide)

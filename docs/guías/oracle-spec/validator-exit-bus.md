@@ -1,7 +1,7 @@
 # Validators Exit Bus
 
 :::info
-It's advised to read [What is Lido Oracle mechanism](/guides/oracle-operator-manual#intro) before
+It's advised to read [What is Lido Oracle mechanism](/guías/oracle-operator-manual#intro) before
 :::
 
 [Validators Exit Bus](/contracts/validators-exit-bus-oracle) is an oracle that ejects Lido validators when the protocol requires additional funds to process user withdrawals.

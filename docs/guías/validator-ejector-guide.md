@@ -128,7 +128,7 @@ docker run \
 		node /app/dist/encryptor/encrypt.js
 ```
 
-You can find a recommended version's hash [here](/guides/tooling).
+You can find a recommended version's hash [here](/guías/tooling).
 
 For platforms with a different architecture but with emulation/transpilation support eg macOS on M processors, additionally specify:
 

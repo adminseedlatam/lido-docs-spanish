@@ -5,7 +5,7 @@
 - Inherits [BaseOracle](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/oracle/BaseOracle.sol)
 
 :::info
-It's advised to read [What is Lido Oracle mechanism](/guides/oracle-operator-manual#intro) before
+It's advised to read [What is Lido Oracle mechanism](/guías/oracle-operator-manual#introducción) before
 :::
 
 ## What is AccountingOracle
@@ -23,7 +23,7 @@ It's worth noting that frame length [can be changed](./hash-consensus#setframeco
 
 The frame includes these stages:
 
-- **Waiting:** oracle starts as a [daemon](/guides/oracle-operator-manual#the-oracle-daemon) and wakes up every 12 seconds (by default) in order to find the last finalized slot, trying to collate with it with the expected reference slot;
+- **Waiting:** oracle starts as a [daemon](/guías/oracle-operator-manual#el-daemon-del-oráculo) and wakes up every 12 seconds (by default) in order to find the last finalized slot, trying to collate with it with the expected reference slot;
 - **Data collection:** oracles monitor the state of both the execution and consensus layers and collect the data for the successfully arrived finalized reference slot;
 - **Hash consensus:** oracles analyze the data, compile the report and submit its hash to the [`HashConsensus`](./hash-consensus) smart contract;
 - **Core update report:** once the [quorum](./hash-consensus#getquorum) of hashes is reached, meaning more than half of the oracles submitted the same hash (i.e., 5 of 9 oracle committee members at the moment of writing), one of the oracles chosen in turn submits the actual report to the `AccountingOracle` contract, which triggers the core protocol state update, including the token rebase, distribution of node operator rewards, finalization of withdrawal requests, and the protocol mode decision: whether to go in the bunker mode, and
@@ -275,7 +275,7 @@ uint256 public constant EXTRA_DATA_TYPE_EXITED_VALIDATORS = 2
 
 The extra data format used to signify that the oracle report contains no [extra data](/contracts/accounting-oracle#extra-data).
 
-Sends as a part of the Oracle's [Phase 3](/guides/oracle-operator-manual#phase-3-submitting-a-report-extra-data).
+Sends as a part of the Oracle's [Phase 3](/guías/oracle-operator-manual#fase-3-envío-de-datos-adicionales-del-informe).
 
 This format uses when there are no new [stuck](/contracts/staking-router#exited-and-stuck-validators) or [exited](/contracts/staking-router#exited-and-stuck-validators) validators on report period.
 

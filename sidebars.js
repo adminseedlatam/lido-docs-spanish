@@ -78,11 +78,11 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Token guides',
+      label: 'Guías Token',
       items: [
-        'token-guides/steth-superuser-functions',
-        'token-guides/steth-on-aave-caveats',
-        'token-guides/wsteth-bridging-guide',
+        'guías-token/steth-superuser-functions',
+        'guías-token/steth-on-aave-caveats',
+        'guías-token/wsteth-bridging-guide',
       ],
     },
     {

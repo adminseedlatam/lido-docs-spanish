@@ -21,7 +21,7 @@ The Lido DAO can also:
 In the context of these terms "signing key", "key", "validator key", "validator" might be used interchangeably.
 :::
 
-**signing key**. BLS12-381 public key that will be used by the protocol for making Beacon deposits to [run a validator](/docs/guías/node-operators/validator-keys.md#generating-signing-keys)
+**signing key**. BLS12-381 public key that will be used by the protocol for making Beacon deposits to [run a validator](/docs/guías/node-operators/validator-keys.md#generación-de-claves-de-firma)
 
 **vetted** (signing key). Approved by the Lido DAO for receiving ether for deposit.
 

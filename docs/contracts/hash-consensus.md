@@ -5,7 +5,7 @@
 - [Deployed instance for ValidatorsExitBusOracle](https://etherscan.io/address/0x7FaDB6358950c5fAA66Cb5EB8eE5147De3df355a)
 
 :::info
-It's advised to read [What is Lido Oracle mechanism](/guides/oracle-operator-manual#intro) before
+It's advised to read [What is Lido Oracle mechanism](/guías/oracle-operator-manual#introducción) before
 :::
 
 ## What is HashConsensus
@@ -24,7 +24,7 @@ Consensus members rotate within one time into two subsets:
 - [Fast-lane members](/contracts/hash-consensus#fast-lane-members)
 
 Once the consensus is gathered, a [Report processor](#report-processor-ireportasyncprocessor) would allow submitting and processing the actual report data.
-The latter is a part of the [phased Oracle report flow](/docs/guías/oracle-operator-manual.md#oracle-phases).
+The latter is a part of the [phased Oracle report flow](/docs/guías/oracle-operator-manual.md#fases-del-oráculo).
 
 ## Report processor (`IReportAsyncProcessor`)
 

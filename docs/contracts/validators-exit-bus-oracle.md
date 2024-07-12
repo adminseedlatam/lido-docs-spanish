@@ -5,7 +5,7 @@
 - Inherits [BaseOracle](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/oracle/BaseOracle.sol)
 
 :::info
-It's advised to read [What is Lido Oracle mechanism](/guides/oracle-operator-manual#intro) before
+It's advised to read [What is Lido Oracle mechanism](/guías/oracle-operator-manual#intro) before
 :::
 
 ## What is ValidatorsExitBusOracle
@@ -39,7 +39,7 @@ It's worth noting that frame length [can be changed](./hash-consensus#setframeco
 
 The frame includes these stages:
 
-- **Waiting** - oracle starts as a [daemon](/guides/oracle-operator-manual#the-oracle-daemon) and wakes up every 12 seconds (by default) in order to find the last finalized slot, trying to collate with it with the expected reference slot;
+- **Waiting** - oracle starts as a [daemon](/guías/oracle-operator-manual#el-daemon-del-oráculo) and wakes up every 12 seconds (by default) in order to find the last finalized slot, trying to collate with it with the expected reference slot;
 - **Data collection**: oracles monitor the state of both the execution and consensus layers and collect the data for the successfully arrived finalized reference slot;
 - **Hash consensus**: oracles analyze the report data, compile the report and submit its hash to the [HashConsensus](/contracts/hash-consensus) smart contract;
 - **Core update report**: once the [quorum](./hash-consensus#getquorum) of hashes is reached, meaning more than half of the oracles submitted the same hash (i.e., 5 of 9 oracle committee members at the moment of writing), one of the oracles chosen in turn submits the actual report to the `ValidatorsExitBusOracle` contract, which triggers a chain of the [`ValidatorExitRequest`](#validatorexitrequest) events containing details about the next validators to be ejected (to initiate a voluntary exit from the Ethereum Consensus Layer side).

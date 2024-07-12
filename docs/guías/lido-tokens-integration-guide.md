@@ -259,7 +259,7 @@ Actualmente, el token wstETH está [presente en](/docs/deployed-contracts/index.
 - [Mantle](https://explorer.mantle.xyz/address/0x458ed78EB972a369799fb278c0243b25e5242A83)
 - [Polygon PoS](https://polygonscan.com/token/0x03b54a6e9a984069379fae1a4fc4dbae93b3bccd)
 
-con puentes implementados a través del [enfoque recomendado de puentes canónicos](/docs/token-guides/wsteth-bridging-guide.md).
+con puentes implementados a través del [enfoque recomendado de puentes canónicos](/docs/guías-token/wsteth-bridging-guide.md).
 
 :::info
 A diferencia de la red principal de Ethereum, en las redes L2, wstETH es simplemente un token ERC-20 y no puede desenvolverse para desbloquear stETH en la red L2 correspondiente hasta ahora.
@@ -456,7 +456,7 @@ La integración se puede implementar utilizando el [Lido en Ethereum SDK](/docs/
 ### Puenteado entre cadenas
 
 El wstETH de Lido se puentea a varios L2 y sidechains.
-El proceso de adopción de una nueva red de manera resistente al futuro se describe como parte de la [guía de puenteado separada](/docs/token-guides/wsteth-bridging-guide.md).
+El proceso de adopción de una nueva red de manera resistente al futuro se describe como parte de la [guía de puenteado separada](/docs/guías-token/wsteth-bridging-guide.md).
 
 La mayoría de los puentes de tokens entre cadenas no tienen mecanismos para manejar rebases.
 Esto significa que el puenteo de stETH a otras cadenas impedirá que los validadores recojan sus recompensas de participación.
