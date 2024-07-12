@@ -1,54 +1,53 @@
-# Accounting oracle
+# Oráculo de contabilidad
 
 :::info
-It's advised to read [What is Lido Oracle mechanism](/guías/oracle-operator-manual#intro) before
+Se recomienda leer [What is Lido Oracle mechanism](/guías/oracle-operator-manual#intro) antes
 :::
 
-## Withdrawal stage
+## Etapa de retiro
 
-As withdrawals on Ethereum are processed asynchronously, the Lido protocol has to have a request-claim process for `stETH` holders. To ensure the requests are processed in the order they are received, the in-protocol FIFO queue is introduced. Here is an overview of the withdrawals handling process:
-
-1. **Request:** To withdraw stETH to ether, one sends the withdrawal request to the [`WithdrawalQueue`](/docs/contracts/withdrawal-queue-erc721.md) contract, locking the `stETH` amount to be withdrawn.
-2. **Fulfillment:** The protocol handles the requests one-by-one, in the order of creation. Once the protocol has enough information to calculate the `stETH:ETH` redemption rate of the next request and obtains enough Ether to handle it, the request can be finalized: the required amount of ether is reserved and the locked stETH is burned.
-3. **Claim:** The requestor can then claim their ether at any time in the future. The `stETH:ETH` redemption rate for each request is determined at the time of its finalization and is the inverse of the `ETH:stETH` staking rate.
+Dado que los retiros en Ethereum se procesan de manera asincrónica, el protocolo de Lido debe tener un proceso de solicitud-reclamo para los `stETH` holders. Para asegurar que las solicitudes se procesen en el orden en que se reciben, se introduce la cola FIFO en el protocolo. A continuación se presenta una descripción general del proceso de manejo de retiros:
+1. **Solicitud:** Para retirar stETH a ether, se envía la solicitud de retiro al contrato [`WithdrawalQueue`](/docs/contracts/withdrawal-queue-erc721.md) , bloqueando la cantidad de `stETH` ue se va a retirar.
+2. **Cumplimiento:** El protocolo maneja las solicitudes una por una, en el orden de creación. Una vez que el protocolo tiene suficiente información para calcular la tasa de redención `stETH:ETH` de la siguiente solicitud y obtiene suficiente Ether para manejarla, la solicitud puede ser finalizada: se reserva la cantidad requerida de ether y se quema el stETH bloqueado.
+3. **Reclamo:** El solicitante puede reclamar su ether en cualquier momento en el futuro. La tasa de redención `stETH:ETH` para cada solicitud se determina en el momento de su finalización y es la inversa de la tasa de staking `ETH:stETH` 
 
 :::note
-It's important to note that the redemption rate at the finalization step may be lower than the rate at the time of the withdrawal request due to slashing or penalties that have been incurred by the protocol. This means that one may receive less Ether for their stETH than they expected when they originally submitted the request.
+Es importante notar que la tasa de redención en el paso de finalización puede ser menor que la tasa en el momento de la solicitud de retiro debido a recortes o penalizaciones que ha incurrido el protocolo. Esto significa que uno puede recibir menos Ether por su stETH de lo que esperaba cuando originalmente presentó la solicitud.
 :::
 
-One can put any number of withdrawal requests in the queue. While there is an upper limit on the size of a particular request, there is no effective limit as the requestor can submit multiple withdrawal requests. There's a minimal request size threshold of `100 wei` required as well due to [rounding error issues](https://github.com/lidofinance/lido-dao/issues/442).
+Es importante notar que la tasa de redención en el paso de finalización puede ser menor que la tasa en el momento de la solicitud de retiro debido a recortes o penalizaciones que ha incurrido el protocolo. Esto significa que uno puede recibir menos Ether por su stETH de lo que esperaba cuando originalmente presentó la solicitud.`100 wei` requerido debido a [rounding error issues](https://github.com/lidofinance/lido-dao/issues/442).
 
-A withdrawal request could be finalized only when the protocol has enough ether to fulfill it completely.  Partial fulfillments are not possible, however, one can accomplish similar behavior by splitting a bigger request into a few smaller ones.
+Una solicitud de retiro solo puede finalizarse cuando el protocolo tiene suficiente ether para cumplirla completamente. No es posible realizar cumplimientos parciales, sin embargo, uno puede lograr un comportamiento similar dividiendo una solicitud más grande en unas pocas más pequeñas.
 
-For UX reasons, the withdrawal request is transferrable being a non-fungible [ERC-721](https://ethereum.org/ru/developers/docs/standards/tokens/erc-721/) compatible token.
+Por razones de experiencia de usuario, la solicitud de retiro es transferible siendo un token no fungible compatible con [ERC-721](https://ethereum.org/ru/developers/docs/standards/tokens/erc-721/) 
 
-It is important to note two additional restrictions related to withdrawal requests. Both restrictions serve to mitigate possible attack vectors allowing would-be attackers to effectively lower the protocol's APR and carry fewer penalties/slashing risk than `stETH` holders staying in the protocol.
+Es importante notar dos restricciones adicionales relacionadas con las solicitudes de retiro. Ambas restricciones sirven para mitigar posibles vectores de ataque que permitirían a los posibles atacantes reducir efectivamente el APR del protocolo y llevar menos penalizaciones/riesgo de recorte que los poseedores de `stETH` que permanecen en el protocolo.
 
-1. **Withdrawal requests cannot be canceled.** To fulfill a withdrawal request, the Lido protocol potentially has to eject validators. A malicious actor could send a withdrawal request to the queue, wait until the protocol sends ejection requests to the corresponding Node Operators, and cancel the request after that. By repeating this process, the attacker could effectively lower the protocol APR by forcing Lido validators to spend time in the activation queue without accruing rewards. If the withdrawal request can't be canceled, there vulnerability is mitigated. As noted above, making the position in the withdrawal queue transferrable can provide a "fast exit path" for regular stakers via external secondary markets.
-2. **The redemption rate at which a request is fulfilled cannot be better than the redemption rate on the request creation.** Otherwise, there’s an incentive to always keep the stETH in the queue, depositing ether back once it’s redeemable, as this allows to carry lower staking risks without losing rewards. This would also allow a malicious actor to effectively lower the protocol APR. To avoid this, the penalties leading to a negative rebase are accounted for and socialized evenly between stETH holders and withdrawers. Positive rebases could still affect requests in the queue, but only to the point where rebases compensate for previously accrued penalties and don't push the redemption rate higher than it was at the moment of the withdrawal request's creation.
+1. **Las solicitudes de retiro no pueden cancelarse.** Para cumplir una solicitud de retiro, el protocolo de Lido potencialmente tiene que expulsar validadores. Un actor malicioso podría enviar una solicitud de retiro a la cola, esperar hasta que el protocolo envíe solicitudes de expulsión a los Operadores de Nodo correspondientes, y cancelar la solicitud después de eso. Repitiendo este proceso, el atacante podría reducir efectivamente el APR del protocolo al obligar a los validadores de Lido a pasar tiempo en la cola de activación sin acumular recompensas. Si la solicitud de retiro no se puede cancelar, esta vulnerabilidad se mitiga. Como se mencionó anteriormente, hacer que la posición en la cola de retiro sea transferible puede proporcionar una "vía de salida rápida" para los apostadores regulares a través de mercados secundarios externos.
+2. **La tasa de redención a la que se cumple una solicitud no puede ser mejor que la tasa de redención en la creación de la solicitud.** De lo contrario, existe un incentivo para mantener siempre el stETH en la cola, depositando ether nuevamente una vez que sea canjeable, ya que esto permite llevar menores riesgos de staking sin perder recompensas. Esto también permitiría a un actor malicioso reducir efectivamente el APR del protocolo. Para evitar esto, las penalizaciones que llevan a una rebase negativa se contabilizan y socializan de manera uniforme entre los poseedores de stETH y los que retiran. Las rebases positivas aún podrían afectar las solicitudes en la cola, pero solo hasta el punto donde las rebases compensen las penalizaciones acumuladas anteriormente y no empujen la tasa de redención más alta de lo que era en el momento de la creación de la solicitud de retiro.
 
-### Request finalization
+### Finalización de solicitud
 
-On each report, the oracle decides how many requests to finalize and at what rate. Requests are finalized in the order in which they were created by moving the cursor to the last finalized request. Oracle must take two things into account:
+En cada informe, el oráculo decide cuántas solicitudes finalizar y a qué tasa. Las solicitudes se finalizan en el orden en que fueron creadas moviendo el cursor a la última solicitud finalizada. El oráculo debe tener en cuenta dos cosas:
 
-1. Available ether and redemption rate (also called as 'share rate')
-2. Safe requests finalization border
+1. Ether disponible y tasa de redención (también llamada 'tasa de participación')
+2. Frontera segura de finalización de solicitudes
 
-#### Available ether and share rate
+#### Ether disponible y tasa de participación
 
-The Oracle report has two parts: the report of the number of validators and their total balance and the finalization of requests in the [`WithdrawalQueue`](/docs/contracts/withdrawal-queue-erc721.md). The finalization of requests requires data from the first part of the report. Therefore, to calculate this part the oracle report is simulated by `eth_call` to `handleOracleReport` in Lido contract, getting share rate and amount of ether that can be withdrawn from [Withdrawal](/docs/contracts/withdrawal-vault.md) and [Execution Layer Rewards](/docs/contracts/lido-execution-layer-rewards-vault.md) Vaults taking into account the limits.
+El informe del oráculo tiene dos partes: el informe del número de validadores y su balance total, y la finalización de solicitudes en el [`WithdrawalQueue`](/docs/contracts/withdrawal-queue-erc721.md). La finalización de solicitudes requiere datos de la primera parte del informe. Por lo tanto, para calcular esta parte, el informe del oráculo se simula mediante `eth_call` to `handleOracleReport` en el contrato de Lido, obteniendo la tasa de participación y la cantidad de ether que se puede retirar de los [Withdrawal](/docs/contracts/withdrawal-vault.md) y [Execution Layer Rewards](/docs/contracts/lido-execution-layer-rewards-vault.md) Vaults teniendo en cuenta los límites.
 
-The structure of the data for simulation:
+La estructura de los datos para la simulación:
 
-- `reportTimestamp` - the moment of the oracle report calculation, calculated as `timestamp = genesis_time + ref_slot * seconds_per_slot`;
-- `timeElapsed` - seconds elapsed since the previous reported ref slot and the simulated one
-- `clValidators` - number of Lido validators on the Ethereum Consensus Layer
-- `clBalance` - sum of all Lido validators' balances on the Ethereum Consensus Layer
-- `withdrawalVaultBalance` - withdrawal vault balance on the Ethereum Execution Layer for the reported block
-- `elRewardsVaultBalance` - elRewards vault balance on the Ethereum Execution Layer for reported block. Set to "**0**" if try to simulate report in bunker mode
-- `sharesRequestedToBurn` - gets from `Burner.getSharesRequestedToBurn()`
-- `withdrawalFinalizationBatches` - Set to "**[]**"
-- `simulatedShareRate` - share rate that was simulated by oracle when the report data created (`1e27` precision). Set to "**0**"
+- `reportTimestamp` - el momento del cálculo del informe del oráculo, calculado como `timestamp = genesis_time + ref_slot * seconds_per_slot`;
+- `timeElapsed` - segundos transcurridos desde la ranura de referencia informada anterior y la simulada
+- `clValidators` - número de validadores de Lido en la Capa de Consenso de Ethereum
+- `clBalance` - suma de todos los balances de validadores de Lido en la Capa de Consenso de Ethereum
+- `withdrawalVaultBalance` - balance del vault de retiros en la Capa de Ejecución de Ethereum para el bloque informado
+- `elRewardsVaultBalance` - balance del vault de elRewards en la Capa de Ejecución de Ethereum para el bloque informado. Establecido en "**0**" si intenta simular el informe en modo bunker
+- `sharesRequestedToBurn` - obtenido de `Burner.getSharesRequestedToBurn()`
+- `withdrawalFinalizationBatches` - Establecido en "**[]**"
+- `simulatedShareRate` - asa de participación que fue simulada por el oráculo cuando se creó el informe de datos (`1e27` precision). Establecido en "**0**"
 
 This data is provided to make the call to `Lido.handleOracleReport()` and the following retrieved values are gathered: `post_total_pooled_ether` and `post_total_shares`.
 
