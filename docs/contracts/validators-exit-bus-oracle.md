@@ -5,7 +5,7 @@
 - Inherits [BaseOracle](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/oracle/BaseOracle.sol)
 
 :::info
-It's advised to read [What is Lido Oracle mechanism](/guías/oracle-operator-manual#intro) before
+It's advised to read [What is Lido Oracle mechanism](/guías/oracle-operator-manual#introducción) before
 :::
 
 ## What is ValidatorsExitBusOracle

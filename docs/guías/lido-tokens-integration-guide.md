@@ -80,7 +80,7 @@ Por lo tanto, los saldos de los titulares de LDO son consultables para cualquier
 Un token no fungible (NFT) se utiliza para representar una posición de solicitud de retiro [en la cola de retiros a nivel de protocolo](/contracts/withdrawal-queue-erc721) cuando un titular de stToken decide canjearlo por ether a través del protocolo.
 
 :::note
-A diferencia de los otros tokens de Lido (`stETH`, `wstETH` y `LDO`), [unstETH](#withdrawals-unsteth) es no fungible y utiliza el estándar de token ERC-721 en lugar del ERC-20.
+A diferencia de los otros tokens de Lido (`stETH`, `wstETH` y `LDO`), [unstETH](#retiros-unsteth) es no fungible y utiliza el estándar de token ERC-721 en lugar del ERC-20.
 :::
 
 ## stETH vs. wstETH
@@ -100,9 +100,9 @@ Por ejemplo, las posiciones de wstETH subcolateralizadas en Maker pueden ser liq
 
 stETH es un token ERC-20 rebaseable que representa ether con stake en Lido. A diferencia del ether con stake, es líquido y puede transferirse, negociarse o utilizarse en aplicaciones DeFi. El suministro total de stETH refleja la cantidad de ether depositado en el protocolo combinado con las recompensas de staking, menos posibles penalizaciones de validadores. Los tokens stETH se emiten al depositar ether en una proporción de 1:1. Desde que se introdujeron los retiros de la capa de consenso, también es posible canjear ether quemando stETH en la misma proporción de 1:1 (aunque en casos raros no preservará la proporción 1:1).
 
-Ten en cuenta que Lido ha implementado límites de tasa de staking para reducir el impacto del aumento de staking posterior a la fusión en la cola de staking y el modelo de distribución de recompensas socializadas de Lido. Lee más al respecto [aquí](#staking-rate-limits).
+Ten en cuenta que Lido ha implementado límites de tasa de staking para reducir el impacto del aumento de staking posterior a la fusión en la cola de staking y el modelo de distribución de recompensas socializadas de Lido. Lee más al respecto [aquí](#límites-de-tasa-de-staking).
 
-stETH es un token ERC-20 rebaseable. Normalmente, los saldos de tokens stETH se recalculan diariamente cuando el oráculo de Lido informa la actualización del saldo de ether de la capa de consenso. La actualización del saldo de stETH ocurre automáticamente en todas las direcciones que poseen stETH en el momento del rebase. La mecánica de rebase se ha implementado mediante shares (ver [shares](#steth-internals-share-mechanics)).
+stETH es un token ERC-20 rebaseable. Normalmente, los saldos de tokens stETH se recalculan diariamente cuando el oráculo de Lido informa la actualización del saldo de ether de la capa de consenso. La actualización del saldo de stETH ocurre automáticamente en todas las direcciones que poseen stETH en el momento del rebase. La mecánica de rebase se ha implementado mediante shares (ver [shares](#internos-de-steth-mecánica-de-shares)).
 
 ### Nota sobre la conformidad ERC-20
 
@@ -176,7 +176,7 @@ Si el uso del token stETH rebaseable no es una opción para tu integración, se 
 
 ### Función de transferencia de shares para stETH
 
-El [LIP-11](https://github.com/lidofinance/lido-improvement-proposals/blob/develop/LIPS/lip-11.md) introdujo la función `transferShares` que permite transferir stETH de manera "agnóstica al rebase": transferir en términos de cantidad de [shares](#steth-internals-share-mechanics).
+El [LIP-11](https://github.com/lidofinance/lido-improvement-proposals/blob/develop/LIPS/lip-11.md) introdujo la función `transferShares` que permite transferir stETH de manera "agnóstica al rebase": transferir en términos de cantidad de [shares](#internos-de-steth-mecánica-de-shares).
 
 Normalmente, uno transfiere stETH utilizando las funciones ERC-20 `transfer` y `transferFrom`, que aceptan como entrada la cantidad de stETH, no la cantidad de shares subyacentes. A veces es mejor operar directamente con shares para evitar posibles problemas de redondeo. Los problemas de redondeo generalmente podrían aparecer después de un rebase del token.
 Esta característica está destinada a proporcionar un nivel adicional de precisión al operar con stETH.
@@ -222,7 +222,7 @@ Debido a la naturaleza de rebasing de stETH, el saldo de stETH en la dirección 
 Aunque los tokens rebaseables están siendo comunes en DeFi recientemente, muchas dApps no admiten tokens rebaseables. Por ejemplo, Maker, UniSwap y SushiSwap no están diseñados para tokens rebaseables. Listar stETH en estas aplicaciones puede resultar en que los titulares no reciban sus recompensas diarias de staking, lo que efectivamente anula los beneficios del staking líquido. Para integrarse con estas dApps, existe otra forma de stTokens de Lido llamada wstETH (ether con stake envuelto).
 ### ¿Qué es wstETH?
 
-wstETH es un token ERC20 que representa la participación de una cuenta en el suministro total de stETH (envoltura de token stETH con saldos estáticos). Para wstETH, 1 wei en [participaciones](#steth-internals-share-mechanics) es equivalente a 1 wei en saldo. El saldo de wstETH solo puede modificarse mediante transferencias, creación y quema de tokens. El saldo de wstETH no se rebasea; en cambio, el precio de wstETH denominado en stETH cambia.
+wstETH es un token ERC20 que representa la participación de una cuenta en el suministro total de stETH (envoltura de token stETH con saldos estáticos). Para wstETH, 1 wei en [participaciones](#internos-de-steth-mecánica-de-shares) es equivalente a 1 wei en saldo. El saldo de wstETH solo puede modificarse mediante transferencias, creación y quema de tokens. El saldo de wstETH no se rebasea; en cambio, el precio de wstETH denominado en stETH cambia.
 
 En cualquier momento, cualquier persona que posea wstETH puede convertir cualquier cantidad de este a stETH a una tasa fija, y viceversa. La tasa es la misma para todos en cualquier momento dado. Normalmente, la tasa se actualiza una vez al día, cuando stETH experimenta un rebase. La tasa actual se puede obtener llamando a `wstETH.stEthPerToken()` o `wstETH.getStETHByWstETH(10 ** decimals)`.
 
@@ -234,7 +234,7 @@ Al desenvolver, se quema wstETH y se desbloquea la cantidad correspondiente de s
 
 #### Atajo wstETH
 
-Es importante notar que el contrato WstETH incluye un atajo para convertir ether a wstETH automáticamente, lo cual permite saltarse efectivamente el paso de envoltura y apostar ether directamente por wstETH. Ten en cuenta que al usar este atajo, [los límites de tasa de apostado](#staking-rate-limits) aún se aplican.
+Es importante notar que el contrato WstETH incluye un atajo para convertir ether a wstETH automáticamente, lo cual permite saltarse efectivamente el paso de envoltura y apostar ether directamente por wstETH. Ten en cuenta que al usar este atajo, [los límites de tasa de apostado](#límites-de-tasa-de-staking) aún se aplican.
 
 ### Contabilidad de Recompensas
 
@@ -265,7 +265,7 @@ con puentes implementados a través del [enfoque recomendado de puentes canónic
 A diferencia de la red principal de Ethereum, en las redes L2, wstETH es simplemente un token ERC-20 y no puede desenvolverse para desbloquear stETH en la red L2 correspondiente hasta ahora.
 :::
 
-Sin la contabilidad de participaciones, el token no puede proporcionar la tasa `wstETH/stETH` ni las recompensas acumuladas en cadena. Utiliza los [feeds de tasas y precios](./lido-tokens-integration-guide.md#integration-utilities-rate-and-price-feeds) de wstETH/stETH listados arriba.
+Sin la contabilidad de participaciones, el token no puede proporcionar la tasa `wstETH/stETH` ni las recompensas acumuladas en cadena. Utiliza los [feeds de tasas y precios](./lido-tokens-integration-guide.md#utilidades-de-integración-feeds-de-tasa-y-precio) de wstETH/stETH listados arriba.
 
 ## LDO
 
@@ -291,9 +291,9 @@ Los tokens wstETH y stETH en la red principal de Ethereum implementan la extensi
 
 El método `permit` permite a los usuarios modificar la asignación utilizando un mensaje firmado, en lugar de a través de `msg.sender`. Al no depender del método `approve`, puedes construir interfaces que aprueben y utilicen wstETH en una sola transacción.
 
-## Límites de Tasa de Apostado
+## Límites de Tasa de Staking
 
-Para manejar la afluencia de apostado en caso de algunas condiciones de mercado imprevistas, el protocolo Lido implementó límites de tasa de apostado destinados a reducir el impacto de la afluencia en la cola de apostado y en el modelo de distribución de recompensas socializadas de Lido.
+Para manejar la afluencia de Staking en caso de algunas condiciones de mercado imprevistas, el protocolo Lido implementó límites de tasa de Staking destinados a reducir el impacto de la afluencia en la cola de Staking y en el modelo de distribución de recompensas socializadas de Lido.
 
 Existe un límite de ventana deslizante parametrizado con `_maxStakingLimit` y `_stakeLimitIncreasePerBlock`. Esto significa que solo es posible enviar esta cantidad de ether a los contratos de apostado de Lido dentro de un marco de tiempo de 24 horas. Actualmente, el límite diario de apostado está establecido en 150,000 ether.
 
@@ -308,7 +308,7 @@ eth-shortcut), los límites se aplican en ambos casos.
 1. Espera a que los límites de apostado se regeneren a valores más altos y vuelve a intentar depositar ether en Lido más tarde.
 2. Considera intercambiar ETH por stETH en DEXes como Curve o Balancer. En condiciones de mercado específicas, stETH puede adquirirse efectivamente allí con un descuento debido a las fluctuaciones en el precio de stETH.
 
-## Retiros (unstETH)
+## Retiros unstETH
 
 Lido V2 introdujo la posibilidad de retirar ETH del protocolo Lido en Ethereum (es decir, mercado primario).
 
@@ -426,15 +426,15 @@ stETH/wstETH como garantía DeFi es beneficioso por varias razones:
 
 - stETH/wstETH es casi tan seguro como ether, en términos de precio: excepto en escenarios catastróficos, su valor tiende a mantenerse bien respecto a ETH 1:1.
 - stETH/wstETH es un token productivo: obtener recompensas por la garantía efectivamente reduce el costo de endeudamiento.
-- stETH/wstETH es un token muy líquido con miles de millones de liquidez bloqueada en pools de liquidez (ver [arriba](#sttokens-steth-and-wsteth)).
+- stETH/wstETH es un token muy líquido con miles de millones de liquidez bloqueada en pools de liquidez (ver [arriba](#sttokens-steth-y-wsteth)).
 
 Los tokens staked de Lido se han listado en importantes protocolos de liquidez:
 
 - En Maker, [colateral de wstETH (desplácese hacia abajo a la sección Dai de la sección WSTETH-A)](https://daistats.com/#/collateral) se puede usar para emitir la moneda estable DAI. Consulta la [publicación en el blog de Lido](https://blog.lido.fi/makerdao-integrates-lidos-staked-eth-steth-as-collateral-asset/) para más detalles.
-- En AAVE v3, se pueden pedir prestados varios tokens contra wstETH en varias cadenas (ver la lista de [mercados](#sttokens-steth-and-wsteth))
+- En AAVE v3, se pueden pedir prestados varios tokens contra wstETH en varias cadenas (ver la lista de [mercados](#sttokens-steth-y-wsteth))
 
 Se requieren fuentes de precios sólidas para listar en la mayoría de los mercados de dinero, siendo los feeds de precios de ChainLink el estándar de la industria.
-La opción predeterminada es utilizar los [feeds de tasas de cambio](./lido-tokens-integration-guide.md#sttokens-steth-and-wsteth) con la opción de componer feeds arbitrarios:
+La opción predeterminada es utilizar los [feeds de tasas de cambio](./lido-tokens-integration-guide.md#sttokens-steth-y-wsteth) con la opción de componer feeds arbitrarios:
 
 ```python
 'wstETH/X price feed' = 'wstETH/stETH rate feed' × 'ETH/X price feed'

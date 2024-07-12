@@ -476,7 +476,7 @@ function addSigningKeys(
 | `_publicKeys`     | `bytes`   | Several concatenated validator signing public keys                                                                                             |
 | `_signatures`     | `bytes`   | Several concatenated signatures for the DepositContract messages see the [keys section in NO guide] |
 
-[keys section in NO guide]: /guías/node-operators/validator-keys.md#generating-signing-keys
+[keys section in NO guide]: /guías/node-operators/validator-keys.md#generación-de-claves-de-firma
 
 ### removeSigningKeys()
 
