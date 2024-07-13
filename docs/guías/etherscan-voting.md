@@ -1,62 +1,61 @@
-# DAO voting with Etherscan
+# Votación en el DAO con Etherscan
 
-This how to vote on Lido DAO Aragon with Etherscan UI
+Así es como se vota en el Aragon DAO de Lido utilizando la interfaz de Etherscan.
 
-## Video guide
+## Guía en video
 
 <div style={{position:'relative',width:'100%',paddingBottom:'62.5%',height:0}}>
    <iframe style={{position:'absolute',top:0,left:0,width:'100%',height:'100%'}} src="https://www.youtube.com/embed/5YTJgudYHs8" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
 </div>
 
-## Preparation
+## Preparación
 
-Get the address of the Lido DAO `Aragon Voting` contract from [Deployed Contracts](/deployed-contracts/#dao-contracts) page. It should be: [0x2e59A20f205bB85a89C53f1936454680651E618e].
+Obtén la dirección del contrato de votación Aragon del DAO de Lido desde la página [Contratos Desplegados](/deployed-contracts/#dao-contracts). Debería ser: [0x2e59A20f205bB85a89C53f1936454680651E618e].
 
-Get the vote id, either from [voting ui]:
+Obtén el ID del voto, ya sea desde [la interfaz de votación]:
 
 ![](/img/etherscan-voting/voting_ui.png)
 
-or from [Etherscan]:
+o desde [Etherscan]:
 
 ![](/img/etherscan-voting/etherscan_vote_address.png)
 
-1. Open "[Contract/Read as Proxy]" tab
-2. Get the total number of the votes from `votesLength` method (number 21 on [Etherscan page])
+1. Abre la pestaña "[Contrato / Leer como Proxy]".
+2. Obtén el número total de votos desde el método `votesLength` (número 21 en [la página de Etherscan]).
 
 ![](/img/etherscan-voting/votes-length.png)
 
-3. If you're looking to vote on the last vote, take `votesLength - 1` as an id. If the `votesLength` is `89`, last vote would have the id `88`
-4. You can check the vote data with `getVote` method (number 6 on [Etherscan page])
+3. Si deseas votar en el último voto, toma `votesLength - 1` como ID. Si `votesLength` es `89`, el último voto tendría el ID `88`.
+4. Puedes verificar los datos del voto con el método `getVote` (número 6 en [la página de Etherscan]).
 
 ![](/img/etherscan-voting/get-vote.png)
 
-[0x2e59a20f205bb85a89c53f1936454680651e618e]: https://etherscan.io/address/0x2e59A20f205bB85a89C53f1936454680651E618e
-[voting ui]: https://vote.lido.fi
-[etherscan]: https://etherscan.io/address/0x2e59A20f205bB85a89C53f1936454680651E618e#readProxyContract
-[contract/read as proxy]: https://etherscan.io/address/0x2e59A20f205bB85a89C53f1936454680651E618e#readProxyContract
-[etherscan page]: https://etherscan.io/address/0x2e59A20f205bB85a89C53f1936454680651E618e#readProxyContract
+[la interfaz de votación]: https://vote.lido.fi
+[Etherscan]: https://etherscan.io/address/0x2e59A20f205bB85a89C53f1936454680651E618e#readProxyContract
+[Contrato / Leer como Proxy]: https://etherscan.io/address/0x2e59A20f205bB85a89C53f1936454680651E618e#readProxyContract
+[la página de Etherscan]: https://etherscan.io/address/0x2e59A20f205bB85a89C53f1936454680651E618e#readProxyContract
 
-## Voting
+## Votación
 
-1. Open "[Contract / Write as Proxy](https://etherscan.io/address/0x2e59A20f205bB85a89C53f1936454680651E618e#writeProxyContract)" tab on Etherscan
-2. Connect Etherscan UI to Web3 with either MetaMask or WalletConnect
+1. Abre la pestaña "[Contrato / Escribir como Proxy](https://etherscan.io/address/0x2e59A20f205bB85a89C53f1936454680651E618e#writeProxyContract)" en Etherscan.
+2. Conecta la interfaz de Etherscan a Web3 con MetaMask o WalletConnect.
 
 ![](/img/etherscan-voting/connect-wallet.png)
 
-3. Use method `vote` (number 6 on the [Etherscan Page](https://etherscan.io/address/0x2e59A20f205bB85a89C53f1936454680651E618e#writeProxyContract))
+3. Utiliza el método `vote` (número 6 en [la página de Etherscan](https://etherscan.io/address/0x2e59A20f205bB85a89C53f1936454680651E618e#writeProxyContract)).
 
 ![](/img/etherscan-voting/vote-1.png)
 
-- `_voteId` is the vote id from the point 2.
-- `_supports` is the flag of whether you're voting for (type `true`) or against (type `false`) the vote
-- `_executesIfDecided` is the flag to enact the vote if it could be executed right away in the tx sending the vote, `true` or `false`; from the experience of the previous votes, you may leave that as `false`
+- `_voteId` es el ID del voto obtenido en el punto 2.
+- `_supports` es la bandera que indica si estás votando a favor (`true`) o en contra (`false`) del voto.
+- `_executesIfDecided` es la bandera para ejecutar el voto si se decide inmediatamente en la transacción, `true` o `false`. Según experiencias previas de votos, puedes dejar esto como `false`.
 
-4. Fill in the parameters `_voteId`, `_supports` & `_executesIsDecided` and send the transaction
+4. Completa los parámetros `_voteId`, `_supports` y `_executesIsDecided`, y envía la transacción.
 
 ![](/img/etherscan-voting/vote-2.png)
 
-5. Sign the transaction
+5. Firma la transacción.
 
 ![](/img/etherscan-voting/sign-transaction.png)
 
-That's it! 🎉
+¡Eso es todo! 🎉
