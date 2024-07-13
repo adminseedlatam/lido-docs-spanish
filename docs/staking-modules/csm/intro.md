@@ -1,21 +1,21 @@
-# Intro
+# Introducción
 
 :::info
-Terms "validator", "key", "validator key", and "deposit data" have the same meaning within the document.
+Los terminos "validator", "key", "validator key", y "deposit data" tienen el mismo significado dentro del documento.
 :::
 
 ## ∑ TL;DR
-Community Staking Module (CSM) is a permissionless staking module aimed at attracting community stakers to participate in Lido on Ethereum protocol as Node Operators. The only requirement to join CSM as a Node Operator is to be able to run validators (according to the Lido on Ethereum policies) and supply a bond. The stake is allocated to the validator keys in the order in which the keys are provided, given the keys are valid. The bond is not directly associated with the actual validator's stake but instead treated as a security collateral. The bond is a characteristic of a Node Operator; hence, it is collateral for all Node Operator's validators. This allows for the bond reduction. The more validators the Node Operator has, the less the bond for one validator. Node Operators get their rewards from the bond rebase and from the Node Operator's portion of the staking rewards. Node Operator's portion of the staking rewards is socialized (averaged) if the validators perform above the threshold. Accumulated CL penalties resulting in a balance reduction below the deposit balance and stolen EL rewards are confiscated from the Node Operator's bond. Node Operators should perform validator exits upon protocol request or can exit voluntarily.
+El Módulo de Staking Comunitario (CSM) es un módulo de staking sin permisos diseñado para atraer a los stakers de la comunidad a participar en Lido en el protocolo Ethereum como Operadores de Nodo. El único requisito para unirse al CSM como Operador de Nodo es poder ejecutar validadores (según las políticas de Lido en Ethereum) y proporcionar un bono. La participación se asigna a los validator keys en el orden en que se proporcionan las keys, siempre que sean válidas. El bono no está directamente asociado con la participación real del validador, sino que se trata como una garantía de seguridad. El bono es una característica de un Operador de Nodo; por lo tanto, es una garantía para todos los validadores del Operador de Nodo. Esto permite la reducción del bono. Cuantos más validadores tenga el Operador de Nodo, menor será el bono por cada validador. Los Operadores de Nodo obtienen sus recompensas del rebase del bono y de la porción de recompensas de staking del Operador de Nodo. La porción de recompensas de staking del Operador de Nodo se socializa (promedia) si los validadores superan el umbral. Las penalizaciones acumuladas de la CL que resulten en una reducción del saldo por debajo del saldo de depósito y las recompensas de la EL robadas se confiscan del bono del Operador de Nodo. Los Operadores de Nodo deben realizar salidas de validadores a solicitud del protocolo o pueden salir voluntariamente.
 
-## 📓 Glossary
-- The [**staking router**](../../contracts/staking-router.md) (SR) is a smart contract within the Lido on Ethereum protocol that facilitates stake allocation and rewards distribution across different modules;
-- A **staking module** (SM) is a smart contract or a set of smart contracts connected to the staking router, which:
-    - maintains the underlying operator and validator sets,
-    - is responsible for on/off-boarding operators,
-    - maintains validator deposits, withdrawals, and exits,
-    - maintains fee structure and distribution for the module and participants, etc,
-    - conforms to the IStakingModule interface;
-- **Bond** - a security collateral that Node Operators must submit before uploading validator keys into CSM. This collateral covers possible losses caused by inappropriate actions on the Node Operator's side. Once the validator exits from the Beacon chain and all losses that occurred are covered, the collateral can be claimed or reused to upload new validator keys.
+## 📓 Glosario
+- The [**staking router**](../../contracts/staking-router.md) (SR) es un contrato inteligente dentro del protocolo Lido en Ethereum que facilita la asignación de participación y la distribución de recompensas a través de diferentes módulos;
+- Un **staking module** (SM) es un contrato inteligente o un conjunto de contratos inteligentes conectados al enrutador de staking, que:
+  - mantiene los conjuntos de operadores y validadores subyacentes,
+  - es responsable de la incorporación y exclusión de operadores,
+  - mantiene los depósitos, retiros y salidas de validadores,
+  - mantiene la estructura de tarifas y la distribución para el módulo y los participantes, etc.,
+  - se ajusta a la interfaz IStakingModule;
+- **Bono** - una garantía de seguridad que los Operadores de Nodo deben presentar antes de cargar validator keys en el CSM. Esta garantía cubre posibles pérdidas causadas por acciones inapropiadas del lado del Operador de Nodo. Una vez que el validador sale de la cadena Beacon y se cubren todas las pérdidas ocurridas, la garantía puede ser reclamada o reutilizada para cargar nuevas validator keys.
 - The **Lido DAO** is a Decentralized Autonomous Organization that decides on the critical parameters of controlled liquid staking protocols through the voting power of governance token (LDO).
 - A **Node Operator** (NO) is a person or entity that runs validators;
 - [`Lido`](../../contracts/lido.md) is a core contract of the Lido on Ethereum protocol that stores the protocol state, accepts user submissions, and includes the stETH token;
