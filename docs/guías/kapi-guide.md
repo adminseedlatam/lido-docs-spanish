@@ -1,53 +1,52 @@
 # Keys API
 
-El Keys API proporciona una API HTTP sencilla para gestionar claves y validadores de Lido.
+API HTTP sencilla para claves y validadores de Lido.
 
 ## Requisitos
 
-1. **Hardware:**
-   - CPU de 2 núcleos
-   - 5 GB de RAM
-     - Keys-API-DB — 500 MB
-     - Keys-API — 4 GB
+1. CPU con 2 núcleos
+2. RAM de 5 GB
+   - Keys-API-DB — 500 MB
+   - Keys-API — 4 GB
+3. Nodo completo de la EL (Execution Layer)
+4. Nodo CL para aplicaciones como Ejector que utilizan la [API de validadores](https://hackmd.io/fv8btyNTTOGLZI6LqYyYIg?view#validators). Para Teku, utilice el modo de archivo. Actualmente, Nimbus no es compatible.
 
-2. **Nodos:**
-   - Nodo completo de EL
-   - Nodo CL para aplicaciones (por ejemplo, Ejector) que utilizan la [API de validadores](https://hackmd.io/fv8btyNTTOGLZI6LqYyYIg?view#validators). Para Teku, se recomienda el modo de archivo. Actualmente, Nimbus no es compatible.
+## Variables de Entorno
 
-## Variables de entorno
+Se dispone de un ejemplo anotado de variables de entorno en el repositorio:
 
-Para configurar las variables de entorno necesarias para el Keys API, consulta el ejemplo anotado proporcionado en el repositorio:
+https://github.com/lidofinance/lido-keys-api/blob/main/sample.env
 
-[Ejemplo de Variables de Entorno](https://github.com/lidofinance/lido-keys-api/blob/main/sample.env)
+## Cómo Ejecutar
 
-## Cómo ejecutar
+Para ejecutar `Keys API`, utilice el hash de la imagen de una versión estable, [disponible aquí](https://docs.lido.fi/guías/tooling/).
 
-### Usando Docker
+A continuación, puede encontrar un ejemplo de docker-compose para ejecutar el servicio con una base de datos.
 
-Para ejecutar Keys API con el hash de la imagen de una versión estable, consulta el hash disponible [aquí](https://docs.lido.fi/guías/tooling/).
+https://github.com/lidofinance/lido-keys-api/blob/main/docker-compose.yml
 
-Una forma típica de iniciar el servicio con una base de datos usando `docker-compose` es la siguiente:
+Para ejecutar utilizando docker-compose:
 
-1. Crea un archivo `docker-compose.yml` similar al ejemplo proporcionado en el repositorio:
+```bash
+docker-compose up
+```
 
-   [Ejemplo de docker-compose.yml](https://github.com/lidofinance/lido-keys-api/blob/main/docker-compose.yml)
-
-2. Ejecuta el siguiente comando en tu terminal:
-
-   ```bash
-   docker-compose up
-   ```
-
-3. Después de iniciar, la API estará accesible en `http://localhost:${PORT}/api`, donde `${PORT}` es el puerto configurado.
+Ahora puede acceder a la API en `http://localhost:${PORT}/api`.
 
 ## Monitoreo
 
-Se encuentran disponibles métricas de Prometheus para monitorear Keys API. Puedes acceder a ellas en el endpoint:
+Las métricas de Prometheus estarán disponibles en el endpoint `http://localhost:${PORT}/metrics`.
 
-- `http://localhost:${PORT}/metrics`
+Puede encontrar configuraciones y paneles para ejecutar Prometheus y Grafana localmente en el repositorio: [Grafana](https://github.com/lidofinance/lido-keys-api/tree/main/grafana), [Prometheus](https://github.com/lidofinance/lido-keys-api/tree/main/prometheus).
 
-Para la configuración local de Prometheus y Grafana, se proporcionan archivos de configuración y paneles en el repositorio:
+Ejemplo de `docker-compose.yml` con configuración de métricas:
 
-- [Configuración de Grafana](https://github.com/lidofinance/lido-keys-api/tree/main/grafana)
-- [Configuración de Prometheus](https://github.com/lidofinance/lido-keys-api/tree/main/prometheus)
+https://github.com/lidofinance/lido-keys-api/blob/main/docker-compose.metrics.yml
 
+## Recursos Adicionales
+
+Repositorio de GitHub de Keys API (Código Abierto)
+https://github.com/lidofinance/lido-keys-api
+
+Documentación de la API y lógica interna
+https://hackmd.io/@lido/B1aCdW6Lo
