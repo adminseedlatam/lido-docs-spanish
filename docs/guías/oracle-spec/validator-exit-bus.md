@@ -1,274 +1,257 @@
-# Validators Exit Bus
+## Autobús de Salida de Validadores: Explicación Detallada
 
-:::info
-It's advised to read [What is Lido Oracle mechanism](/guías/oracle-operator-manual#introducción) before
-:::
+El **Autobús de Salida de Validadores Oracle** es un mecanismo dentro del protocolo Lido responsable de solicitar la salida de validadores para cubrir los retiros de los usuarios cuando el protocolo necesita fondos adicionales. Este documento describe paso a paso el proceso para calcular y ejecutar las salidas de los validadores.
 
-[Validators Exit Bus](/contracts/validators-exit-bus-oracle) is an oracle that ejects Lido validators when the protocol requires additional funds to process user withdrawals.
+### Pasos para el Cálculo del Informe
 
-A report calculation consists of 4 key steps:
+1. **Calcular la cantidad de retiros a cubrir con ether.**
+2. **Calcular la predicción de recompensas en ether por época.**
+3. **Calcular la época de retiro para el próximo validador elegible para salir y cubrir las solicitudes de retiro si es necesario.**
+4. **Preparar la cola de orden de salida de validadores.**
+5. **Recorrer la cola hasta que los saldos de los validadores salientes cubran todas las solicitudes de retiro (considerando el saldo final predicho de cada validador).**
 
-1. Calculate withdrawals amount to cover with ether.
-2. Calculate ether rewards prediction per epoch.
-3. Calculate withdrawal epoch for next validator eligible for exit to cover withdrawal requests if needed
-4. Prepare validators exit order queue
-5. Go through the queue until the exited validators’ balances cover all withdrawal requests (considering the predicated final exited balance of each validator).
+### Algoritmo para el Próximo Validador en Salir
 
-:::note
-Placed exit requests via `ValidatorsExitBusOracle` should be processed timely according to the ratified [Lido on Ethereum Validator Exits Policy V1.0](https://snapshot.org/#/lido-snapshot.eth/proposal/0xa4eb1220a15d46a1825d5a0f44de1b34644d4aa6bb95f910b86b29bb7654e330).
+El algoritmo para la salida de validadores se basa en el [algoritmo descrito en el foro de investigación](https://research.lido.fi/t/withdrawals-on-validator-exiting-order/3048#combined-approach-17).
 
-See also the provided [penalties](./penalties.md) spec.
-:::
-
-## Next validator to exit algorithm
-
-The algorithm for the validators exiting is based on [the algorithm described on the research forum](https://research.lido.fi/t/withdrawals-on-validator-exiting-order/3048#combined-approach-17).
-
-The algorithm is supposed to correct the future number of validators for each Node Operator. Suppose the validators and deposits in-flight of one of the Node Operator are represented in the following form, where validators are sorted by their indexes:
+El algoritmo supone corregir el número futuro de validadores para cada Operador de Nodo. Supongamos que los validadores y depósitos en proceso de uno de los Operadores de Nodo se representan de la siguiente manera, donde los validadores están ordenados por sus índices:
 
 ![VEBO 1](../../../static/img/oracle-spec/vebo-1.png)
 
-The algorithm assumes that the oldest validators are exited first. Therefore, previously requested validators can be separated to exit by knowing the index of the last requested.
+El algoritmo asume que los validadores más antiguos salen primero. Por lo tanto, los validadores previamente solicitados se pueden separar para salir sabiendo el índice del último solicitado.
 
 ![VEBO 2](../../../static/img/oracle-spec/vebo-2.png)
 
-Worth noting, each validator has a status. Some validators may be slashed or be exited without an request from the protocol:
+Cabe destacar que cada validador tiene un estado. Algunos validadores pueden estar castigados o haber salido sin una solicitud del protocolo:
 
 ![VEBO 3](../../../static/img/oracle-spec/vebo-3.png)
 
-Among all validators the projected ones are the point of interest. They include all active validators and in-flight deposits, but exclude validators whose `exit_epoch != FAR_FUTURE_EPOCH` and those validators that were requested to exit.
+Entre todos los validadores, los proyectados son el punto de interés. Incluyen todos los validadores activos y depósitos en proceso, pero excluyen los validadores cuyo `exit_epoch != FAR_FUTURE_EPOCH` y aquellos validadores que fueron solicitados para salir.
 
 ![VEBO 4](../../../static/img/oracle-spec/vebo-4.png)
 
-A few hours later it might look like the following:
+Unas horas después, podría verse de la siguiente manera:
 ![VEBO 5](../../../static/img/oracle-spec/vebo-5.png)
 
-Note that th described algorithm is looking for a validator to exit only among those that can be exited, while using the projected number of validators, which includes non-existent yet validators. It's only weights, so there is no misconception here.
+Nota que el algoritmo descrito está buscando un validador para salir solo entre aquellos que pueden salir, mientras usa el número proyectado de validadores, que incluye validadores aún no existentes. Son solo ponderaciones, por lo que no hay malentendidos aquí.
 
-The final exit order predicate sequence:
+### Secuencia de Predicados para el Orden de Salida
 
-1. Validator whose operator with the lowest number of delayed validators
-2. Validator whose operator with the highest number of targeted validators to exit
-3. Validator whose operator with the highest stake weight
-4. Validator whose operator with the highest number of validators
-5. Validator with the lowest index
+1. Validador cuyo operador tenga el menor número de validadores retrasados.
+2. Validador cuyo operador tenga el mayor número de validadores objetivo para salir.
+3. Validador cuyo operador tenga el mayor peso de participación.
+4. Validador cuyo operador tenga el mayor número de validadores.
+5. Validador con el índice más bajo.
 
-## Get information to prepare ordered queue
+### Obtener Información para Preparar la Cola Ordenada
 
-In order to prepare a queue of validators to exit, the following actions and considerations involved:
+Para preparar una cola de validadores para salir, se involucran las siguientes acciones y consideraciones:
 
-- the maximum number of validators that can be requested to exit in one report;
-- operator network penetration percent - only if the operator's share is greater than 1%;
-- 'exitable' Lido validators;
-- fetch node operators stats to sort exitable validators;
-- total predictable validators count;
-- last requested validators indices.
+- El número máximo de validadores que pueden ser solicitados para salir en un informe.
+- Porcentaje de penetración en la red del operador: solo si la participación del operador es mayor al 1%.
+- Validadores 'exiteables' de Lido.
+- Obtener estadísticas de los operadores de nodos para ordenar los validadores exiteables.
+- Total de validadores predecibles.
+- Índices de los últimos validadores solicitados.
 
-### Report limits
+### Límites del Informe
 
-- `maxValidatorExitRequestsPerReport` - max number of exit requests allowed in report to `ValidatorsExitBusOracle` from `OracleReportSanityChecker.getOracleReportLimits()`.
-- `VALIDATOR_DELAYED_TIMEOUT_IN_SLOTS` - A parameter from from `OracleDaemonConfig` contract used to calculate validators going to exit.
-- `NODE_OPERATOR_NETWORK_PENETRATION_THRESHOLD_BP` - - A parameter from `OracleDaemonConfig` that is taken into account when determining the penetration of the operator into the network.
+- `maxValidatorExitRequestsPerReport`: número máximo de solicitudes de salida permitidas en el informe al `ValidatorsExitBusOracle` desde `OracleReportSanityChecker.getOracleReportLimits()`.
+- `VALIDATOR_DELAYED_TIMEOUT_IN_SLOTS`: un parámetro del contrato `OracleDaemonConfig` usado para calcular los validadores que van a salir.
+- `NODE_OPERATOR_NETWORK_PENETRATION_THRESHOLD_BP`: un parámetro del `OracleDaemonConfig` que se tiene en cuenta al determinar la penetración del operador en la red.
 
-### Get exitable validators
+### Obtener Validadores Exiteables
 
-A validator is 'exitable' if two conditions are strictly have NOT met:
+Un validador es 'exiteable' si NO se cumplen estrictamente dos condiciones:
 
-- `validator.exit_epoch != FAR_FUTURE_EPOCH` and
+- `validator.exit_epoch != FAR_FUTURE_EPOCH` y
 - `validator.index <= last_requested_to_exit_index`.
 
-### Node operator stats
+### Estadísticas del Operador de Nodo
 
-Statistics for each node operator, which are needed for sorting their validators in exit order:
+Estadísticas para cada operador de nodo, necesarias para ordenar sus validadores en orden de salida:
 
-- validators count that are not yet in CL
-- validators that are in CL and are not yet requested to exit and not on exit
-- validators that are in CL and requested to exit but not on exit and not requested to exit recently
-- target validators count
-- checks whether the target limit flag is enabled
+- Número de validadores que aún no están en CL.
+- Validadores que están en CL y aún no han sido solicitados para salir y no están en salida.
+- Validadores que están en CL y se han solicitado para salir pero no están en salida y no se han solicitado para salir recientemente.
+- Número objetivo de validadores.
+- Comprueba si la bandera de límite de objetivo está habilitada.
 
-NB: A validator can not be considered as delayed if it was requested to exit in last `VALIDATOR_DELAYED_TIMEOUT_IN_SLOTS` slots
+NB: Un validador no puede considerarse retrasado si se solicitó su salida en los últimos `VALIDATOR_DELAYED_TIMEOUT_IN_SLOTS` slots.
 
-#### Last requested validators indices
+### Índices de los Últimos Validadores Solicitados
 
-The [`ValidatorsExitBusOracle`](../../contracts/validators-exit-bus-oracle.md) contract stores the index of the last validator that was requested to exit. Since validators are requested in strict order from the lowest `validatorIndex` to the highest, the indexes help find all the previously requested validators without fetching all events.
+El contrato [`ValidatorsExitBusOracle`](../../contracts/validators-exit-bus-oracle.md) almacena el índice del último validador que se solicitó para salir. Dado que los validadores se solicitan en un orden estricto desde el `validatorIndex` más bajo hasta el más alto, los índices ayudan a encontrar todos los validadores solicitados previamente sin necesidad de obtener todos los eventos.
 
-Returns the latest validator indices that were requested to exit for the given
-        `operator_indexes` in the given `module`. For node operators that were never requested to exit
-        any validator yet, index is set to `-1`.
+Devuelve los índices de los últimos validadores que se solicitaron para salir para los `operator_indexes` dados en el `module` dado. Para los operadores de nodo que nunca solicitaron la salida de ningún validador, el índice se establece en `-1`.
 
-```
+```solidity
 ValidatorsExitBusOracle.getLastRequestedValidatorIndices(
     uint256 moduleId,
     uint256[] nodeOpIds
 ): int256[]
 ```
 
-### State collection
+### Recopilación de Estado
 
-To find the next validators to exit, Validators Exit Bus Oracle collects the following state from both Ethereum Consensus and Execution layers.
+Para encontrar los próximos validadores que saldrán, el Autobús de Salida de Validadores Oracle recopila el siguiente estado tanto de las capas de Consenso de Ethereum como de Ejecución.
 
-- From [OracleDaemonConfig](/contracts/oracle-daemon-config) contract:
+- Del contrato [OracleDaemonConfig](/contracts/oracle-daemon-config):
   - PREDICTION_DURATION_IN_SLOTS
   - VALIDATOR_DELAYED_TIMEOUT_IN_SLOTS
-- From [Withdrawal Queue](/contracts/withdrawal-queue-erc721):
-  - Get total unfinalized withdrawal request amount
-- From [Lido](/contracts/lido) contract:
-  - Recent postCLBalance/preCLBalance and withdrawals from Execution Layer Rewards and Withdrawal vaults via events
-- From Consensus Layer node:
-  - All validators and their states on the reference slot
-- From [Staking Router](/contracts/staking-router):
-  - Public keys of all Lido validators
-  - Indices of the last requested validator to exit for each Node Operator
-  - Validator keys statistics for each Node Operator
-- From Oracle contract:
-  - Maximum number of exit requests for the current frame
-  - Recently requested via Exit Bus public keys to exit
+- De la [Cola de Retiros](/contracts/withdrawal-queue-erc721):
+  - Obtener la cantidad total de solicitudes de retiro no finalizadas
+- Del contrato [Lido](/contracts/lido):
+  - Balance reciente postCL/preCL y retiros de las recompensas de la Capa de Ejecución y de los cofres de retiro a través de eventos
+- Del nodo de la Capa de Consenso:
+  - Todos los validadores y sus estados en el slot de referencia
+- Del [Staking Router](/contracts/staking-router):
+  - Claves públicas de todos los validadores de Lido
+  - Índices del último validador solicitado para salir para cada Operador de Nodo
+  - Estadísticas de claves de validadores para cada Operador de Nodo
+- Del contrato Oracle:
+  - Número máximo de solicitudes de salida para el marco actual
+  - Claves públicas solicitadas recientemente a través del Autobús de Salida
 
-### Fetching data
+### Obtener Datos
 
-#### Get uncovered withdrawal requests amount of stETH
+#### Obtener la Cantidad de Solicitudes de Retiro de stETH No Cubiertas
 
-Collects the amount of stETH in the queue yet to be finalized from `WithdrawalQueue.unfinalizedStETH()`
+Recopila la cantidad de stETH en la cola aún por finalizar de `WithdrawalQueue.unfinalizedStETH()`
 
-#### Calculate average rewards speed per epoch
+#### Calcular la Velocidad Promedio de Recompensas por Época
 
-Fetches `ETHDistributed` and `TokenRebased` events from the [`Lido`](../../contracts/lido) contract and calculate average rewards amount per epoch. The rewards prediction period config fetches from the [OracleDaemonConfig](/contracts/oracle-daemon-config) contract.
+Obtiene los eventos `ETHDistributed` y `TokenRebased` del contrato [`Lido`](../../contracts/lido) y calcula la cantidad promedio de recompensas por época. El período de predicción de recompensas se obtiene del contrato [OracleDaemonConfig](/contracts/oracle-daemon-config).
 
-To get events in past, addressing the cases where there can be slots with missed block, the next scheme is introduced:
+Para obtener eventos en el pasado, abordando los casos donde puede haber slots con bloque perdido, se introduce el siguiente esquema:
 
 ![VEBO 6](../../../static/img/oracle-spec/vebo-6.png)
 
-- Get from [OracleDaemonConfig](/contracts/oracle-daemon-config) contract `PREDICTION_DURATION_IN_SLOTS` value
-- Get `TokenRebased` events from Lido
-- Get `ETHDistributed` events from Lido
-- Group that events by transaction hash
-- Collect from events:
-  - `total_rewards` as `postCLBalance + withdrawalsWithdrawn - preCLBalance executionLayerRewardsWithdrawn`
-  - `time_spent` as sum of each event `timeElapsed`
-- calculate `rewards_speed_per_epoch` as `max(total_rewards * chain_configs.seconds_per_slot * chain_configs.slots_per_epoch // time_spent, 0)`
+- Obtener el valor `PREDICTION_DURATION_IN_SLOTS` del contrato [OracleDaemonConfig](/contracts/oracle-daemon-config).
+- Obtener eventos `TokenRebased` de Lido.
+- Obtener eventos `ETHDistributed` de Lido.
+- Agrupar esos eventos por hash de transacción.
+- Recopilar de los eventos:
+  - `total_rewards` como `postCLBalance + withdrawalsWithdrawn - preCLBalance executionLayerRewardsWithdrawn`.
+  - `time_spent` como suma de `timeElapsed` de cada evento.
+- Calcular `rewards_speed_per_epoch` como `max(total_rewards * chain_configs.seconds_per_slot * chain_configs.slots_per_epoch // time_spent, 0)`.
 
-#### Calculate epochs to sweep
+#### Calcular las Épocas Necesarias para el Barrido
 
-##### Average sweep prediction
+##### Predicción Promedio del Barrido
 
-Predicts the average epochs of the sweep cycle. In the spec: [get expected withdrawals](https://github.com/ethereum/consensus-specs/blob/dev/specs/capella/beacon-chain.md#new-get_expected_withdrawals), [process withdrawals](https://github.com/ethereum/consensus-specs/blob/dev/specs/capella/beacon-chain.md#new-process_withdrawals)
+Predice las épocas promedio del ciclo de barrido. En la especificación: [get expected withdrawals](https://github.com/ethereum/consensus-specs/blob/dev/specs/capella/beacon-chain.md#new-get_expected_withdrawals), [process withdrawals](https://github.com/ethereum/consensus-specs/blob/dev/specs/capella/beacon-chain.md#new-process_withdrawals).
 
-[source](https://github.com/lidofinance/lido-oracle/blob/master/src/modules/ejector/ejector.py#L301)
+##### Validadores retirables
 
-##### Withdrawable validators
+- Verifica si `validator` tiene las credenciales de retiro "eth1" con prefijo 0x01, y
+- Verifica si `validator` es parcialmente retirable, o
+- Verifica si `validator` es completamente retirable
 
-- Check if `validator` has the 0x01 prefixed "eth1" withdrawal credentials, and
-- Check if `validator` is partially withdrawable, or
-- Check if `validator` is fully withdrawable
+#### Predicción del ether disponible antes del próximo retiro
 
-[source](https://github.com/lidofinance/lido-oracle/blob/master/src/modules/ejector/ejector.py#L306)
+Para estimar la cantidad necesaria para cubrir completamente las solicitudes de retiro no finalizadas, se calculan los siguientes valores:
 
-#### Predict available ether before next withdrawn
+- **Recompensas futuras**
+- **Cantidad futura de retiros**
+- **Saldo total disponible**
+- **Suma acumulativa de los validadores a expulsar**
+- **Balance que se va a retirar**
 
-In order to estimate the amount is needed to fully cover the non-finalized withdraw requests, the following values are calculated
+Para calcular las **recompensas futuras**, es necesario [predecir](https://github.com/lidofinance/lido-oracle/blob/master/src/modules/ejector/ejector.py#L244) un epoch en el cual todos los validadores en la cola y `validators_to_eject` serán retirados:
 
-- **Future rewards**
-- **Future withdrawals amount**
-- **Total available balance**
-- **Validators to eject cummulative amount**
-- **Going to withdrawn balance**
+1. Calcula el número de epoch de salida más reciente y la cantidad de validadores que están saliendo en este epoch.
+2. Si la cola está vacía, el epoch de salida se calculará como `epoch actual + MAX_SEED_LOOK AHEAD + 1`. La constante **MAX_SEED_LOOKAHEAD** ayuda a mitigar algunos ataques, más detalles [aquí](https://eth2book.info/bellatrix/part3/config/preset/#max_seed_lookahead).
+3. Calcula el **límite de churn** - similar a un límite de velocidad en los cambios al conjunto de validadores. El mínimo es de 4 validadores por epoch y se recalcula cada `CHURN_LIMIT_QUOTIENT = 2**16`. Por ejemplo, cuando el número de validadores activos alcanza hasta 327,680, el límite de churn aumenta a 5, [especificación](https://github.com/ethereum/consensus-specs/blob/master/specs/phase0/beacon-chain.md#get_validator_churn_limit).
+4. Calcula la capacidad de slots para la salida:
 
-To calculate **future rewards**, it's needed to [predict](https://github.com/lidofinance/lido-oracle/blob/master/src/modules/ejector/ejector.py#L244) an epoch when all validators in queue and `validators_to_eject` will be withdrawn:
-
-1. Calculate latest exit epoch number and amount of validators that are exiting in this epoch
-2. If queue is empty - exit epoch will be calculated as `current epoch + MAX_SEED_LOOK AHEAD + 1`. **MAX_SEED_LOOKAHEAD** constant needs to mitigate some attacks, more details [here](https://eth2book.info/bellatrix/part3/config/preset/#max_seed_lookahead)
-3. Calculate **churn limit** - like a rate-limit on changes to the validator set. Minimum is 4 validators per epoch. And recalculates each `CHURN_LIMIT_QUOTIENT = 2**16`. For example when active validators reaches up to 327,680 amount, `churn limit` rises to 5, [spec](https://github.com/ethereum/consensus-specs/blob/master/specs/phase0/beacon-chain.md#get_validator_churn_limit)
-4. Calculate slots capacity for exit:
-
-```!
-remain_exits_capacity_for_epoch=churn_limit - (amount of validators that are exiting in this epoch)
+```python
+remain_exits_capacity_for_epoch = churn_limit - (cantidad de validadores que están saliendo en este epoch)
 ```
 
-5. Calculate epoch to exit all `validators_to_eject_count`:
+5. Calcula el epoch para retirar todos los `validators_to_eject_count`:
 
-```!
+```python
 epochs_required_to_exit_validators = (validators_to_eject_count - remain_exits_capacity_for_epoch) // churn_limit + 1
 ```
 
-6. So the predictable withdrawable epoch:
+6. Entonces el epoch predecible para retirar:
 
-```!
-withdrawal_epoch=max_exit_epoch_number + epochs_required_to_exit_validators + MIN_VALIDATOR_WITHDRAWABILITY_DELAY)
+```python
+withdrawal_epoch = max_exit_epoch_number + epochs_required_to_exit_validators + MIN_VALIDATOR_WITHDRAWABILITY_DELAY
 ```
 
-MIN_VALIDATOR_WITHDRAWABILITY_DELAY [here](https://eth2book.info/altair/part3/config/configuration#min_validator_withdrawability_delay)
+MIN_VALIDATOR_WITHDRAWABILITY_DELAY [aquí](https://eth2book.info/altair/part3/config/configuration#min_validator_withdrawability_delay)
 
-So now we can calculate what amount (and validators count) is needed to fully cover amount of non-finalized WithdrawQueue requests.
+Ahora podemos calcular la cantidad (y el número de validadores) necesarios para cubrir completamente la cantidad de solicitudes de retiro no finalizadas en la cola de retirada.
 
-#### Calculate expected balance to withdraw
+#### Calcular el saldo esperado a retirar
 
-##### Future rewards
+##### Recompensas futuras
 
-```!
-future_rewards = (withdrawal_epoch + epochs_to_sweep - blockstamp.ref_epoch ) * rewards_speed_per_epoch
+```python
+future_rewards = (withdrawal_epoch + epochs_to_sweep - blockstamp.ref_epoch) * rewards_speed_per_epoch
 ```
 
-##### Future withdrawals amount
+##### Cantidad futura de retiros
 
-Get total balance from validators which can be fully withdrawn.
+Obtener el saldo total de los validadores que pueden ser retirados completamente.
 
-##### Total available balance
+##### Saldo total disponible
 
-Fetch total balance as sum from:
+Obtén el saldo total como suma de:
 
 - `Lido.getBufferedEther()` +
-- Balance from `elRewardsVault` +
-- Balance from `withdrawalVault`
+- Saldo de `elRewardsVault` +
+- Saldo de `withdrawalVault`
 
-##### Validators to eject cummulative amount
+##### Suma acumulativa de los validadores a expulsar
 
-Get balance from next validator in exit queue.
+Obtén el saldo del próximo validador en la cola de salida.
 
-##### Validators going to exit
+##### Validadores que van a salir
 
-Fetches recently emitted `ValidatorExitRequest` events from `ValidatorsExitBusOracle` contract and extract pubkeys from them. The delayed timeout config fetches from the `OracleDaemonConfig` contract.
+Recupera eventos `ValidatorExitRequest` emitidos recientemente del contrato `ValidatorsExitBusOracle` y extrae claves públicas de ellos. La configuración de timeout diferido se obtiene del contrato `OracleDaemonConfig`.
 
-Validators requested to exit, but didn't send exit message.
-In case:
+Validadores que han solicitado salir, pero no han enviado un mensaje de salida:
 
-- Activation epoch is not old enough to initiate exit
-- Node operator had not enough time to send exit message (VALIDATOR_DELAYED_TIMEOUT_IN_SLOTS)
+- Si el epoch de activación no es lo suficientemente antiguo para iniciar la salida.
+- Si el operador del nodo no tuvo suficiente tiempo para enviar el mensaje de salida (VALIDATOR_DELAYED_TIMEOUT_IN_SLOTS).
 
-To get validators, oracle calculates:
+Para obtener los validadores, el oráculo calcula:
 
-- `lido_validators_by_operator` - Fetches all used Lido keys from [Keys API](https://github.com/lidofinance/lido-keys-api) + Fetches all validators at the reference slot and merge them with keys
-- `ejected_indexes` - get operators with last exited validator indexes from for all staking_modules and node operators via `ValidatorsExitBusOracle.getLastRequestedValidatorIndices(module_id, uint256[] nodeOpIds)`
-- `recent_pubkeys` - get last requested to exit pubkeys from `ValidatorExitRequest` event
+- `lido_validators_by_operator` - Recupera todas las claves Lido utilizadas desde [Keys API](https://github.com/lidofinance/lido-keys-api) + Recupera todos los validadores en el slot de referencia y los fusiona con las claves.
+- `ejected_indexes` - Obtiene los operadores con los últimos índices de validadores que han salido de todos los módulos de estaca y operadores de nodos mediante `ValidatorsExitBusOracle.getLastRequestedValidatorIndices(module_id, uint256[] nodeOpIds)`.
+- `recent_pubkeys` - Obtiene las últimas claves públicas solicitadas para salir del evento `ValidatorExitRequest`.
 
-For each `lido_validators_by_operator` oracle tries to find **non exited validators**, so:
+Para cada `lido_validators_by_operator`, el oráculo intenta encontrar **validadores no salidos**:
 
-- if not `validator_asked_to_exit` -> return False
-- if `is_on_exit` -> return false
-- if `validator_recently_asked_to_exit` -> return **True**
-- if not `validator_eligible_to_exit` -> return **True**
-- otherwise return False
+- Si no `validator_asked_to_exit` -> devuelve Falso.
+- Si `is_on_exit` -> devuelve Falso.
+- Si `validator_recently_asked_to_exit` -> devuelve **Verdadero**.
+- Si no `validator_eligible_to_exit` -> devuelve **Verdadero**.
+- De lo contrario, devuelve Falso.
 
-Oracle calculates `going_to_withdraw_balance` for all **non exited validators**
+El oráculo calcula `going_to_withdraw_balance` para todos los **validadores no salidos**.
 
-##### Compare expected_balance vs to_withdrawn_balance
+##### Comparar saldo esperado vs. saldo a retirar
 
-Expected balance is:
+El saldo esperado es:
 
 ```
 expected_balance = (
-  future_withdrawals +  # Validators that have withdrawal_epoch
-  future_rewards +  # Rewards we get until last validator in validators_to_eject will be withdrawn
-  total_available_balance +  # Current EL balance (el vault, wc vault, buffered eth)
-  validator_to_eject_balance_sum +  # Validators that we expected to be ejected (requested to exit, not delayed)
-  going_to_withdraw_balance  # validators_to_eject balance
+  future_withdrawals +  # Validadores que tienen epoch de retiro
+  future_rewards +  # Recompensas que obtenemos hasta que se retire el último validador en validators_to_eject
+  total_available_balance +  # Saldo actual de EL (el vault, wc vault, buffered eth)
+  validator_to_eject_balance_sum +  # Validadores que esperamos que sean expulsados (solicitados para salir, no demorados)
+  going_to_withdraw_balance  # Saldo de validadores_to_eject
 )
 ```
 
-First of all, it's checked without exiting the validator, whether the protocol already has enough available ether to cover withdrawal requests in the queue. If yes, then it's not reasonable to exit validators.
+Primero, se verifica sin sacar al validador si el protocolo ya tiene suficiente ether disponible para cubrir las solicitudes de retiro en la cola. Si es así, no es razonable expulsar validadores.
 
-If there is not enough, one more validator is considered to be exited and the expected balance gets calculated again. The process continues until the expected balance becomes greater than or equal to the unfinalized withdrawal requests amount.
+Si no hay suficiente, se considera sacar a un validador más y se vuelve a calcular el saldo esperado. El proceso continúa hasta que el saldo esperado sea mayor o igual a la cantidad de solicitudes de retiro no finalizadas.
 
-## Helpful links
+## Enlaces útiles
 
-- [Lido Oracle source code](https://github.com/lidofinance/lido-oracle)
+- [Código fuente de Lido Oracle](https://github.com/lidofinance/lido-oracle)
