@@ -1,51 +1,49 @@
 # AccountingOracle
 
-- [Source code](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/oracle/AccountingOracle.sol)
-- [Deployed contract](https://etherscan.io/address/0x852deD011285fe67063a08005c71a85690503Cee)
-- Inherits [BaseOracle](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/oracle/BaseOracle.sol)
+- [Código fuente](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/oracle/AccountingOracle.sol)
+- [Contrato desplegado](https://etherscan.io/address/0x852deD011285fe67063a08005c71a85690503Cee)
+- Hereda de [BaseOracle](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/oracle/BaseOracle.sol)
 
 :::info
-It's advised to read [What is Lido Oracle mechanism](/guías/oracle-operator-manual#introducción) before
+Se recomienda leer [¿Qué es el mecanismo de Lido Oracle?](/guías/oracle-operator-manual#introducción) antes.
 :::
 
-## What is AccountingOracle
+## ¿Qué es AccountingOracle?
 
-AccountingOracle is a contract which collects information submitted by the off-chain oracles about state of the Lido-participating validators and their balances, the
-amount of funds accumulated on the protocol vaults (i.e., [withdrawal](./withdrawal-vault) and [execution layer rewards](./lido-execution-layer-rewards-vault) vaults), the number [exited and stuck](./staking-router#exited-and-stuck-validators) validators, the number of [withdrawal requests](./withdrawal-queue-erc721#request) the protocol is able to process and distributes node-operator rewards.
+AccountingOracle es un contrato que recopila información enviada por los oráculos fuera de la cadena sobre el estado de los validadores que participan en Lido y sus saldos, la cantidad de fondos acumulados en las bóvedas del protocolo (es decir, [retiro](./withdrawal-vault) y [recompensas de la capa de ejecución](./lido-execution-layer-rewards-vault)), el número de validadores [salidos y atascados](./staking-router#exited-and-stuck-validators), el número de [solicitudes de retiro](./withdrawal-queue-erc721#request) que el protocolo puede procesar y distribuye las recompensas a los operadores de nodos.
 
-## Report cycle
+## Ciclo de reporte
 
-The oracle work is delineated by equal time periods called frames. In normal operation, oracles finalize a report in each frame (the frame duration is 225 Ethereum Consensus Layer epochs, each frame starts at ~12:00 noon UTC). Each frame has a reference slot and processing deadline. Report data is gathered by looking at the world state (both Ethereum Execution and Consensus Layers) at the moment of the frame's reference slot (including any state changes made in that slot), and must be processed before the frame's processing deadline.
+El trabajo del oráculo se delimita por períodos de tiempo iguales llamados marcos. En operación normal, los oráculos finalizan un informe en cada marco (la duración del marco es de 225 épocas de la capa de consenso de Ethereum, cada marco comienza alrededor de las 12:00 del mediodía UTC). Cada marco tiene un slot de referencia y un plazo de procesamiento. Los datos del informe se recopilan observando el estado mundial (tanto de las capas de ejecución como de consenso de Ethereum) en el momento del slot de referencia del marco (incluyendo cualquier cambio de estado realizado en ese slot), y deben procesarse antes del plazo de procesamiento del marco.
 
-Reference slot for each frame is set to the last slot of the epoch preceding the frame's first epoch. The processing deadline is set to the last slot of the last epoch of the frame.
+El slot de referencia para cada marco se establece en el último slot de la época que precede a la primera época del marco. El plazo de procesamiento se establece en el último slot de la última época del marco.
 
-It's worth noting that frame length [can be changed](./hash-consensus#setframeconfig). And if oracle report is delayed it does not extend the report period, unless it's missed. In this case, the next report will have the report period increased.
+Vale la pena señalar que la duración del marco [puede cambiarse](./hash-consensus#setframeconfig). Y si el informe del oráculo se retrasa, no extiende el período del informe, a menos que se pierda. En este caso, el próximo informe tendrá el período del informe incrementado.
 
-The frame includes these stages:
+El marco incluye estas etapas:
 
-- **Waiting:** oracle starts as a [daemon](/guías/oracle-operator-manual#el-daemon-del-oráculo) and wakes up every 12 seconds (by default) in order to find the last finalized slot, trying to collate with it with the expected reference slot;
-- **Data collection:** oracles monitor the state of both the execution and consensus layers and collect the data for the successfully arrived finalized reference slot;
-- **Hash consensus:** oracles analyze the data, compile the report and submit its hash to the [`HashConsensus`](./hash-consensus) smart contract;
-- **Core update report:** once the [quorum](./hash-consensus#getquorum) of hashes is reached, meaning more than half of the oracles submitted the same hash (i.e., 5 of 9 oracle committee members at the moment of writing), one of the oracles chosen in turn submits the actual report to the `AccountingOracle` contract, which triggers the core protocol state update, including the token rebase, distribution of node operator rewards, finalization of withdrawal requests, and the protocol mode decision: whether to go in the bunker mode, and
-- **Extra data report:** an additional report carrying additional information that is not vital for the core update is submitted to the AccountingOracle, can be submitted in chunks (e.g, node operator key states and reward distribution data).
+- **Esperando:** el oráculo comienza como un [daemon](/guías/oracle-operator-manual#el-daemon-del-oráculo) y se despierta cada 12 segundos (por defecto) para encontrar el último slot finalizado, intentando colisionarlo con el slot de referencia esperado;
+- **Recopilación de datos:** los oráculos monitorean el estado de ambas capas de ejecución y consenso y recopilan los datos para el slot de referencia finalizado que ha llegado con éxito;
+- **Consenso de hash:** los oráculos analizan los datos, compilan el informe y envían su hash al contrato inteligente [`HashConsensus`](./hash-consensus);
+- **Informe de actualización central:** una vez que se alcanza el [quórum](./hash-consensus#getquorum) de hashes, lo que significa que más de la mitad de los oráculos enviaron el mismo hash (es decir, 5 de 9 miembros del comité de oráculos en el momento de escribir), uno de los oráculos elegido a su vez envía el informe real al contrato `AccountingOracle`, lo que desencadena la actualización del estado central del protocolo, incluyendo la rebase del token, la distribución de recompensas a los operadores de nodos, la finalización de las solicitudes de retiro y la decisión del modo del protocolo: si entrar en modo búnker, y
+- **Informe de datos adicionales:** un informe adicional que lleva información adicional que no es vital para la actualización central se envía a `AccountingOracle`, y puede enviarse en partes (por ejemplo, estados de claves de operadores de nodos y datos de distribución de recompensas).
 
 :::note
-As it was said, daily oracle reports shouldn't be taken for granted.
-Oracle daemons could stop pushing their reports for extended periods of time in case of no
-[finality](https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/#finality) on the Ethereum Consensus Layer.
-This would ultimately result in no oracle reports and no stETH rebases for this whole period.
+Como se dijo, los informes diarios del oráculo no deben darse por sentados.
+Los daemons de los oráculos podrían dejar de enviar sus informes por períodos prolongados en caso de no haber [finalidad](https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/#finality) en la capa de consenso de Ethereum.
+Esto resultaría en última instancia en la ausencia de informes del oráculo y en la falta de rebases de stETH durante todo ese período.
 :::
 
-## Report processing
+## Procesamiento de informes
 
-The [submission](./accounting-oracle#submitreportdata) of the main report to `AccountingOracle` triggers the next processes in order, although within a single tx:
+La [envío](./accounting-oracle#submitreportdata) del informe principal a `AccountingOracle` desencadena los siguientes procesos en orden, aunque dentro de una única transacción:
 
-1. Update exited validators counts for each StakingModule in StakingRouter;
-2. Update bunker mode status for WithdrawalQueue;
-3. Handle function on the Lido contract which performs the main protocol state change.
-4. Store information about ExtraData
+1. Actualizar el conteo de validadores salidos para cada módulo de staking en StakingRouter;
+2. Actualizar el estado de modo búnker para WithdrawalQueue;
+3. Manejar la función en el contrato Lido que realiza el cambio principal de estado del protocolo.
+4. Almacenar información sobre ExtraData.
 
-The diagram shows the interaction with contracts.
+El diagrama muestra la interacción con los contratos.
 
 ```mermaid
 graph LR;
@@ -57,9 +55,9 @@ graph LR;
   AccountingOracle--'onOracleReport'-->WithdrawalQueue;
 ```
 
-## Report data
+## Datos del informe
 
-The function `submitReportData()` accepts the following `ReportData` structure.
+La función `submitReportData()` acepta la siguiente estructura `ReportData`.
 
 ```solidity
 struct ReportData {
@@ -81,135 +79,113 @@ struct ReportData {
 }
 ```
 
-**Oracle consensus info**
+**Información de consenso del oráculo**
 
-- `consensusVersion` — Version of the oracle consensus rules. A current version expected by the oracle can be obtained by calling `getConsensusVersion()`.
-- `refSlot` — Reference slot for which the report was calculated. The state being reported must include all state changes resulting from the all blocks up to this reference slot (inclusive). The epoch containing the slot must be finalized prior to calculating the report.
+- `consensusVersion` — Versión de las reglas de consenso del oráculo. La versión actual esperada por el oráculo puede obtenerse llamando a `getConsensusVersion()`.
+- `refSlot` — Slot de referencia para el cual se calculó el informe. El estado informado debe incluir todos los cambios de estado resultantes de todos los bloques hasta este slot de referencia (inclusive). La época que contiene el slot debe estar finalizada antes de calcular el informe.
 
-**CL values**
+**Valores de la CL**
 
-- `numValidators` — The number of validators on the Ethereum Consensus Layer that were ever deposited via Lido as observed at the reference slot.
-- `clBalanceGwei` — Cumulative balance nominated in gwei of all Lido validators on the Ethereum Consensus Layer as observed at the reference slot.
-- `stakingModuleIdsWithNewlyExitedValidators` — Ids of staking modules that have more exited validators than the number stored in the respective staking module contract as observed at the reference slot.
-- `numExitedValidatorsByStakingModule` — Number of ever exited validators for each of the staking modules from the `stakingModuleIdsWithNewlyExitedValidators` array as observed at the reference slot.
+- `numValidators` — El número de validadores en la capa de consenso de Ethereum que alguna vez fueron depositados a través de Lido, observado en el slot de referencia.
+- `clBalanceGwei` — Saldo acumulado nominado en gwei de todos los validadores de Lido en la capa de consenso de Ethereum observado en el slot de referencia.
+- `stakingModuleIdsWithNewlyExitedValidators` — IDs de módulos de staking que tienen más validadores salidos que el número almacenado en el contrato del módulo de staking respectivo, observado en el slot de referencia.
+- `numExitedValidatorsByStakingModule` — Número de validadores que han salido alguna vez para cada uno de los módulos de staking del array `stakingModuleIdsWithNewlyExitedValidators`, observado en el slot de referencia.
 
-**EL values**
+**Valores de la EL**
 
-- `withdrawalVaultBalance` — Ether balance of the Lido [withdrawal vault](/contracts/withdrawal-vault) as observed at the reference slot.
-- `elRewardsVaultBalance` — Ether balance of the Lido [execution layer rewards vault](/contracts/lido-execution-layer-rewards-vault) as observed at the reference slot.
-- `sharesRequestedToBurn` — The shares amount requested to burn through [Burner](/contracts/burner) as observed at the reference slot. The value can be obtained in the following way:
+- `withdrawalVaultBalance` — Saldo en ether de la [bóveda de retiros](/contracts/withdrawal-vault) de Lido observado en el slot de referencia.
+- `elRewardsVaultBalance` — Saldo en ether de la [bóveda de recompensas de la capa de ejecución](/contracts/lido-execution-layer-rewards-vault) de Lido observado en el slot de referencia.
+- `sharesRequestedToBurn` — La cantidad de acciones solicitadas para quemar a través del [Burner](/contracts/burner) observado en el slot de referencia. El valor puede obtenerse de la siguiente manera:
 
 ```solidity
 (coverSharesToBurn, nonCoverSharesToBurn) = IBurner(burner).getSharesRequestedToBurn()
 sharesRequestedToBurn = coverSharesToBurn + nonCoverSharesToBurn
 ```
 
-**Withdrawals finalization decision**
+# Decisión de finalización de retiros
 
-- `withdrawalFinalizationBatches` — The ascendingly-sorted array of withdrawal request IDs obtained by the oracle daemon on report gathering via calling [`WithdrawalQueue.calculateFinalizationBatches`](./withdrawal-queue-erc721#calculatefinalizationbatches). An empty array means that no withdrawal requests to be finalized.
-- `simulatedShareRate` — The share rate (i.e., [total pooled ether](./lido#gettotalpooledether) divided by [total shares](./lido#gettotalshares)) with the 10^27 precision (i.e., multiplied by 10^27) that would be effective as the result of applying this oracle report at the reference slot, with `withdrawalFinalizationBatches` set to empty array and `simulatedShareRate` set to 0. To estimate `simulatedShareRate` one should perform a view call [Lido.handleOracleReport](/contracts/lido#handleoraclereport) directly via [`eth_call`](https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_call) JSON-RPC API and calculate as follows:
+- `withdrawalFinalizationBatches` — Array ordenado ascendentemente de IDs de solicitudes de retiro obtenidos por el daemon del oráculo al recopilar el informe llamando a [`WithdrawalQueue.calculateFinalizationBatches`](./withdrawal-queue-erc721#calculatefinalizationbatches). Un array vacío significa que no hay solicitudes de retiro para finalizar.
+- `simulatedShareRate` — La tasa de participación (es decir, [total de ether agrupado](./lido#gettotalpooledether) dividido por [total de acciones](./lido#gettotalshares)) con una precisión de 10^27 (es decir, multiplicado por 10^27) que sería efectiva como resultado de aplicar este informe del oráculo en el slot de referencia, con `withdrawalFinalizationBatches` establecido en array vacío y `simulatedShareRate` establecido en 0. Para estimar `simulatedShareRate` se debe realizar una llamada de vista [Lido.handleOracleReport](/contracts/lido#handleoraclereport) directamente a través de la API JSON-RPC [`eth_call`](https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_call) y calcularlo de la siguiente manera:
 
 ```solidity
 _simulatedShareRate = (postTotalPooledEther * 10**27) / postTotalShares
 ```
 
-where `postTotalPooledEther` and `postTotalShares` were retrieved as return values from the performed view call
+donde `postTotalPooledEther` y `postTotalShares` se recuperaron como valores de retorno de la llamada de vista realizada.
 
-- `isBunkerMode` — Whether, based on the state observed at the reference slot, the protocol must be in the bunker mode or the turbo (regular) mode.
+- `isBunkerMode` — Si, basado en el estado observado en el slot de referencia, el protocolo debe estar en modo búnker o en modo turbo (regular).
 
 :::note
 
-##### Extra data
+##### Datos adicionales
 
-Extra data — the oracle information that allows asynchronous processing, potentially in
-    chunks, after the main data is processed. The oracle doesn't enforce that extra data
-    attached to the same data report is processed in full before the processing deadline expires
-    or a new data report starts being processed, but enforces that no processing of extra
-    data for a report is possible after its processing deadline passes or a new data report
-    arrives.
+Datos adicionales — la información del oráculo que permite el procesamiento asincrónico, potencialmente en partes, después de que se procesan los datos principales. El oráculo no impone que los datos adicionales adjuntos al mismo informe de datos se procesen en su totalidad antes de que expire el plazo de procesamiento o comience a procesarse un nuevo informe de datos, pero impone que no es posible procesar datos adicionales para un informe después de que expire su plazo de procesamiento o llegue un nuevo informe de datos.
 
-Extra data is an array of items, each item being encoded as follows:
+Los datos adicionales son un array de elementos, cada elemento codificado de la siguiente manera:
 
        3 bytes    2 bytes      X bytes
     | itemIndex | itemType | itemPayload |
 
-- `itemIndex` is a 0-based index into the extra data array;
-- `itemType` is the type of extra data item;
-- `itemPayload` is the item's data which interpretation depends on the item's type.
+- `itemIndex` es un índice basado en 0 en el array de datos adicionales;
+- `itemType` es el tipo de elemento de datos adicionales;
+- `itemPayload` es el dato del elemento cuya interpretación depende del tipo de elemento.
 
-Items must be sorted ascendingly by the `(itemType, ...itemSortingKey)` compound key
-where `itemSortingKey` calculation depends on the item's type (see below).
+Los elementos deben estar ordenados de manera ascendente por la clave compuesta `(itemType, ...itemSortingKey)` donde el cálculo de `itemSortingKey` depende del tipo de elemento (ver más abajo).
 
 ---------------------------------------------------------------------------------------
 
-**`itemType=0`** (`EXTRA_DATA_TYPE_STUCK_VALIDATORS`): stuck validators by node operators.
+**`itemType=0`** (`EXTRA_DATA_TYPE_STUCK_VALIDATORS`): validadores atascados por operadores de nodos.
 
-The `itemPayload` field has the following format:
+El campo `itemPayload` tiene el siguiente formato:
 
     | 3 bytes  |   8 bytes    |  nodeOpsCount * 8 bytes  |  nodeOpsCount * 16 bytes  |
     | moduleId | nodeOpsCount |      nodeOperatorIds     |   stuckValidatorsCounts   |
 
-`moduleId` is the staking module for which exited keys counts are being reported.
+`moduleId` es el módulo de staking para el cual se informan los conteos de claves salidas.
 
-`nodeOperatorIds` contains an array of ids of node operators that have total stuck
-    validators counts changed compared to the staking module smart contract storage as
-    observed at the reference slot. Each id is a 8-byte uint, ids are packed tightly.
+`nodeOperatorIds` contiene un array de IDs de operadores de nodos que tienen cambios en los conteos totales de validadores atascados en comparación con el almacenamiento del contrato inteligente del módulo de staking observado en el slot de referencia. Cada ID es un uint de 8 bytes, los IDs están empaquetados de forma compacta.
 
-`nodeOpsCount` contains the number of node operator ids contained in the nodeOperatorIds
-    array. Thus,
+`nodeOpsCount` contiene el número de IDs de operadores de nodos contenidos en el array `nodeOperatorIds`. Así,
 
     nodeOpsCount = byteLength(nodeOperatorIds) / 8
 
-`stuckValidatorsCounts` contains an array of stuck validators total counts, as observed at
-    the reference slot, for the node operators from the nodeOperatorIds array, in the same
-    order. Each count is a 16-byte uint, counts are packed tightly. Thus,
+`stuckValidatorsCounts` contiene un array de conteos totales de validadores atascados, observado en el slot de referencia, para los operadores de nodos del array `nodeOperatorIds`, en el mismo orden. Cada conteo es un uint de 16 bytes, los conteos están empaquetados de forma compacta. Así,
 
     byteLength(stuckValidatorsCounts) = nodeOpsCount * 16
 
-`nodeOpsCount` must not be greater than `maxAccountingExtraDataListItemsCount` specified
-    in the [`OracleReportSanityChecker`](./oracle-report-sanity-checker) contract. If a staking module has more node operators
-    with total stuck validators counts changed compared to the staking module smart contract
-    storage (as observed at the reference slot), reporting for that module should be split
-    into multiple items.
+`nodeOpsCount` no debe ser mayor que `maxAccountingExtraDataListItemsCount` especificado en el contrato [`OracleReportSanityChecker`](./oracle-report-sanity-checker). Si un módulo de staking tiene más operadores de nodos con cambios en los conteos totales de validadores atascados en comparación con el almacenamiento del contrato inteligente del módulo de staking (observado en el slot de referencia), los informes para ese módulo deben dividirse en múltiples elementos.
 
-Item sorting key is a compound key consisting of the module id and the first reported
-    node operator's id:
+La clave de ordenación del elemento es una clave compuesta que consiste en el ID del módulo y el ID del primer operador de nodos informado:
 
     itemSortingKey = (moduleId, nodeOperatorIds[0:8])
 
 ---------------------------------------------------------------------------------------
 
-**`itemType=1`** (`EXTRA_DATA_TYPE_EXITED_VALIDATORS`): exited validators by node operators.
+**`itemType=1`** (`EXTRA_DATA_TYPE_EXITED_VALIDATORS`): validadores salidos por operadores de nodos.
 
-The payload format is exactly the same as for `itemType=EXTRA_DATA_TYPE_STUCK_VALIDATORS`,
-    except that, instead of stuck validators counts, exited validators counts are reported.
-    The `itemSortingKey` is calculated identically.
+El formato de carga útil es exactamente el mismo que para `itemType=EXTRA_DATA_TYPE_STUCK_VALIDATORS`, excepto que, en lugar de los conteos de validadores atascados, se informan los conteos de validadores salidos. La clave de ordenación del elemento se calcula de manera idéntica.
 
 ---------------------------------------------------------------------------------------
 
-The oracle daemon must report exited/stuck validators counts ONLY for those
-    `(moduleId, nodeOperatorId)` pairs that contain outdated counts in the staking
-    module smart contract as observed at the reference slot.
+El daemon del oráculo debe informar los conteos de validadores salidos/atascados SOLO para aquellos pares `(moduleId, nodeOperatorId)` que contienen conteos desactualizados en el almacenamiento del contrato inteligente del módulo de staking observado en el slot de referencia.
 
-Extra data array can be passed in different formats, see below.
+El array de datos adicionales puede pasarse en diferentes formatos, ver más abajo.
 
 :::
 
-- `extraDataFormat` -  Format of the extra data. Currently, only the `EXTRA_DATA_FORMAT_EMPTY=0` and `EXTRA_DATA_FORMAT_LIST=1` formats are supported. See the constant defining a specific data format for more info.
-- `extraDataHash` - Hash of the extra data. See the constant defining a specific extra data format for the info on how to calculate the hash. Must be set to a zero hash if the oracle report contains no extra data.
-- `extraDataItemsCount` - Number of the extra data items. Must be set to zero if the oracle report contains no extra data.
+- `extraDataFormat` - Formato de los datos adicionales. Actualmente, solo se admiten los formatos `EXTRA_DATA_FORMAT_EMPTY=0` y `EXTRA_DATA_FORMAT_LIST=1`. Ver la constante que define un formato de datos específico para más información.
+- `extraDataHash` - Hash de los datos adicionales. Ver la constante que define un formato de datos adicionales específico para obtener información sobre cómo calcular el hash. Debe establecerse en un hash nulo si el informe del oráculo no contiene datos adicionales.
+- `extraDataItemsCount` - Número de elementos de datos adicionales. Debe establecerse en cero si el informe del oráculo no contiene datos adicionales.
 
-## Access and permissioms
+## Acceso y permisos
 
-Access to lever methods is restricted using the functionality of the
-[AccessControlEnumerable](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/utils/access/AccessControlEnumerable.sol)
-contract and a bunch of [granular roles](#permissions).
+El acceso a los métodos de palanca está restringido utilizando la funcionalidad del contrato [AccessControlEnumerable](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/utils/access/AccessControlEnumerable.sol) y un conjunto de [roles granulares](#permisos).
 
-## Constants
+## Constantes
 
 ### LIDO()
 
-Returns an address of the [Lido](/contracts/lido) contract
+Devuelve una dirección del contrato [Lido](/contracts/lido)
 
 ```solidity
 address public immutable LIDO
@@ -217,7 +193,7 @@ address public immutable LIDO
 
 ### LOCATOR()
 
-Returns an address of the [LidoLocator](/contracts/lido-locator) contract
+Devuelve la dirección del contrato [LidoLocator](/contracts/lido-locator)
 
 ```solidity
 ILidoLocator public immutable LOCATOR
@@ -225,7 +201,7 @@ ILidoLocator public immutable LOCATOR
 
 ### LEGACY_ORACLE()
 
-Returns an address of the [LegacyOracle](/contracts/legacy-oracle) contract
+Devuelve la dirección del contrato [LegacyOracle](/contracts/legacy-oracle)
 
 ```solidity
 address public immutable LEGACY_ORACLE
@@ -233,10 +209,10 @@ address public immutable LEGACY_ORACLE
 
 ### SECONDS_PER_SLOT()
 
-See [https://ethereum.org/en/developers/docs/blocks/#block-time](https://ethereum.org/en/developers/docs/blocks/#block-time)
+Ver [https://ethereum.org/en/developers/docs/blocks/#block-time](https://ethereum.org/en/developers/docs/blocks/#block-time)
 
 :::note
-always returns 12 seconds due to [the Merge](https://ethereum.org/en/roadmap/merge/)
+siempre devuelve 12 segundos debido a [the Merge](https://ethereum.org/en/roadmap/merge/)
 :::
 
 ```solidity
@@ -245,10 +221,10 @@ uint256 public immutable SECONDS_PER_SLOT
 
 ### GENESIS_TIME()
 
-See [https://blog.ethereum.org/2020/11/27/eth2-quick-update-no-21](https://blog.ethereum.org/2020/11/27/eth2-quick-update-no-21)
+Ver [https://blog.ethereum.org/2020/11/27/eth2-quick-update-no-21](https://blog.ethereum.org/2020/11/27/eth2-quick-update-no-21)
 
 :::note
-always returns 1606824023 (December 1, 2020, 12:00:23pm UTC) on [Mainnet](https://blog.ethereum.org/2020/11/27/eth2-quick-update-no-21)
+siempre devuelve 1606824023 (1 de diciembre de 2020, 12:00:23 pm UTC) en [Mainnet](https://blog.ethereum.org/2020/11/27/eth2-quick-update-no-21)
 :::
 
 ```solidity
@@ -257,7 +233,7 @@ uint256 public immutable GENESIS_TIME
 
 ### EXTRA_DATA_TYPE_STUCK_VALIDATORS()
 
-This type carries the details of [stuck](/contracts/staking-router#exited-and-stuck-validators) validator(s).
+Este tipo lleva los detalles de los validador(es) [atascados](/contracts/staking-router#exited-and-stuck-validators).
 
 ```solidity
 uint256 public constant EXTRA_DATA_TYPE_STUCK_VALIDATORS = 1
@@ -265,7 +241,7 @@ uint256 public constant EXTRA_DATA_TYPE_STUCK_VALIDATORS = 1
 
 ### EXTRA_DATA_TYPE_EXITED_VALIDATORS()
 
-This type contains the details of [exited](/contracts/staking-router#exited-and-stuck-validators) validator(s).
+Este tipo contiene los detalles de los validador(es) [salidos](/contracts/staking-router#exited-and-stuck-validators).
 
 ```solidity
 uint256 public constant EXTRA_DATA_TYPE_EXITED_VALIDATORS = 2
@@ -273,11 +249,11 @@ uint256 public constant EXTRA_DATA_TYPE_EXITED_VALIDATORS = 2
 
 ### EXTRA_DATA_FORMAT_EMPTY()
 
-The extra data format used to signify that the oracle report contains no [extra data](/contracts/accounting-oracle#extra-data).
+El formato de datos adicionales utilizado para significar que el informe del oráculo no contiene [datos adicionales](/contracts/accounting-oracle#datos-adicionales).
 
-Sends as a part of the Oracle's [Phase 3](/guías/oracle-operator-manual#fase-3-envío-de-datos-adicionales-del-informe).
+Enviado como parte de la [Fase 3](/guías/oracle-operator-manual#fase-3-envío-de-datos-adicionales-del-informe) del oráculo.
 
-This format uses when there are no new [stuck](/contracts/staking-router#exited-and-stuck-validators) or [exited](/contracts/staking-router#exited-and-stuck-validators) validators on report period.
+Este formato se usa cuando no hay nuevos validadores [atascados](/contracts/staking-router#exited-and-stuck-validators) o [salidos](/contracts/staking-router#exited-and-stuck-validators) en el período del informe.
 
 ```solidity
 uint256 public constant EXTRA_DATA_FORMAT_EMPTY = 0
@@ -285,14 +261,11 @@ uint256 public constant EXTRA_DATA_FORMAT_EMPTY = 0
 
 ### EXTRA_DATA_FORMAT_LIST()
 
-The list format for the extra data array. Used when all extra data processing
- fits into a single transaction.
+El formato de lista para el array de datos adicionales. Se utiliza cuando todo el procesamiento de datos adicionales cabe en una sola transacción.
 
-Extra data is passed within a single transaction as a bytearray containing all data items
-packed tightly.
+Los datos adicionales se pasan en una sola transacción como un array de bytes que contiene todos los elementos de datos empaquetados de manera compacta.
 
-Hash is a `keccak256` hash calculated over the bytearray items. The Solidity equivalent of
-the hash calculation code would be `keccak256(array)`, where `array` has the `bytes` type.
+El hash es un hash `keccak256` calculado sobre los elementos del array de bytes. El equivalente en Solidity del código de cálculo del hash sería `keccak256(array)`, donde `array` tiene el tipo `bytes`.
 
 ```solidity
 uint256 public constant EXTRA_DATA_FORMAT_LIST = 1
@@ -314,20 +287,20 @@ struct ProcessingState {
 }
 ```
 
-- `currentFrameRefSlot` - Reference slot for the current reporting frame.
-- `processingDeadlineTime` - The last time at which a data can be submitted for the current reporting frame.
-- `mainDataHash` - Hash of the main report data. Zero bytes if consensus on the hash hasn't been reached yet for the current reporting frame.
-- `mainDataSubmitted` - Whether the main report data for the current reporting frame has already been submitted.
-- `extraDataHash` - Hash of the extra report data. Should be ignored unless `mainDataSubmitted` is true.
-- `extraDataFormat` - Format of the extra report data for the current reporting frame. Should be ignored unless `mainDataSubmitted` is true.
-- `extraDataSubmitted` - Total number of extra report data items for the current reporting frame. Should be ignored unless `mainDataSubmitted` is true.
-- `extraDataItemsSubmitted` - How many extra report data items are already submitted for the current reporting frame.
+- `currentFrameRefSlot` - Slot de referencia para el marco de informes actual.
+- `processingDeadlineTime` - El último tiempo en el que se pueden enviar datos para el marco de informes actual.
+- `mainDataHash` - Hash de los datos del informe principal. Bytes cero si no se ha alcanzado el consenso sobre el hash para el marco de informes actual.
+- `mainDataSubmitted` - Si los datos del informe principal para el marco de informes actual ya se han enviado.
+- `extraDataHash` - Hash de los datos del informe adicional. Debe ser ignorado a menos que `mainDataSubmitted` sea verdadero.
+- `extraDataFormat` - Formato de los datos del informe adicional para el marco de informes actual. Debe ser ignorado a menos que `mainDataSubmitted` sea verdadero.
+- `extraDataSubmitted` - Número total de elementos de datos del informe adicional para el marco de informes actual. Debe ser ignorado a menos que `mainDataSubmitted` sea verdadero.
+- `extraDataItemsSubmitted` - Cuántos elementos de datos del informe adicional ya se han enviado para el marco de informes actual.
 
-## View methods
+## Métodos de vista
 
 ### getConsensusContract()
 
-Returns the address of the [HashConsensus](/contracts/hash-consensus) contract instance used by `AccountingOracle`.
+Devuelve la dirección de la instancia del contrato [HashConsensus](/contracts/hash-consensus) utilizada por `AccountingOracle`.
 
 ```solidity
 function getConsensusContract() external view returns (address)
@@ -335,7 +308,7 @@ function getConsensusContract() external view returns (address)
 
 ### getConsensusReport()
 
-Returns the last consensus report hash and metadata.
+Devuelve el último hash del informe de consenso y los metadatos.
 
 ```solidity
 function getConsensusReport() external view returns (
@@ -348,20 +321,19 @@ function getConsensusReport() external view returns (
 
 #### Returns
 
-| Name                     | Type      | Description                                                |
-| ------------------------ | --------- | ---------------------------------------------------------- |
-| `hash`                   | `bytes32` | The last reported hash                 |
-| `refSlot`                | `uint256` | The frame's reference slot: if the data the consensus is being reached upon includes or depends on any onchain state, this state should be queried at the reference slot. The state being reported must include all state changes resulting from all blocks up to this reference slot (inclusive).                 |
-| `processingDeadlineTime` | `uint256` | Timestamp of the last slot at which a report can be reported and processed |
-| `processingStarted`      | `bool`    | Has the processing of the report been started or not                       |
+| Nombre                     | Tipo      | Descripción                                                                                                                                                                                                                                    |
+| ------------------------ | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `hash`                   | `bytes32` | El último hash reportado                                                                                                                                                                                                                       |
+| `refSlot`                | `uint256` | El slot de referencia del marco: si los datos sobre los cuales se está alcanzando el consenso incluyen o dependen de algún estado on-chain, este estado debe consultarse en el slot de referencia. El estado reportado debe incluir todos los cambios de estado resultantes de todos los bloques hasta este slot de referencia (inclusive). |
+| `processingDeadlineTime` | `uint256` | Marca de tiempo del último slot en el cual un informe puede ser reportado y procesado                                                                                                                                                          |
+| `processingStarted`      | `bool`    | Indica si se ha iniciado o no el procesamiento del informe                                                                                                                                                                                     |
 
 ### getConsensusVersion()
 
-Returns the current consensus version expected by the oracle contract.
+Devuelve la versión actual de consenso esperada por el contrato del oráculo.
 
 :::note
-Consensus version must change every time consensus rules change, meaning that
- an oracle looking at the same reference slot would calculate a different hash.
+La versión de consenso debe cambiar cada vez que cambian las reglas de consenso, lo que significa que un oráculo que observa el mismo slot de referencia calcularía un hash diferente.
 :::
 
 ```solidity
@@ -370,7 +342,7 @@ function getConsensusVersion() external view returns (uint256)
 
 ### getContractVersion()
 
-Returns the current contract version.
+Devuelve la versión actual del contrato.
 
 ```solidity
 function getContractVersion() public view returns (uint256)
@@ -378,7 +350,7 @@ function getContractVersion() public view returns (uint256)
 
 ### getLastProcessingRefSlot()
 
-Returns the last reference slot for which processing of the report was started.
+Devuelve el último slot de referencia para el cual se inició el procesamiento del informe.
 
 ```solidity
 function getLastProcessingRefSlot() external view returns (uint256)
@@ -386,36 +358,36 @@ function getLastProcessingRefSlot() external view returns (uint256)
 
 ### getProcessingState()
 
-Returns data processing state for the current reporting frame. See the docs for the [ProcessingState](#processingstate) struct.
+Devuelve el estado del procesamiento de datos para el marco de informes actual. Ver la documentación para la estructura [ProcessingState](#processingstate).
 
 ```solidity
 function getProcessingState() external view returns (ProcessingState memory result)
 ```
 
-## Methods
+## Métodos
 
 ### submitReportData()
 
-Submits report data for processing.
+Envía los datos del informe para su procesamiento.
 
 ```solidity
 function submitReportData(ReportData calldata data, uint256 contractVersion)
 ```
 
-#### Parameters
+#### Parámetros
 
-| Name              | Type          | Description                                                  |
-| ------------------ | ------------ | ------------------------------------------------------------ |
-| `data`             | `ReportData` | The data. See the [ReportData](./accounting-oracle#report-data) structure's docs for details. |
-| `contractVersion`  | `uint256`    | Expected version of the oracle contract.                     |
+| Nombre            | Tipo         | Descripción                                                                                           |
+| ----------------- | ------------ | ----------------------------------------------------------------------------------------------------- |
+| `data`            | `ReportData` | Los datos. Ver la documentación de la estructura [ReportData](./accounting-oracle#datos-del-informe) para más detalles. |
+| `contractVersion` | `uint256`    | Versión esperada del contrato del oráculo.                                                            |
 
 #### Reverts
 
-For more information about reverts, see a separate section [here](#reverts-3)
+Para más información sobre reverts, ver una sección separada [aquí](#reverts-3)
 
 ### submitReportExtraDataEmpty()
 
-Triggers the processing required when no extra data is present in the report, i.e. when extra data format equals EXTRA_DATA_FORMAT_EMPTY.
+Dispara el procesamiento requerido cuando no hay datos adicionales presentes en el informe, es decir, cuando el formato de datos adicionales es igual a EXTRA_DATA_FORMAT_EMPTY.
 
 ```solidity
 function submitReportExtraDataEmpty()
@@ -423,65 +395,60 @@ function submitReportExtraDataEmpty()
 
 #### Reverts
 
-- Reverts with `SenderNotAllowed()` if sender doesn't have a `SUBMIT_DATA_ROLE` role and sender is not a consensus member.
+- Reviértese con `SenderNotAllowed()` si el remitente no tiene un rol `SUBMIT_DATA_ROLE` y el remitente no es un miembro del consenso.
 
 ### submitReportExtraDataList()
 
-Submits report extra data in the EXTRA_DATA_FORMAT_LIST format for processing.
+Envía los datos adicionales del informe en el formato EXTRA_DATA_FORMAT_LIST para su procesamiento.
 
 ```solidity
 function submitReportExtraDataList(bytes calldata items)
 ```
 
-#### Parameters
+#### Parámetros
 
-| Name    | Type    | Description                                                  |
-| ------- | ------- | ------------------------------------------------------------ |
-| `items` | `bytes` | The extra data items list. See docs for the [EXTRA_DATA_FORMAT_LIST](#extra_data_format_list) constant for details. |
+| Nombre  | Tipo    | Descripción                                                                                               |
+| ------- | ------- | --------------------------------------------------------------------------------------------------------- |
+| `items` | `bytes` | La lista de elementos de datos adicionales. Ver la documentación para la constante [EXTRA_DATA_FORMAT_LIST](#extra_data_format_list) para más detalles. |
 
 #### Reverts
 
-- Reverts with `SenderNotAllowed()` if sender doesn't have a `SUBMIT_DATA_ROLE` role and sender is not a consensus member.
+- Reviértese con `SenderNotAllowed()` si el remitente no tiene un rol `SUBMIT_DATA_ROLE` y el remitente no es un miembro del consenso.
 
 ### submitConsensusReport()
 
-Called by [AccountingOracle HashConsensus](/contracts/hash-consensus) contract to push a consensus report for processing.
+Llamado por el contrato [AccountingOracle HashConsensus](/contracts/hash-consensus) para enviar un informe de consenso para su procesamiento.
 
 :::note
-Note that submitting the report doesn't require the processor to start processing it right
- away, this can happen later (see [`getLastProcessingRefSlot`](#getlastprocessingrefslot)). Until processing is started,
- HashConsensus is free to reach consensus on another report for the same reporting frame an
- submit it using this same function, or to lose the consensus on the submitted report,
- notifying the processor via `discardConsensusReport`.
+Tenga en cuenta que enviar el informe no requiere que el procesador comience a procesarlo de inmediato, esto puede suceder más tarde (ver [`getLastProcessingRefSlot`](#getlastprocessingrefslot)). Hasta que se inicie el procesamiento, HashConsensus es libre de alcanzar el consenso sobre otro informe para el mismo marco de informes y enviarlo usando esta misma función, o perder el consenso sobre el informe enviado, notificando al procesador a través de `discardConsensusReport`.
 :::
 
 ```solidity
 function submitConsensusReport(bytes32 reportHash, uint256 refSlot, uint256 deadline)
 ```
 
-#### Parameters
+#### Parámetros
 
-| Name              | Type          | Description                                                  |
-| ------------------ | ------------ | ------------------------------------------------------------ |
-| `reportHash` | `bytes32` | Hash of the data calculated for the given reference slot. |
-| `refSlot`    | `uint256` | The reference slot the data was calculated for. Reverts if doesn't match the current reference slot.                     |
-| `deadline`   | `uint256` | The timestamp of the last slot at which the report can be processed by the report processor contract.                     |
+| Nombre       | Tipo      | Descripción                                                                                             |
+| ------------ | --------- | ------------------------------------------------------------------------------------------------------- |
+| `reportHash` | `bytes32` | Hash de los datos calculados para el slot de referencia dado.                                           |
+| `refSlot`    | `uint256` | El slot de referencia para el cual se calcularon los datos. Revierte si no coincide con el slot de referencia actual. |
+| `deadline`   | `uint256` | La marca de tiempo del último slot en el cual el informe puede ser procesado por el contrato de procesamiento de informes. |
 
 ### discardConsensusReport()
 
-Called by HashConsensus contract to notify that the report for the given ref. slot
- is not a consensus report anymore and should be discarded. This can happen when a member
- changes their report, is removed from the set, or when the quorum value gets increased.
+Llamado por el contrato HashConsensus para notificar que el informe para el slot de referencia dado
+ ya no es un informe de consenso y debe ser descartado. Esto puede suceder cuando un miembro
+ cambia su informe, es removido del conjunto, o cuando se incrementa el valor del quórum.
 
-Only called when, for the given reference slot:
+Solo se llama cuando, para el slot de referencia dado:
 
-1. there previously was a consensus report; AND
-2. processing of the consensus report hasn't started yet; AND
-3. report processing deadline is not expired yet; AND
-4. there's no consensus report now (otherwise, [submitConsensusReport](#submitconsensusreport) is called instead).
+1. Anteriormente hubo un informe de consenso; Y
+2. El procesamiento del informe de consenso no ha comenzado aún; Y
+3. La fecha límite para el procesamiento del informe no ha expirado aún; Y
+4. Actualmente no hay un informe de consenso (de lo contrario, se llama a [submitConsensusReport](#submitconsensusreport)).
 
-Can be called even when there's no submitted non-discarded consensus report for the current
-reference slot, i.e. can be called multiple times in succession.
+Puede ser llamado incluso cuando no hay un informe de consenso no descartado presentado para el slot de referencia actual, es decir, puede ser llamado múltiples veces sucesivamente.
 
 ```solidity
 function discardConsensusReport(uint256 refSlot)
@@ -495,17 +462,17 @@ function setConsensusContract(address addr)
 
 ### setConsensusVersion()
 
-Sets the consensus version expected by the oracle contract.
+Establece la versión de consenso esperada por el contrato del oráculo.
 
 ```solidity
 function setConsensusVersion(uint256 version)
 ```
 
-## Permissions
+## Permisos
 
 ### SUBMIT_DATA_ROLE()
 
-An ACL role granting the permission to submit the data for a committee report.
+Un rol de ACL que otorga permiso para enviar los datos para un informe del comité.
 
 ```solidity
 bytes32 public constant SUBMIT_DATA_ROLE = keccak256("SUBMIT_DATA_ROLE");
@@ -513,7 +480,7 @@ bytes32 public constant SUBMIT_DATA_ROLE = keccak256("SUBMIT_DATA_ROLE");
 
 ### MANAGE_CONSENSUS_CONTRACT_ROLE()
 
-An ACL role granting the permission to set the consensus contract address by calling setConsensusContract.
+Un rol de ACL que otorga permiso para establecer la dirección del contrato de consenso llamando a setConsensusContract.
 
 ```solidity
 bytes32 public constant MANAGE_CONSENSUS_CONTRACT_ROLE = keccak256("MANAGE_CONSENSUS_CONTRACT_ROLE");
@@ -521,17 +488,17 @@ bytes32 public constant MANAGE_CONSENSUS_CONTRACT_ROLE = keccak256("MANAGE_CONSE
 
 ### MANAGE_CONSENSUS_VERSION_ROLE()
 
-An ACL role granting the permission to set the consensus version by calling setConsensusVersion.
+Un rol de ACL que otorga permiso para establecer la versión de consenso llamando a setConsensusVersion.
 
 ```solidity
 bytes32 public constant MANAGE_CONSENSUS_VERSION_ROLE = keccak256("MANAGE_CONSENSUS_VERSION_ROLE");
 ```
 
-## Events
+## Eventos
 
 ### ExtraDataSubmitted()
 
-Emits when any extra report data for the current reporting frame has been submitted.
+Se emite cuando se han enviado datos adicionales para el marco de informes actual.
 
 ```solidity
 ExtraDataSubmitted(uint256 indexed refSlot, uint256 itemsProcessed, uint256 itemsCount)
@@ -539,7 +506,7 @@ ExtraDataSubmitted(uint256 indexed refSlot, uint256 itemsProcessed, uint256 item
 
 ### WarnExtraDataIncompleteProcessing()
 
-Emits when try to submit the same report, but not all items are processed yet.
+Se emite cuando se intenta enviar el mismo informe, pero aún no se han procesado todos los elementos.
 
 ```solidity
 event WarnExtraDataIncompleteProcessing(
@@ -551,7 +518,7 @@ event WarnExtraDataIncompleteProcessing(
 
 ### ConsensusHashContractSet()
 
-Emits when a contract hash value is changed.
+Se emite cuando se cambia el valor del hash del contrato.
 
 ```solidity
 event ConsensusHashContractSet(address indexed addr, address indexed prevAddr)
@@ -559,7 +526,7 @@ event ConsensusHashContractSet(address indexed addr, address indexed prevAddr)
 
 ### ConsensusVersionSet()
 
-Emits when a consensus version value is changed.
+Se emite cuando se cambia el valor de la versión de consenso.
 
 ```solidity
 event ConsensusVersionSet(uint256 indexed version, uint256 indexed prevVersion)
@@ -567,7 +534,7 @@ event ConsensusVersionSet(uint256 indexed version, uint256 indexed prevVersion)
 
 ### ReportSubmitted()
 
-Emits when a new consensus report hash is submitted
+Se emite cuando se envía un nuevo hash de informe de consenso
 
 ```solidity
 event ReportSubmitted(uint256 indexed refSlot, bytes32 hash, uint256 processingDeadlineTime)
@@ -575,7 +542,7 @@ event ReportSubmitted(uint256 indexed refSlot, bytes32 hash, uint256 processingD
 
 ### ReportDiscarded()
 
-Emits when consensus report is discarded.
+Se emite cuando se descarta un informe de consenso.
 
 ```solidity
 event ReportDiscarded(uint256 indexed refSlot, bytes32 hash)
@@ -583,7 +550,7 @@ event ReportDiscarded(uint256 indexed refSlot, bytes32 hash)
 
 ### ProcessingStarted()
 
-Emits when report data is submitted
+Se emite cuando se envían datos de informe
 
 ```solidity
 event ProcessingStarted(uint256 indexed refSlot, bytes32 hash)
@@ -591,7 +558,7 @@ event ProcessingStarted(uint256 indexed refSlot, bytes32 hash)
 
 ### WarnProcessingMissed()
 
-Emits on [submitConsensusReport](#submitconsensusreport) when `refSlot != prevSubmittedRefSlot && prevProcessingRefSlot != prevSubmittedRefSlot`
+Se emite en [submitConsensusReport](#submitconsensusreport) cuando `refSlot != prevSubmittedRefSlot && prevProcessingRefSlot != prevSubmittedRefSlot`
 
 ```solidity
 event WarnProcessingMissed(uint256 indexed refSlot)
@@ -601,33 +568,33 @@ event WarnProcessingMissed(uint256 indexed refSlot)
 
 ### submitReportData()
 
-To ensure that the reported data is within possible values, the handler function performs a number of sanity checks. When checking, reverts may occur in different contracts.
+Para asegurarse de que los datos reportados están dentro de los valores posibles, la función manejadora realiza una serie de comprobaciones de sanidad. Al comprobar, pueden ocurrir reverts en diferentes contratos.
 
-#### AccountingOracle and BaseOracle contracts
+#### Contratos AccountingOracle y BaseOracle
 
-- Reverts with `SenderNotAllowed()` if caller doesn't have a `SUBMIT_DATA_ROLE` role and is not a member of the oracle committee.
-- Reverts with `UnexpectedContractVersion(expectedVersion, version)` if provided contract version is different from the current one.
-- Reverts with `UnexpectedConsensusVersion(expectedConsensusVersion, consensusVersion)` if provided consensus version is different from the expected one.
-- Reverts with `UnexpectedRefSlot(report.refSlot, refSlot)` if provided reference slot differs from the current consensus frame's one.
-- Reverts with `UnexpectedDataHash(report.hash, hash)` if keccak256 hash of the ABI-encoded data is different from the last hash.
-- Reverts with `NoConsensusReportToProcess()` if report hash data is 0.
-- Reverts with `RefSlotAlreadyProcessing()` if report reference slot is equal to previous processing reference slot.
-- Reverts with `UnexpectedExtraDataHash(bytes32(0), data.extraDataHash)` if `data.extraDataFormat` is `EXTRA_DATA_FORMAT_EMPTY` and `data.extraDataHash` is 0
-- Reverts with `UnexpectedExtraDataItemsCount(0, data.extraDataItemsCount)` if `data.extraDataFormat` is `EXTRA_DATA_FORMAT_EMPTY` and `data.extraDataItemsCount` is not 0
-- Reverts with `UnsupportedExtraDataFormat(data.extraDataFormat)` if `data.extraDataFormat` is not `EXTRA_DATA_FORMAT_EMPTY` and not `EXTRA_DATA_FORMAT_LIST`
-- Reverts with `ExtraDataItemsCountCannotBeZeroForNonEmptyData()` if `data.extraDataFormat` is `EXTRA_DATA_FORMAT_LIST` and `data.extraDataItemsCount` is 0
-- Reverts with `ExtraDataHashCannotBeZeroForNonEmptyData()` if  `data.extraDataFormat` is `EXTRA_DATA_FORMAT_LIST` and `data.extraDataHash` is 0
-- Reverts with `InvalidExitedValidatorsData()` if provided exited validators data doesn't meet safety checks.
+- Revierte con `SenderNotAllowed()` si el llamador no tiene un rol `SUBMIT_DATA_ROLE` y no es un miembro del comité del oráculo.
+- Revierte con `UnexpectedContractVersion(expectedVersion, version)` si la versión del contrato proporcionada es diferente de la actual.
+- Revierte con `UnexpectedConsensusVersion(expectedConsensusVersion, consensusVersion)` si la versión de consenso proporcionada es diferente de la esperada.
+- Revierte con `UnexpectedRefSlot(report.refSlot, refSlot)` si el slot de referencia proporcionado difiere del del marco de consenso actual.
+- Revierte con `UnexpectedDataHash(report.hash, hash)` si el hash keccak256 de los datos codificados en ABI es diferente del último hash.
+- Revierte con `NoConsensusReportToProcess()` si los datos del hash del informe son 0.
+- Revierte con `RefSlotAlreadyProcessing()` si el slot de referencia del informe es igual al slot de referencia de procesamiento previo.
+- Revierte con `UnexpectedExtraDataHash(bytes32(0), data.extraDataHash)` si `data.extraDataFormat` es `EXTRA_DATA_FORMAT_EMPTY` y `data.extraDataHash` es 0.
+- Revierte con `UnexpectedExtraDataItemsCount(0, data.extraDataItemsCount)` si `data.extraDataFormat` es `EXTRA_DATA_FORMAT_EMPTY` y `data.extraDataItemsCount` no es 0.
+- Revierte con `UnsupportedExtraDataFormat(data.extraDataFormat)` si `data.extraDataFormat` no es `EXTRA_DATA_FORMAT_EMPTY` y no es `EXTRA_DATA_FORMAT_LIST`.
+- Revierte con `ExtraDataItemsCountCannotBeZeroForNonEmptyData()` si `data.extraDataFormat` es `EXTRA_DATA_FORMAT_LIST` y `data.extraDataItemsCount` es 0.
+- Revierte con `ExtraDataHashCannotBeZeroForNonEmptyData()` si `data.extraDataFormat` es `EXTRA_DATA_FORMAT_LIST` y `data.extraDataHash` es 0.
+- Revierte con `InvalidExitedValidatorsData()` si los datos de validadores salientes proporcionados no cumplen con las comprobaciones de seguridad.
 
 #### OracleReportSanityChecker
 
-- Reverts with `MaxAccountingExtraDataItemsCountExceeded(uint256 maxItemsCount, uint256 receivedItemsCount)` error when check is failed, more [here](/contracts/oracle-report-sanity-checker.md#checkaccountingextradatalistitemscount)
-- Reverts with `ExitedValidatorsLimitExceeded(uint256 limitPerDay, uint256 exitedPerDay)` if provided exited validators data doesn't meet safety checks. (OracleReportSanityChecker)
+- Revierte con el error `MaxAccountingExtraDataItemsCountExceeded(uint256 maxItemsCount, uint256 receivedItemsCount)` cuando la comprobación falla, más información [aquí](/contracts/oracle-report-sanity-checker.md#checkaccountingextradatalistitemscount)
+- Revierte con `ExitedValidatorsLimitExceeded(uint256 limitPerDay, uint256 exitedPerDay)` si los datos de validadores salientes proporcionados no cumplen con las comprobaciones de seguridad. (OracleReportSanityChecker)
 
 #### StakingRouter
 
-- Reverts with `ArraysLengthMismatch(_stakingModuleIds.length, _exitedValidatorsCounts.length)` if provided exited validators data doesn't meet safety checks. (StakingRouter)
-- Reverts with `ExitedValidatorsCountCannotDecrease()` if provided exited validators data doesn't meet safety checks. (StakingRouter)
-- Reverts with `ReportedExitedValidatorsExceedDeposited(uint256 reportedExitedValidatorsCount,uint256 depositedValidatorsCount)` if provided exited validators data doesn't meet safety checks. (StakingRouter)
+- Revierte con `ArraysLengthMismatch(_stakingModuleIds.length, _exitedValidatorsCounts.length)` si los datos de validadores salientes proporcionados no cumplen con las comprobaciones de seguridad. (StakingRouter)
+- Revierte con `ExitedValidatorsCountCannotDecrease()` si los datos de validadores salientes proporcionados no cumplen con las comprobaciones de seguridad. (StakingRouter)
+- Revierte con `ReportedExitedValidatorsExceedDeposited(uint256 reportedExitedValidatorsCount,uint256 depositedValidatorsCount)` si los datos de validadores salientes proporcionados no cumplen con las comprobaciones de seguridad. (StakingRouter)
 
-Other reverts on `Lido.handleOracleReport()`
+Otras reverts en `Lido.handleOracleReport()`
