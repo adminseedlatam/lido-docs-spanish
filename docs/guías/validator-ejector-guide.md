@@ -1,40 +1,40 @@
 # Validator Ejector
 
-## Introduction
+## Introducción
 
-Ejector is a daemon service which monitors [ValidatorsExitBusOracle](https://github.com/lidofinance/lido-dao/blob/feature/shapella-upgrade/contracts/0.8.9/oracle/ValidatorsExitBusOracle.sol) events and sends out stored exit messages when necessary. It allows Node Operators to generate and sign exit messages ahead of time, which will be sent out by the Ejector when the Protocol requests an exit to be made.
+Ejector es un servicio daemon que monitorea los eventos de [ValidatorsExitBusOracle](https://github.com/lidofinance/lido-dao/blob/feature/shapella-upgrade/contracts/0.8.9/oracle/ValidatorsExitBusOracle.sol) y envía mensajes de salida almacenados cuando es necesario. Permite a los Node Operators generar y firmar mensajes de salida con anticipación, los cuales serán enviados por Ejector cuando el Protocolo solicite realizar una salida.
 
-On start, it loads exit messages from a specified folder in form of individual `.json` files and validates their format, structure and signature. Then, it loads events from a configurable amount of latest finalized blocks, checks if exits should be made and after that periodically fetches fresh events.
+Al iniciar, carga los mensajes de salida desde una carpeta especificada en forma de archivos individuales `.json` y valida su formato, estructura y firma. Luego, carga eventos de una cantidad configurable de bloques finalizados más recientes, verifica si se deben realizar salidas y periódicamente obtiene eventos frescos.
 
-## Requirements
+## Requisitos
 
 ### Hardware
 
-- 2-core CPU
-- 1GB RAM
+- CPU de 2 núcleos
+- 1GB de RAM
 
-### Nodes
+### Nodos
 
-- Execution Node - [Full node required](https://ethereum.org/en/developers/docs/nodes-and-clients/#node-types)
-- Consensus Node
+- Nodo de Ejecución - [Se requiere un nodo completo](https://ethereum.org/en/developers/docs/nodes-and-clients/#node-types)
+- Nodo de Consenso
 
 ### Software
 
-#### Using Docker:
+#### Utilizando Docker:
 
 Docker + docker-compose.
 
-#### Running directly or using for message encryption:
+#### Ejecutando directamente o para encriptación de mensajes:
 
 Node.js 16.
 
-## Exit Messages
+## Mensajes de Salida
 
-Ejector loads and validates exit messages on start. This means that any changes to the messages folder (eg new exit messages) require a restart of the app to be picked up.
+Ejector carga y valida los mensajes de salida al inicio. Esto significa que cualquier cambio en la carpeta de mensajes (por ejemplo, nuevos mensajes de salida) requiere un reinicio de la aplicación para ser detectado.
 
-Ejector accepts messages in three formats:
+Ejector acepta mensajes en tres formatos:
 
-### Generic Format
+### Formato Genérico
 
 ```json
 {
@@ -43,7 +43,7 @@ Ejector accepts messages in three formats:
 }
 ```
 
-### ethdo Output Format
+### Formato de Salida de ethdo
 
 ```json
 {
@@ -55,7 +55,7 @@ Ejector accepts messages in three formats:
 }
 ```
 
-### Encrypted Format
+### Formato Encriptado
 
 ```json
 {
@@ -88,36 +88,36 @@ Ejector accepts messages in three formats:
 }
 ```
 
-## Encrypting Messages
+## Encriptación de Mensajes
 
-It is highly advised that after exit message are generated and signed, they should be encrypted for storage safety. Ejector will decrypt files on start by looking up the password in `MESSAGES_PASSWORD` environment variable.
+Se recomienda encarecidamente que después de generar y firmar los mensajes de salida, se encripten para la seguridad del almacenamiento. Ejector descifrará los archivos al inicio buscando la contraseña en la variable de entorno `MESSAGES_PASSWORD`.
 
-Exit messages are encrypted and decrypted by Ejector following the [EIP-2335](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2335.md) spec.
+Los mensajes de salida se encriptan y descifran siguiendo la especificación [EIP-2335](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2335.md).
 
-Ejector is bundled with a small, easy to use encryption script.
+Ejector incluye un pequeño y fácil de usar script de encriptación.
 
-### Encryption using Ejector - Source Code
+### Encriptación usando Ejector - Código Fuente
 
-1. Clone repository:
+1. Clonar el repositorio:
 
 ```bash
 git clone https://github.com/lidofinance/validator-ejector.git
 cd validator-ejector
 ```
 
-2. Create `.env` file with encryption password or pass before the command:
+2. Crear el archivo `.env` con la contraseña de encriptación o pasarla antes del comando:
 
 ```
 MESSAGES_PASSWORD=password
 ```
 
-3. Copy JSON exit message files to `encryptor/input`
-4. Run `yarn & yarn encrypt`
-5. Encrypted exit message files will be saved to `encryptor/output`
+3. Copiar los archivos JSON de mensajes de salida a `encryptor/input`
+4. Ejecutar `yarn & yarn encrypt`
+5. Los archivos de mensajes de salida encriptados se guardarán en `encryptor/output`
 
-### Encryption using Ejector - Docker
+### Encriptación usando Ejector - Docker
 
-Ejector is bundled with encryptor script inside, so you can run it using the same Docker image:
+Ejector incluye un script de encriptación dentro, por lo que se puede ejecutar usando la misma imagen Docker:
 
 ```bash
 docker run \
@@ -128,60 +128,58 @@ docker run \
 		node /app/dist/encryptor/encrypt.js
 ```
 
-You can find a recommended version's hash [here](/guías/tooling).
+Puedes encontrar el hash de la versión recomendada [aquí](/guías/tooling).
 
-For platforms with a different architecture but with emulation/transpilation support eg macOS on M processors, additionally specify:
+Para plataformas con una arquitectura diferente pero con soporte de emulación/transpilación como macOS en procesadores M, especifica adicionalmente:
 
 ```bash
 --platform linux/amd64
 ```
 
-## Env Variables
+## Variables de Entorno
 
 ### EXECUTION_NODE
 
-Address of the Execution Node.
+Dirección del Nodo de Ejecución.
 
 ### CONSENSUS_NODE
 
-Address of the Consensus Node.
+Dirección del Nodo de Consenso.
 
 ### LOCATOR_ADDRESS
 
-Address of the [LidoLocator](https://github.com/lidofinance/lido-dao/blob/feature/shapella-upgrade/contracts/0.8.9/LidoLocator.sol) contract: [Holešky](https://docs.lido.fi/deployed-contracts/holesky) / [Mainnet](https://docs.lido.fi/deployed-contracts/)
+Dirección del contrato [LidoLocator](https://github.com/lidofinance/lido-dao/blob/feature/shapella-upgrade/contracts/0.8.9/LidoLocator.sol): [Holešky](https://docs.lido.fi/deployed-contracts/holesky) / [Mainnet](https://docs.lido.fi/deployed-contracts/)
 
-### STAKING_MODULE_ID
+# STAKING_MODULE_ID
 
-ID of the [StakingRouter](https://github.com/lidofinance/lido-dao/blob/feature/shapella-upgrade/contracts/0.8.9/StakingRouter.sol) contract module.
+ID del contrato StakingRouter: [StakingRouter.sol](https://github.com/lidofinance/lido-dao/blob/feature/shapella-upgrade/contracts/0.8.9/StakingRouter.sol). Actualmente, solo tiene un módulo ([NodeOperatorsRegistry](https://github.com/lidofinance/lido-dao/blob/feature/shapella-upgrade/contracts/0.4.24/nos/NodeOperatorsRegistry.sol)), cuyo ID es `1`.
 
-Currently, it has only one module ([NodeOperatorsRegistry](https://github.com/lidofinance/lido-dao/blob/feature/shapella-upgrade/contracts/0.4.24/nos/NodeOperatorsRegistry.sol)), it's id is `1`.
+# OPERATOR_ID
 
-### OPERATOR_ID
+Puedes encontrar este ID en el Panel de Operadores (`#123` en la tarjeta del operador): [Holešky](https://operators-holesky.testnet.fi) / [Mainnet](https://operators.lido.fi).
 
-You can find it on the Operators Dashboard (`#123` on the operator card): [Holešky](https://operators-holesky.testnet.fi) / [Mainnet](https://operators.lido.fi)
+# MESSAGES_LOCATION
 
-### MESSAGES_LOCATION
+Ubicación desde la cual cargar los mensajes de salida en formato `.json`.
 
-Location from which to load `.json` exit messages from.
+Cuando se establece, activa el modo de mensajes. No es necesario si estás utilizando Ejector en modo webhook.
 
-When set, messages mode will be activated. Not needed if you are using the Ejector in webhook mode.
+Por ejemplo, `/messages` en Docker o simplemente `messages` si se ejecuta directamente para archivos locales.
 
-For example, `/messages` in Docker or simply `messages` if running directly for local files.
+También se admite la URL de un bucket de almacenamiento externo para AWS S3 y Google Cloud Storage:
 
-External storage bucket url is also supported for AWS S3 and Google Cloud Storage:
+- `s3://` para S3
+- `gs://` para GCS
 
-- `s3://` for S3
-- `gs://` for GCS
+Configuración de autenticación: [GCS](https://cloud.google.com/docs/authentication/application-default-credentials#attached-sa), [S3](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/setting-credentials-node.html).
 
-Authentication setup: [GCS](https://cloud.google.com/docs/authentication/application-default-credentials#attached-sa), [S3](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/setting-credentials-node.html).
+# VALIDATOR_EXIT_WEBHOOK
 
-### VALIDATOR_EXIT_WEBHOOK
+Endpoint al cual hacer una solicitud cuando se requiere una salida. Permite implementar un enfoque Just-in-Time (JIT) descargando la lógica de salida a un servicio externo y utilizando Ejector como lector seguro de eventos de salida.
 
-Endpoint to fetch when an exit has to be made. Allows to implement JIT approach by offloading exiting logic to an external service and using the Ejector as a secure exit events reader.
+Cuando se establece, activa el modo webhook. No es necesario si estás utilizando Ejector en modo mensajes.
 
-When set, webhook mode will be activated. Not needed if you are using the Ejector in messages mode.
-
-On the endpoint, JSON will be POSTed with the following structure:
+En el endpoint, se realizará un POST de JSON con la siguiente estructura:
 
 ```json
 {
@@ -190,106 +188,106 @@ On the endpoint, JSON will be POSTed with the following structure:
 }
 ```
 
-200 response will be counted as a successful exit, non-200 as a fail.
+Se considerará una salida exitosa si la respuesta es 200, y como fallida si no lo es.
 
-### ORACLE_ADDRESSES_ALLOWLIST
+# ORACLE_ADDRESSES_ALLOWLIST
 
-JSON array of Lido Oracle addresses, from which only report transactions will be accepted.
+Un array JSON de direcciones de oráculos de Lido, de las cuales solo se aceptarán transacciones de informe.
 
-You can get a list from Etherscan on [Holešky](https://holesky.etherscan.io/address/0xa067FC95c22D51c3bC35fd4BE37414Ee8cc890d2#readContract#F16) or [Mainnet](https://etherscan.io/address/0xD624B08C83bAECF0807Dd2c6880C3154a5F0B288#readContract#F16)
+Puedes obtener una lista desde Etherscan en [Holešky](https://holesky.etherscan.io/address/0xa067FC95c22D51c3bC35fd4BE37414Ee8cc890d2#readContract#F16) o [Mainnet](https://etherscan.io/address/0xD624B08C83bAECF0807Dd2c6880C3154a5F0B288#readContract#F16).
 
-Format:
+Formato:
 
 ```json
 ["0x123", "0x123"]
 ```
 
-### MESSAGES_PASSWORD
+# MESSAGES_PASSWORD
 
-Password to decrypt encrypted exit messages with on app start.
+Contraseña para descifrar los mensajes de salida encriptados al inicio de la aplicación.
 
-### MESSAGES_PASSWORD_FILE
+# MESSAGES_PASSWORD_FILE
 
-Alternative to `MESSAGES_PASSWORD`. Path to a file with password inside to decrypt exit messages with. If used, MESSAGES_PASSWORD (not MESSAGES_PASSWORD_FILE) needs to be added to LOGGER_SECRETS in order to be sanitized
+Alternativa a `MESSAGES_PASSWORD`. Ruta a un archivo con la contraseña dentro para descifrar los mensajes de salida. Si se utiliza, `MESSAGES_PASSWORD` (no `MESSAGES_PASSWORD_FILE`) debe agregarse a `LOGGER_SECRETS` para que se oculte.
 
-### BLOCKS_PRELOAD
+# BLOCKS_PRELOAD
 
-Amount of blocks to load events from on start.
+Cantidad de bloques desde los cuales cargar eventos al iniciar.
 
-Suggested to include in your env variables, but to be left at default 50000 value (~7 days of blocks).
+Se sugiere incluirlo en tus variables de entorno, pero dejar el valor predeterminado de 50000 (~7 días de bloques).
 
-In case your Ejector will be down due to an emergency, this value can be tweaked to let the Ejector load a higher amount of blocks on start.
+En caso de una emergencia que requiera que Ejector esté inactivo, este valor puede ajustarse para permitir cargar una cantidad mayor de bloques al inicio.
 
-### HTTP_PORT
+# HTTP_PORT
 
-Port for serving metrics and a health check endpoint. Default is 8989.
+Puerto para servir métricas y un punto de verificación de salud. El valor predeterminado es 8989.
 
-### RUN_METRICS
+# RUN_METRICS
 
-Enable with `true` to serve Prometheus metrics: [full list](https://github.com/lidofinance/validator-ejector#metrics).
+Habilita con `true` para servir métricas de Prometheus: [lista completa](https://github.com/lidofinance/validator-ejector#metrics).
 
-Will be served on `HOST:$HTTP_PORT/metrics`.
+Se servirá en `HOST:$HTTP_PORT/metrics`.
 
-Highly advised for monitoring and alerting.
+Altamente recomendado para monitoreo y alertas.
 
-### RUN_HEALTH_CHECK
+# RUN_HEALTH_CHECK
 
-Enabled by default, disabled with `false`. Highly recommended to monitor this endpoint.
+Habilitado por defecto, deshabilitado con `false`. Altamente recomendado para monitorear este endpoint.
 
-Will be served on `HOST:$HTTP_PORT/health`.
+Se servirá en `HOST:$HTTP_PORT/health`.
 
-### LOGGER_LEVEL
+# LOGGER_LEVEL
 
-Recommended to set to `info` (default), can be changed to `debug` in case of issues for easier debugging.
+Recomendado establecerlo en `info` (predeterminado), puede cambiarse a `debug` en caso de problemas para facilitar la depuración.
 
-### LOGGER_FORMAT
+# LOGGER_FORMAT
 
-Format of logs, `simple` by default, but can be set to `json` to be easily parseable by [Loki](https://github.com/grafana/loki), for example.
+Formato de los logs, por defecto es `simple`, pero puede establecerse en `json` para que sea fácilmente interpretable por [Loki](https://github.com/grafana/loki), por ejemplo.
 
-### LOGGER_SECRETS
+# LOGGER_SECRETS
 
-Env var names or exact values which should be replaced in logs, in JSON array of strings format.
+Nombres de variables de entorno o valores exactos que deben reemplazarse en los logs, en formato de array JSON de cadenas.
 
-Advised to include your MESSAGES_PASSWORD, EXECUTION_NODE, and MESSAGES_PASSWORD:
+Se recomienda incluir tu `MESSAGES_PASSWORD`, `EXECUTION_NODE`, y `CONSENSUS_NODE`:
 
 ```json
 ["MESSAGES_PASSWORD", "EXECUTION_NODE", "CONSENSUS_NODE"]
 ```
 
-Notice: make sure quotes are copied correctly if copying this sample.
+Asegúrate de copiar correctamente las comillas si copias este ejemplo.
 
-### DRY_RUN
+# DRY_RUN
 
-Allows to test the app with `true` without actually sending out exit messages.
+Permite probar la aplicación con `true` sin enviar realmente mensajes de salida.
 
-Use with caution!
+¡Úsalo con precaución!
 
-Make sure to set to `false` or completely leave it out in production.
+Asegúrate de establecerlo en `false` o de eliminarlo completamente en producción.
 
-### Advanced Parameters
+# Parámetros Avanzados
 
-Please don't use unless suggested by a Lido contributor.
+Por favor, no los utilices a menos que lo sugiera un contribuidor de Lido.
 
-- BLOCKS_LOOP - 900 (3 hours of blocks) - Amount of blocks Ejector looks behind on wake in polling jobs.
-- JOB_INTERVAL - 384000 (1 epoch) - Time for which Ejector sleeps between jobs.
-- DISABLE_SECURITY_DONT_USE_IN_PRODUCTION - false - Set to `true` to skip security checks, for example if Exit Bus Consensus contract was changed after the Ejector was unable to exit validators eg was switched off.
+- BLOCKS_LOOP - 900 (3 horas de bloques) - Cantidad de bloques que Ejector observa en trabajos de sondeo al despertar.
+- JOB_INTERVAL - 384000 (1 epoch) - Tiempo que Ejector duerme entre trabajos.
+- DISABLE_SECURITY_DONT_USE_IN_PRODUCTION - false - Establecer en `true` para omitir controles de seguridad, por ejemplo, si el contrato de Consenso de Bus de Salida fue cambiado después de que Ejector no pudiera salir de los validadores, por ejemplo, si fue desactivado.
 
-## Running
+## Ejecución
 
-### Source Code
+### Código Fuente
 
-1. Clone repository:
+1. Clona el repositorio:
 
 ```bash
 git clone https://github.com/lidofinance/validator-ejector.git
 cd validator-ejector
 ```
 
-2. Create exit messages folder, for example locally `mkdir messages`
-3. Put exit message files in the messages folder.
-4. Copy env sample file `cp sample.env .env`
-5. Fill environment variables in `.env` file.
-6. Run
+2. Crea una carpeta de mensajes de salida, por ejemplo, localmente `mkdir messages`.
+3. Coloca los archivos de mensajes de salida en la carpeta de mensajes.
+4. Copia el archivo de ejemplo de env: `cp sample.env .env`.
+5. Llena las variables de entorno en el archivo `.env`.
+6. Ejecuta:
 
 ```bash
 yarn
@@ -297,27 +295,26 @@ yarn build
 yarn start
 ```
 
-### Docker with docker-compose
+### Docker con docker-compose
 
-1. Create root folder for Ejector, cd into that folder.
-2. Create exit messages folder `mkdir messages`
-3. Put exit message files in messages folder.
-4. Copy env file `cp sample.env .env`
-5. Fill environment variables in .env file.
-6. Create `docker-compose.yml` file using the following template:
+1. Crea una carpeta raíz para Ejector, y entra en esa carpeta.
+2. Crea una carpeta de mensajes de salida `mkdir messages`.
+3. Coloca los archivos de mensajes de salida en la carpeta de mensajes.
+4. Copia el archivo de env: `cp sample.env .env`.
+5. Crea un archivo `docker-compose.yml` utilizando la siguiente plantilla:
 
 https://github.com/lidofinance/validator-ejector/blob/develop/docker-compose.yml
 
-6. Run `docker-compose up` or `docker-compose up -d` to start in detached mode (in background).
+6. Ejecuta `docker-compose up` o `docker-compose up -d` para iniciar en modo desacoplado (en segundo plano).
 
-## Check Ejector is working
+## Verificación de que Ejector está funcionando
 
-1. Ensure there are no errors in logs and no restarts.
-2. Verify that config logged on start is correct in logs.
-3. If you have put presigned messages in the messages folder, make sure Loaded Messages count is greater than `0`.
-4. Ensure you can see `Job started` and `Job finished` lines in logs.
+1. Asegúrate de que no haya errores en los logs y de que no haya reinicios.
+2. Verifica que la configuración registrada al inicio sea correcta en los logs.
+3. Si has colocado mensajes prefirmados en la carpeta de mensajes, asegúrate de que el recuento de mensajes cargados sea mayor que `0`.
+4. Asegúrate de ver líneas como `Job started` y `Job finished` en los logs.
 
-Example of correct operation logs:
+Ejemplo de logs de operación correcta:
 
 ```
 info: Application started, version 1.0.0 {"EXECUTION_NODE":"<secret>","CONSENSUS_NODE":"<secret>","LOCATOR_ADDRESS":"0x123","STAKING_MODULE_ID":"1","OPERATOR_ID":"0","MESSAGES_LOCATION":"messages","ORACLE_ADDRESSES_ALLOWLIST":["0x123"],"MESSAGES_PASSWORD":"<secret>","BLOCKS_PRELOAD":190000,"BLOCKS_LOOP":64,"JOB_INTERVAL":384000,"HTTP_PORT":8989,"RUN_METRICS":true,"RUN_HEALTH_CHECK":true,"DRY_RUN":false}
@@ -331,27 +328,29 @@ info: Resolved Exit Bus contract address using the Locator {"exitBusAddress":"0x
 info: Resolved Consensus contract address {"consensusAddress":"0x123"}
 info: Fetched the latest block from EL {"latestBlock":12345}
 info: Fetching request events from the Exit Bus {"eventsNumber":190000,"fromBlock":12345,"toBlock":12345}
-info: Loaded ValidatorExitRequest events {"amount":0}
+info
+
+: Loaded ValidatorExitRequest events {"amount":0}
 info: Handling ejection requests {"amount":0}
 info: Job finished
 info: Starting 384 seconds polling for 64 last blocks
 ```
 
-## What if something is wrong?
+## ¿Qué hacer si algo está mal?
 
-1. Make sure configuration is correct.
-2. Make sure you are on the recommended Docker image SHA hash or version if running directly.
-3. Check if Nodes are synced and are working correctly.
-4. Restart the app.
-5. Start the app with LOGGER_LEVEL=debug env variable and contact Lido devs with logs to investigate the problem.
+1. Asegúrate de que la configuración sea correcta.
+2. Asegúrate de estar usando el hash SHA o la versión recomendada de la imagen Docker.
+3. Verifica que los nodos estén sincronizados y funcionando correctamente.
+4. Reinicia la aplicación.
+5. Inicia la aplicación con la variable de entorno `LOGGER_LEVEL=debug` y contacta a los desarrolladores de Lido con los logs para investigar el problema.
 
-## Additional Resources
+## Recursos Adicionales
 
-Validator Ejector GitHub Repository (Open Source)
+Repositorio GitHub de Validator Ejector (Open Source)
 https://github.com/lidofinance/validator-ejector
 
-Lido Withdrawals: Automating Validator Exits - parts can now be outdated
+Retiros de Lido: Automatización de Salidas de Validador - algunas partes pueden estar desactualizadas
 https://hackmd.io/@lido/BkxRxAr-o
 
-Ejector Logic Spec - parts can now be outdated
+Especificación de la Lógica de Ejector - algunas partes pueden estar desactualizadas
 https://hackmd.io/@lido/r1KZ4YNdj
