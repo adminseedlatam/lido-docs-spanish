@@ -337,5 +337,5 @@ Informa el saldo del beacon y su cambio durante el último frame.
 
 - Accesor: `getLastCompletedReportDelta() returns (uint256 postTotalPooledEther, uint256 preTotalPooledEther, uint256 timeElapsed)`.
 
-[1]: #sanity-check
-[3]: #expected-epoch
+[1]: #verificación-de-integridad
+[3]: #epoch-esperado
