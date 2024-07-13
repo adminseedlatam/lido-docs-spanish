@@ -1,15 +1,12 @@
-# Protocol levers
+# Palancas del Protocolo
 
-The protocol provides a number of settings controllable by the DAO. Modifying each of them requires
-the caller to have a specific permission. After deploying the DAO, all permissions belong to either DAO `Voting` or `Agent` apps,
-which can also manage them. This means that, initially, levers can only be changed by
-the DAO voting, and other entities can be allowed to do the same only as a result of the voting.
+El protocolo proporciona una serie de ajustes controlables por el DAO. Modificar cada uno de ellos requiere que el llamante tenga un permiso específico. Después de implementar el DAO, todos los permisos pertenecen a las aplicaciones DAO `Voting` o `Agent`, las cuales también pueden gestionarlos. Esto significa que, inicialmente, las palancas solo pueden ser modificadas mediante votación del DAO, y otras entidades solo pueden permitirse lo mismo como resultado de esa votación.
 
-All existing levers are listed below, grouped by the contract.
+A continuación se enumeran todas las palancas existentes, agrupadas por contrato.
 
-### A note on upgradeability
+### Nota sobre la capacidad de actualización
 
-The following contracts are upgradeable by the DAO voting:
+Los siguientes contratos pueden ser actualizables mediante votación del DAO:
 
 - [`LidoLocator`](/contracts/lido-locator)
 - [`Lido`](/contracts/lido)
@@ -21,351 +18,324 @@ The following contracts are upgradeable by the DAO voting:
 - [`WithdrawalQueueERC721`](/contracts/withdrawal-queue-erc721)
 - [`LegacyOracle`](/contracts/legacy-oracle)
 
-Upgradeability is implemented either by the Aragon kernel and base contracts OR by the [OssifiableProxy](/contracts/ossifiable-proxy) instances.
-To upgrade an Aragon app, one needs the `dao.APP_MANAGER_ROLE` permission provided by Aragon.
-To upgrade an `OssifiableProxy` implementation, one needs to be an owner of the proxy.
-As it was said previously, both belong either to the DAO `Voting` or `Agent` apps.
+La capacidad de actualización está implementada ya sea mediante el kernel y los contratos base de Aragon o mediante instancias de [OssifiableProxy](/contracts/ossifiable-proxy).
+Para actualizar una aplicación de Aragon, se necesita el permiso `dao.APP_MANAGER_ROLE` proporcionado por Aragon.
+Para actualizar una implementación de `OssifiableProxy`, se necesita ser propietario del proxy.
+Como se mencionó anteriormente, ambos pertenecen a las aplicaciones DAO `Voting` o `Agent`.
 
-All upgradeable contracts use the [Unstructured Storage pattern] in order to provide stable storage structure across upgrades.
+Todos los contratos actualizables utilizan el [patrón de almacenamiento no estructurado] para proporcionar una estructura de almacenamiento estable a través de las actualizaciones.
 
 :::note
-Some of the contracts still contain structured storage data, hence the order of inheritance always matters.
+Algunos de los contratos todavía contienen datos de almacenamiento estructurado, por lo que el orden de herencia siempre es importante.
 :::
 
-[unstructured storage pattern]: https://blog.openzeppelin.com/upgradeability-using-unstructured-storage
+[patrón de almacenamiento no estructurado]: https://blog.openzeppelin.com/upgradeability-using-unstructured-storage
 
 ## [Lido](/contracts/lido)
 
-### Burning stETH tokens
+### Quema de tokens stETH
 
-There is a dedicated contract responsible for `stETH` tokens burning.
-The burning itself is a part of the core protocol procedures:
+Existe un contrato dedicado responsable de la quema de tokens `stETH`.
+La quema en sí misma es parte de los procedimientos centrales del protocolo:
 
-- deduct underlying finalized withdrawal request `stETH`, see [`Lido.handleOracleReport`](/contracts/lido#handleoraclereport)
-- penalize delinquent node operators by halving their rewards, see [Validator exits and penalties](/guías/oracle-spec/penalties)
+- deducir la solicitud de retiro finalizada subyacente de `stETH`, ver [`Lido.handleOracleReport`](/contracts/lido#handleoraclereport)
+- penalizar a los operadores de nodos morosos reduciendo a la mitad sus recompensas, ver [Salidas y penalizaciones de los validadores](/guías/oracle-spec/penalties)
 
-These responsibilities are controlled by the `REQUEST_BURN_SHARES_ROLE` role which is assigned to both
-[`Lido`](/contracts/lido) and [`NodeOperatorsRegistry`](/contracts/node-operators-registry) contracts.
-This role should not be ever permanently assigned to another entities.
+Estas responsabilidades están controladas por el rol `REQUEST_BURN_SHARES_ROLE`, que se asigna tanto a los contratos [`Lido`](/contracts/lido) como [`NodeOperatorsRegistry`](/contracts/node-operators-registry).
+Este rol nunca debe asignarse permanentemente a otras entidades.
 
-Apart from this, `stETH` token burning can be applied to compensate for penalties/slashing losses by the DAO decision.
-It's possible via more restrictive role `REQUEST_BURN_MY_STETH_ROLE` which is currently unassigned.
+Además de esto, la quema de tokens `stETH` puede aplicarse para compensar penalizaciones/pérdidas por slashing según la decisión del DAO.
+Es posible a través de un rol más restrictivo `REQUEST_BURN_MY_STETH_ROLE`, que actualmente no está asignado.
 
-The key difference that despite of both roles rely on the `stETH` allowance provided to the `Burner` contract,
-the latter allows token burning only from the request originator balance.
+La diferencia clave es que ambos roles dependen de la asignación de `stETH` proporcionada al contrato `Burner`,
+este último permite la quema de tokens solo desde el saldo del originador de la solicitud.
 
-### Pausing
+### Pausa
 
-- Mutator: `stop()`
-  - Permission required: `PAUSE_ROLE`
-- Mutator: `resume()`
-  - Permission required: `RESUME_ROLE`
-- Accessor: `isStopped() returns (bool)`
+- Mutador: `stop()`
+  - Permiso requerido: `PAUSE_ROLE`
+- Mutador: `resume()`
+  - Permiso requerido: `RESUME_ROLE`
+- Accesorio: `isStopped() returns (bool)`
 
-When paused, `Lido` doesn't accept user submissions, doesn't allow user withdrawals and oracle
-report submissions. No token actions (burning, transferring, approving transfers and changing
-allowances) are allowed. The following transactions revert:
+Cuando está pausado, `Lido` no acepta envíos de usuarios, ni permite retiros de usuarios ni envíos de informes de oráculo. No se permiten acciones con tokens (quema, transferencia, aprobación de transferencias y cambio de asignaciones). Las siguientes transacciones revierten:
 
-- plain ether transfers to `Lido`;
-- calls to `submit(address)`;
-- calls to `deposit(uint256, uint256, bytes)`;
-- calls to `handleOracleReport(...)`;
-- calls to `transfer(address, uint256)`;
-- calls to `transferFrom(address, address, uint256)`;
-- calls to `transferShares(address, uint256)`;
-- calls to `transferSharesFrom(address, uint256)`;
-- calls to `approve(address, uint256)`;
-- calls to `increaseAllowance(address, uint256)`;
-- calls to `decreaseAllowance(address, uint256)`.
+- transferencias de ether simples a `Lido`;
+- llamadas a `submit(address)`;
+- llamadas a `deposit(uint256, uint256, bytes)`;
+- llamadas a `handleOracleReport(...)`;
+- llamadas a `transfer(address, uint256)`;
+- llamadas a `transferFrom(address, address, uint256)`;
+- llamadas a `transferShares(address, uint256)`;
+- llamadas a `transferSharesFrom(address, uint256)`;
+- llamadas a `approve(address, uint256)`;
+- llamadas a `increaseAllowance(address, uint256)`;
+- llamadas a `decreaseAllowance(address, uint256)`.
 
-As a consequence of the list above:
+Como consecuencia de la lista anterior:
 
-- calls to `WithdrawalQueueERC721.requestWithdrawals(uint256[] calldata, address)`, and its variants;
-- calls to `wstETH.wrap(uint256)` and `wstETH.unwrap(uint256)`;
-- calls to `Burner.requestBurnShares`, `Burner.requestBurnMyStETH`, and its variants;
+- llamadas a `WithdrawalQueueERC721.requestWithdrawals(uint256[] calldata, address)`, y sus variantes;
+- llamadas a `wstETH.wrap(uint256)` y `wstETH.unwrap(uint256)`;
+- llamadas a `Burner.requestBurnShares`, `Burner.requestBurnMyStETH`, y sus variantes;
 
 :::note
-External stETH/wstETH DeFi integrations are directly affected as well.
+Las integraciones externas de stETH/wstETH en DeFi también se ven directamente afectadas.
 :::
 
-### Override deposited validators counter
+### Anular el contador de validadores depositados
 
-- Mutator: `unsafeChangeDepositedValidators(uint256)`
-  - Permission required: `UNSAFE_CHANGE_DEPOSITED_VALIDATORS_ROLE`
+- Mutador: `unsafeChangeDepositedValidators(uint256)`
+  - Permiso requerido: `UNSAFE_CHANGE_DEPOSITED_VALIDATORS_ROLE`
 
-The method unsafely changes deposited validator counter.
-Can be required when onboarding external validators to Lido (i.e., had deposited before and rotated their type-0x00 withdrawal credentials to Lido).
+El método cambia de forma insegura el contador de validadores depositados.
+Puede ser necesario al integrar validadores externos a Lido (es decir, que hayan depositado antes y rotado sus credenciales de retiro tipo-0x00 a Lido).
 
-The incorrect values might disrupt protocol operation.
+Valores incorrectos pueden afectar la operación del protocolo.
 
-### Oracle report
+### Informe del oráculo
 
-TODO: oracle reports are committee-driven
+TODO: los informes del oráculo son impulsados por el comité
 
-### Deposit access control
+### Control de acceso al depósito
 
-The `Lido.deposit` method performs an actual deposit (stake) of buffered ether to Consensus Layer
-undergoing through `StakingRouter`, its selected module, and the official Ethereum deposit contract in the end.
+El método `Lido.deposit` realiza un depósito real (stake) de ether almacenado en el Consensus Layer,
+pasando por `StakingRouter`, su módulo seleccionado y finalmente el contrato oficial de depósito de Ethereum.
 
-The method can be called only by `DepositSecurityModule` since access control is a part of the deposits frontrunning vulnerability mitigation.
+El método solo puede ser llamado por `DepositSecurityModule` ya que el control de acceso es parte de la mitigación de vulnerabilidades de frontrunning en los depósitos.
 
-Please see [LIP-5](https://github.com/lidofinance/lido-improvement-proposals/blob/develop/LIPS/lip-5.md) for more details.
+Por favor, consulta [LIP-5](https://github.com/lidofinance/lido-improvement-proposals/blob/develop/LIPS/lip-5.md) para más detalles.
 
-### Deposit loop iteration limit
+### Límite de iteración del bucle de depósito
 
-Controls how many Ethereum deposits can be made in a single transaction.
+Controla cuántos depósitos de Ethereum pueden hacerse en una sola transacción.
 
-- The `_maxDepositsCount` parameter of the `deposit(uint256 _maxDepositsCount, uint256 _stakingModuleId, bytes _depositCalldata)` function
-- Default value: `16`
-- [Scenario test](https://github.com/lidofinance/lido-dao/blob/master/test/scenario/lido_deposit_iteration_limit.js)
+- El parámetro `_maxDepositsCount` de la función `deposit(uint256 _maxDepositsCount, uint256 _stakingModuleId, bytes _depositCalldata)`
+- Valor predeterminado: `16`
+- [Prueba de escenario](https://github.com/lidofinance/lido-dao/blob/master/test/scenario/lido_deposit_iteration_limit.js)
 
-When DSM calls `depositBufferedEther`, `Lido` tries to register as many Ethereum validators
-as it can given the buffered ether amount. The limit is passed as an argument to this function and
-is needed to prevent the transaction from [failing due to the block gas limit], which is possible
-if the amount of the buffered ether becomes sufficiently large.
+Cuando DSM llama a `depositBufferedEther`, `Lido` intenta registrar tantos validadores de Ethereum como sea posible dada la cantidad de ether almacenado en búfer. El límite se pasa como argumento a esta función y es necesario para evitar que la transacción falle debido al límite de gas del bloque, lo cual es posible si la cantidad de ether almacenado en búfer se vuelve suficientemente grande.
 
-[failing due to the block gas limit]: https://github.com/ConsenSys/smart-contract-best-practices/blob/8f99aef/docs/known_attacks.md#gas-limit-dos-on-a-contract-via-unbounded-operations
+[Fallo debido al límite de gas del bloque]: https://github.com/ConsenSys/smart-contract-best-practices/blob/8f99aef/docs/known_attacks.md#gas-limit-dos-on-a-contract-via-unbounded-operations
 
-### Execution layer rewards
+### Recompensas de la capa de ejecución
 
-Lido implements an architecture design which was proposed in the Lido Improvement Proposal [#12](https://github.com/lidofinance/lido-improvement-proposals/blob/develop/LIPS/lip-12.md) to collect the execution level rewards (starting from the Merge hardfork) and distribute them as part of the Lido Oracle report.
+Lido implementa un diseño arquitectónico propuesto en la Propuesta de Mejora de Lido [#12](https://github.com/lidofinance/lido-improvement-proposals/blob/develop/LIPS/lip-12.md) para recolectar las recompensas a nivel de ejecución (a partir del hardfork Merge) y distribuirlas como parte del informe del oráculo de Lido.
 
-These execution layer rewards are initially accumulated on the dedicated [`LidoExecutionLayerRewardsVault`](/contracts/lido-execution-layer-rewards-vault) contract and consists of priority fees and MEV.
+Estas recompensas de la capa de ejecución se acumulan inicialmente en el contrato dedicado [`LidoExecutionLayerRewardsVault`](/contracts/lido-execution-layer-rewards-vault) y consisten en tarifas de prioridad y MEV.
 
-There is an additional limit to prevent drastic token rebase events.
-See the following issue: [`#405`](https://github.com/lidofinance/lido-dao/issues/405)
+Existe un límite adicional para prevenir eventos drásticos de rebase de tokens.
+Consulte el siguiente problema: [`#405`](https://github.com/lidofinance/lido-dao/issues/405)
 
-- Mutator: `setELRewardsVault()`
-  - Permission required: `SET_EL_REWARDS_VAULT_ROLE`
+- Modificador: `setELRewardsVault()`
+  - Permiso requerido: `SET_EL_REWARDS_VAULT_ROLE`
 
-- Mutator: `setELRewardsWithdrawalLimit()`
-  - Permission required: `SET_EL_REWARDS_WITHDRAWAL_LIMIT_ROLE`
+- Modificador: `setELRewardsWithdrawalLimit()`
+  - Permiso requerido: `SET_EL_REWARDS_WITHDRAWAL_LIMIT_ROLE`
 
-- Accessors:
+- Accesores:
   - `getELRewardsVault()`;
   - `getELRewardsWithdrawalLimit()`.
 
-### Staking rate limiting
+### Limitación de la tasa de staking
 
-Lido features a safeguard mechanism to prevent huge APR losses facing the [post-merge entry queue demand](https://blog.lido.fi/modelling-the-entry-queue-post-merge-an-analysis-of-impacts-on-lidos-socialized-model/).
+Lido cuenta con un mecanismo de salvaguardia para prevenir pérdidas significativas en el APR frente a la demanda de la cola de entrada [post-merge](https://blog.lido.fi/modelling-the-entry-queue-post-merge-an-analysis-of-impacts-on-lidos-socialized-model/).
 
-New staking requests could be rate-limited with a soft moving cap for the stake amount per desired period.
+Las nuevas solicitudes de staking pueden estar limitadas con un límite móvil suave para la cantidad de staking por período deseado.
 
-Limit explanation scheme:
+Esquema de explicación de límite:
 
 ```
-    * ▲ Stake limit
-    * │.....  .....   ........ ...            ....     ... Stake limit = max
+    * ▲ Límite de staking
+    * │.....  .....   ........ ...            ....     ... Límite de staking = máximo
     * │      .       .        .   .   .      .    . . .
     * │     .       .              . .  . . .      . .
     * │            .                .  . . .
-    * │──────────────────────────────────────────────────> Time
-    * │     ^      ^          ^   ^^^  ^ ^ ^     ^^^ ^     Stake events
+    * │──────────────────────────────────────────────────> Tiempo
+    * │     ^      ^          ^   ^^^  ^ ^ ^     ^^^ ^     Eventos de staking
 ```
 
-- Mutators: `resumeStaking()`, `setStakingLimit(uint256, uint256)`, `removeStakingLimit()`
-  - Permission required: `STAKING_CONTROL_ROLE`
+- Modificadores: `resumeStaking()`, `setStakingLimit(uint256, uint256)`, `removeStakingLimit()`
+  - Permiso requerido: `STAKING_CONTROL_ROLE`
 
-- Mutator: `pauseStaking()`
-  - Permission required: `STAKING_PAUSE_ROLE`
+- Modificador: `pauseStaking()`
+  - Permiso requerido: `STAKING_PAUSE_ROLE`
 
-- Accessors:
+- Accesores:
   - `isStakingPaused()`
   - `getCurrentStakeLimit()`
   - `getStakeLimitFullInfo()`
 
-When staking is paused, `Lido` doesn't accept user submissions. The following transactions revert:
+Cuando el staking está pausado, `Lido` no acepta envíos de usuarios. Las siguientes transacciones revierten:
 
-- Plain ether transfers;
-- calls to `submit(address)`.
+- Transferencias simples de ether;
+- llamadas a `submit(address)`.
 
-For details, see the Lido Improvement Proposal [#14](https://github.com/lidofinance/lido-improvement-proposals/blob/develop/LIPS/lip-14.md).
+Para más detalles, consulte la Propuesta de Mejora de Lido [#14](https://github.com/lidofinance/lido-improvement-proposals/blob/develop/LIPS/lip-14.md).
 
 ## [StakingRouter](/contracts/staking-router)
 
-### Fee
+### Tarifa
 
-The total fee, in basis points (`10000` corresponding to `100%`).
+La tarifa total, en puntos base (`10000` correspondientes a `100%`).
 
-- Mutator: `setFee(uint16)`
-  - Permission required: `MANAGE_FEE`
-- Accessor: `getFee() returns (uint16)`
+- Modificador: `setFee(uint16)`
+  - Permiso requerido: `MANAGE_FEE`
+- Accesor: `getFee() returns (uint16)`
 
-The fee is taken on staking rewards and distributed between the treasury, the insurance fund, and
-node operators.
+La tarifa se aplica a las recompensas de staking y se distribuye entre el tesoro, el fondo de seguro y
+los operadores de nodos.
 
-### Fee distribution
+### Distribución de la tarifa
 
-Controls how the fee is distributed between the treasury, the insurance fund, and node operators.
-Each fee component is in basis points; the sum of all components must add up to 1 (`10000` basis points).
+Controla cómo se distribuye la tarifa entre el tesoro, el fondo de seguro y los operadores de nodos.
+Cada componente de la tarifa está en puntos base; la suma de todos los componentes debe sumar 1 (`10000` puntos base).
 
-- Mutator: `setFeeDistribution(uint16 treasury, uint16 insurance, uint16 operators)`
-  - Permission required: `MANAGE_FEE`
-- Accessor: `getFeeDistribution() returns (uint16 treasury, uint16 insurance, uint16 operators)`
+- Modificador: `setFeeDistribution(uint16 treasury, uint16 insurance, uint16 operators)`
+  - Permiso requerido: `MANAGE_FEE`
+- Accesor: `getFeeDistribution() returns (uint16 treasury, uint16 insurance, uint16 operators)`
 
-### Ethereum withdrawal Credentials
+### Credenciales de retiro de Ethereum
 
-Credentials to withdraw ETH on the Execution Layer side
+Credenciales para retirar ETH en el lado de la Capa de Ejecución
 
-- Mutator: `setWithdrawalCredentials(bytes)`
-  - Permission required: `MANAGE_WITHDRAWAL_KEY`
-- Accessor: `getWithdrawalCredentials() returns (bytes)`
+- Mutador: `setWithdrawalCredentials(bytes)`
+  - Permiso requerido: `MANAGE_WITHDRAWAL_KEY`
+- Accesor: `getWithdrawalCredentials() returns (bytes)`
 
-The protocol uses these credentials to register new Ethereum validators.
+El protocolo utiliza estas credenciales para registrar nuevos validadores de Ethereum.
 
 ## [NodeOperatorsRegistry](/contracts/node-operators-registry)
 
-### Node Operators list
+### Lista de Operadores de Nodos
 
-- Mutator: `addNodeOperator(string _name, address _rewardAddress, uint64 _stakingLimit)`
-  - Permission required: `ADD_NODE_OPERATOR_ROLE`
-- Mutator: `setNodeOperatorName(uint256 _id, string _name)`
-  - Permission required: `SET_NODE_OPERATOR_NAME_ROLE`
-- Mutator: `setNodeOperatorRewardAddress(uint256 _id, address _rewardAddress)`
-  - Permission required: `SET_NODE_OPERATOR_ADDRESS_ROLE`
-- Mutator: `setNodeOperatorStakingLimit(uint256 _id, uint64 _stakingLimit)`
-  - Permission required: `SET_NODE_OPERATOR_LIMIT_ROLE`
+- Mutador: `addNodeOperator(string _name, address _rewardAddress, uint64 _stakingLimit)`
+  - Permiso requerido: `ADD_NODE_OPERATOR_ROLE`
+- Mutador: `setNodeOperatorName(uint256 _id, string _name)`
+  - Permiso requerido: `SET_NODE_OPERATOR_NAME_ROLE`
+- Mutador: `setNodeOperatorRewardAddress(uint256 _id, address _rewardAddress)`
+  - Permiso requerido: `SET_NODE_OPERATOR_ADDRESS_ROLE`
+- Mutador: `setNodeOperatorStakingLimit(uint256 _id, uint64 _stakingLimit)`
+  - Permiso requerido: `SET_NODE_OPERATOR_LIMIT_ROLE`
 
-Node Operators act as validators on the Beacon chain for the benefit of the protocol. Each
-node operator submits no more than `_stakingLimit` signing keys that will be used later
-by the protocol for registering the corresponding Ethereum validators. As oracle committee
-reports rewards on the Ethereum side, the fee is taken on these rewards, and part of that fee
-is sent to node operators’ reward addresses (`_rewardAddress`).
+Los Operadores de Nodos actúan como validadores en la cadena Beacon en beneficio del protocolo. Cada operador de nodo envía no más de `_stakingLimit` claves de firma que serán utilizadas más tarde por el protocolo para registrar los validadores de Ethereum correspondientes. A medida que el comité oráculo reporta recompensas en el lado de Ethereum, se aplica una tarifa sobre estas recompensas, y parte de esa tarifa se envía a las direcciones de recompensa de los operadores de nodos (`_rewardAddress`).
 
-### Deactivating a node operator
+### Desactivación de un operador de nodo
 
-- Mutator: `setNodeOperatorActive(uint256 _id, bool _active)`
-  - Permission required: `SET_NODE_OPERATOR_ACTIVE_ROLE`
+- Mutador: `setNodeOperatorActive(uint256 _id, bool _active)`
+  - Permiso requerido: `SET_NODE_OPERATOR_ACTIVE_ROLE`
 
-Misbehaving node operators can be deactivated by calling this function. The protocol skips
-deactivated operators during validator registration; also, deactivated operators don’t
-take part in fee distribution.
+Los operadores de nodo que se comporten mal pueden ser desactivados llamando a esta función. El protocolo omite los operadores desactivados durante el registro de validadores; además, los operadores desactivados no participan en la distribución de tarifas.
 
-### Managing node operator’s signing keys
+### Gestión de las claves de firma del operador de nodo
 
-- Mutator: `addSigningKeys(uint256 _operator_id, uint256 _quantity, bytes _pubkeys, bytes _signatures)`
-  - Permission required: `MANAGE_SIGNING_KEYS`
-- Mutator: `removeSigningKey(uint256 _operator_id, uint256 _index)`
-  - Permission required: `MANAGE_SIGNING_KEYS`
+- Mutador: `addSigningKeys(uint256 _operator_id, uint256 _quantity, bytes _pubkeys, bytes _signatures)`
+  - Permiso requerido: `MANAGE_SIGNING_KEYS`
+- Mutador: `removeSigningKey(uint256 _operator_id, uint256 _index)`
+  - Permiso requerido: `MANAGE_SIGNING_KEYS`
 
-Allow to manage signing keys for the given node operator.
+Permite gestionar las claves de firma para el operador de nodo dado.
 
-> Signing keys can also be managed by the reward address of a signing provider by calling
-> the equivalent functions with the `OperatorBH` suffix: `addSigningKeysOperatorBH`, `removeSigningKeyOperatorBH`.
+> Las claves de firma también pueden ser gestionadas por la dirección de recompensa de un proveedor de firmas llamando a las funciones equivalentes con el sufijo `OperatorBH`: `addSigningKeysOperatorBH`, `removeSigningKeyOperatorBH`.
 
-### Reporting new stopped validators
+### Reporte de nuevos validadores detenidos
 
-- Mutator: `reportStoppedValidators(uint256 _id, uint64 _stoppedIncrement)`
-  - Permission required: `REPORT_STOPPED_VALIDATORS_ROLE`
+- Mutador: `reportStoppedValidators(uint256 _id, uint64 _stoppedIncrement)`
+  - Permiso requerido: `REPORT_STOPPED_VALIDATORS_ROLE`
 
-Allows to report that `_stoppedIncrement` more validators of a node operator have become stopped.
+Permite informar que `_stoppedIncrement` validadores adicionales de un operador de nodo se han detenido.
 
 ## [LegacyOracle](/contracts/legacy-oracle)
 
 ### Lido
 
-Address of the Lido contract.
+Dirección del contrato Lido.
 
-- Accessor: `getLido() returns (address)`
+- Accesor: `getLido() returns (address)`
 
-### Members list
+### Lista de miembros
 
-The list of oracle committee members.
+La lista de miembros del comité oráculo.
 
-- Mutators: `addOracleMember(address)`, `removeOracleMember(address)`
-  - Permission required: `MANAGE_MEMBERS`
-- Accessor: `getOracleMembers() returns (address[])`
+- Mutadores: `addOracleMember(address)`, `removeOracleMember(address)`
+  - Permiso requerido: `MANAGE_MEMBERS`
+- Accesor: `getOracleMembers() returns (address[])`
 
-### The quorum
+### El quórum
 
-The number of exactly the same reports needed to finalize the epoch.
+El número exacto de informes necesarios para finalizar el epoch.
 
-- Mutator: `setQuorum(uint256)`
-  - Permission required: `MANAGE_QUORUM`
-- Accessor: `getQuorum() returns (uint256)`
+- Mutador: `setQuorum(uint256)`
+  - Permiso requerido: `MANAGE_QUORUM`
+- Accesor: `getQuorum() returns (uint256)`
 
-When the `quorum` number of the same reports is collected for the current epoch,
+Cuando se recolecta el número `quorum` de informes iguales para el epoch actual,
 
-- the epoch is finalized (no more reports are accepted for it),
-- the final report is pushed to the Lido,
-- statistics collected and the [sanity check][1] is evaluated,
+- el epoch se finaliza (no se aceptan más informes para él),
+- el informe final se envía a Lido,
+- se recopilan estadísticas y se evalúa la [verificación de integridad][1].
 
-### Sanity check
+### Verificación de integridad
 
-To make oracles less dangerous, we can limit rewards report by 0.1% increase in stake and 15%
-decrease in stake, with both values configurable by the governance in case of extremely unusual
-circumstances.
+Para hacer que los oráculos sean menos peligrosos, podemos limitar el informe de recompensas por un aumento del 0.1% en el saldo y una disminución del 15% en el saldo, ambos valores configurables por el gobierno en caso de circunstancias extremadamente inusuales.
 
-- Mutators: `setAllowedBeaconBalanceAnnualRelativeIncrease(uint256)` and
-  `setAllowedBeaconBalanceRelativeDecrease(uint256)`
-  - Permission required: `SET_REPORT_BOUNDARIES`
-- Accessors: `getAllowedBeaconBalanceAnnualRelativeIncrease() returns (uint256)` and
-  `getAllowedBeaconBalanceRelativeDecrease() returns (uint256)`
+- Mutadores: `setAllowedBeaconBalanceAnnualRelativeIncrease(uint256)` y `setAllowedBeaconBalanceRelativeDecrease(uint256)`
+  - Permiso requerido: `SET_REPORT_BOUNDARIES`
+- Accesores: `getAllowedBeaconBalanceAnnualRelativeIncrease() returns (uint256)` y `getAllowedBeaconBalanceRelativeDecrease() returns (uint256)`
 
-### Current reporting status
+### Estado actual de los informes
 
-For transparency we provide accessors to return status of the oracle daemons reporting for the
-current "[expected epoch][3]".
+Para transparencia, proporcionamos accesos para devolver el estado de los informes de los demonios oráculo para el "[epoch esperado][3]" actual.
 
-- Accessors:
-  - `getCurrentOraclesReportStatus() returns (uint256)` - returns the current reporting bitmap,
-    representing oracles who have already pushed their version of report during the [expected][3]
-    epoch, every oracle bit corresponds to the index of the oracle in the current members list,
-  - `getCurrentReportVariantsSize() returns (uint256)` - returns the current reporting variants
-    array size,
-  - `getCurrentReportVariant(uint256 _index) returns (uint64 beaconBalance, uint32 beaconValidators, uint16 count)` - returns the current reporting array element with the given
-    index.
+- Accesores:
+  - `getCurrentOraclesReportStatus() returns (uint256)` - devuelve el bitmap actual de informes, representando los oráculos que ya han enviado su versión del informe durante el [epoch esperado][3], cada bit de oráculo corresponde al índice del oráculo en la lista actual de miembros,
+  - `getCurrentReportVariantsSize() returns (uint256)` - devuelve el tamaño actual del array de variantes de informes,
+  - `getCurrentReportVariant(uint256 _index) returns (uint64 beaconBalance, uint32 beaconValidators, uint16 count)` - devuelve el elemento actual del array de informes con el índice dado.
 
-### Expected epoch
+### Epoch esperado
 
-The oracle daemons may provide their reports only for the one epoch in every frame: the first
-one. The following accessor can be used to look up the current epoch that this contract expects
-reports.
+Los demonios oráculo pueden proporcionar sus informes solo para un epoch en cada marco: el primero. El siguiente accesor puede usarse para buscar el epoch actual que este contrato espera para los informes.
 
-- Accessor: `getExpectedEpochId() returns (uint256)`.
+- Accesor: `getExpectedEpochId() returns (uint256)`.
 
-Note that any later epoch, that has already come _and_ is also the first epoch of its frame, is
-also eligible for reporting. If some oracle daemon reports it, the contract discards any results of
-this epoch and advances to the just reported one.
+Ten en cuenta que cualquier epoch posterior, que ya haya llegado y también sea el primer epoch de su marco, también es elegible para el informe. Si algún demonio oráculo lo informa, el contrato descarta cualquier resultado de este epoch y avanza al que acaba de ser informado.
 
-### Version of the contract
+### Versión del contrato
 
-Returns the initialized version of this contract starting from 0.
+Devuelve la versión inicializada de este contrato comenzando desde 0.
 
-- Accessor: `getVersion() returns (uint256)`.
+- Accesor: `getVersion() returns (uint256)`.
 
-### Beacon specification
+### Especificación de Beacon
 
-Sets and queries configurable beacon chain specification.
+Establece y consulta la especificación configurable de la cadena Beacon.
 
-- Mutator: `setBeaconSpec( uint64 _epochsPerFrame, uint64 _slotsPerEpoch, uint64 _secondsPerSlot, uint64 _genesisTime )`,
-  - Permission required: `SET_BEACON_SPEC`,
-- Accessor: `getBeaconSpec() returns (uint64 epochsPerFrame, uint64 slotsPerEpoch, uint64 secondsPerSlot, uint64 genesisTime)`.
+- Mutador: `setBeaconSpec( uint64 _epochsPerFrame, uint64 _slotsPerEpoch, uint64 _secondsPerSlot, uint64 _genesisTime )`,
+  - Permiso requerido: `SET_BEACON_SPEC`,
+- Accesor: `getBeaconSpec() returns (uint64 epochsPerFrame, uint64 slotsPerEpoch, uint64 secondsPerSlot, uint64 genesisTime)`.
 
-### Current epoch
+### Epoch actual
 
-Returns the epoch calculated from current timestamp.
+Devuelve el epoch calculado a partir del timestamp actual.
 
-- Accessor: `getCurrentEpochId() returns (uint256)`.
+- Accesor: `getCurrentEpochId() returns (uint256)`.
 
-### Supplemental epoch information
+### Información adicional del epoch
 
-Returns currently reportable epoch (the first epoch of the current frame) as well as its start and
-end times in seconds.
+Devuelve el epoch actualmente reportable (el primer epoch del marco actual) así como su inicio y fin en segundos.
 
-- Accessor: `getCurrentFrame() returns (uint256 frameEpochId, uint256 frameStartTime, uint256 frameEndTime)`.
+- Accesor: `getCurrentFrame() returns (uint256 frameEpochId, uint256 frameStartTime, uint256 frameEndTime)`.
 
-### Last completed epoch
+### Último epoch completado
 
-Return the last epoch that has been pushed to Lido.
+Devuelve el último epoch que ha sido enviado a Lido.
 
-- Accessor: `getLastCompletedEpochId() returns (uint256)`.
+- Accesor: `getLastCompletedEpochId() returns (uint256)`.
 
-### Supplemental rewards information
+### Información adicional de recompensas
 
-Reports beacon balance and its change during the last frame.
+Informa el saldo del beacon y su cambio durante el último frame.
 
-- Accessor: `getLastCompletedReportDelta() returns (uint256 postTotalPooledEther, uint256 preTotalPooledEther, uint256 timeElapsed)`.
+- Accesor: `getLastCompletedReportDelta() returns (uint256 postTotalPooledEther, uint256 preTotalPooledEther, uint256 timeElapsed)`.
 
 [1]: #sanity-check
 [3]: #expected-epoch
