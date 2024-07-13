@@ -1,14 +1,14 @@
-# Multisig deployment
+# Despliegue de Multisig
 
 :::warning
-This page is massively outdated with the latest [Lido V2 release](https://github.com/lidofinance/lido-dao/releases/tag/v2.0.0).
+Esta página está muy desactualizada con el último lanzamiento de [Lido V2](https://github.com/lidofinance/lido-dao/releases/tag/v2.0.0).
 :::
 
-This HOWTO describes deployment of the DAO using a multisig/airgapped signer, step-by-step.
+Este tutorial describe el despliegue del DAO utilizando un firmante multisig/airgapped, paso a paso.
 
-## Preparation
+## Preparación
 
-Clone the repo and install the deps:
+Clone el repositorio e instale las dependencias:
 
 ```text
 $ git clone git@github.com:lidofinance/lido-dao.git
@@ -16,24 +16,24 @@ $ cd lido-dao
 $ yarn
 ```
 
-Running deployment scripts requires RPC connection to an Ethereum client, which can be configured
-by editing the `hardhat.config.js` file. It is already pre-configured for using the Infura provider,
-just copy `accounts.sample.json` to `accounts.json` and edit the `infura` key:
+Ejecutar los scripts de despliegue requiere una conexión RPC a un cliente Ethereum, que puede configurarse
+editando el archivo `hardhat.config.js`. Ya está preconfigurado para utilizar el proveedor Infura,
+simplemente copie `accounts.sample.json` a `accounts.json` y edite la clave `infura`:
 
 ```json
 {
   "eth": {},
   "infura": {
-    "projectId": "PUT_YOUR_PROJECT_ID_HERE"
+    "projectId": "COLOQUE_SU_ID_DE_PROYECTO_AQUÍ"
   }
 }
 ```
 
-Some of the deployment steps (namely, deploying contracts) cannot be performed from some multisig
-providers and thus require sending the transactions from a usual address. The repo provides a helper
-for doing that; if you plan to use it, edit `accounts.json` and put your accounts config under the
-`eth.<network-name>` key. If your RPC client provides an unlocked account, use `remote` as the
-value (here and later we assume that the target network is named `mainnet`):
+Algunos pasos de despliegue (en particular, el despliegue de contratos) no pueden realizarse desde algunos
+proveedores de multisig y por lo tanto requieren enviar las transacciones desde una dirección normal.
+El repositorio proporciona una herramienta para hacerlo; si planea usarla, edite `accounts.json` y coloque
+su configuración de cuentas bajo la clave `eth.<nombre-de-red>`. Si su cliente RPC proporciona una cuenta
+desbloqueada, use `remote` como valor (aquí y más adelante asumimos que la red de destino se llama `mainnet`):
 
 ```json
 {
@@ -41,81 +41,64 @@ value (here and later we assume that the target network is named `mainnet`):
     "mainnet": "remote"
   },
   "infura": {
-    "projectId": "PUT_YOUR_PROJECT_ID_HERE"
+    "projectId": "COLOQUE_SU_ID_DE_PROYECTO_AQUÍ"
   }
 }
 ```
 
-If you plan to use a BIP-44 mnemonic phrase instead, use the following config shape:
+Si planea usar una frase mnemotécnica BIP-44 en su lugar, use la siguiente forma de configuración:
 
 ```json
 {
   "eth": {
     "mainnet": {
-      "mnemonic": "YOUR_MNEMONIC_HERE",
+      "mnemonic": "SU_FRASE_MNEMOTÉCNICA_AQUÍ",
       "path": "m/44'/60'/0'/0",
       "initialIndex": 0,
       "count": 1
     }
   },
   "infura": {
-    "projectId": "PUT_YOUR_PROJECT_ID_HERE"
+    "projectId": "COLOQUE_SU_ID_DE_PROYECTO_AQUÍ"
   }
 }
 ```
 
-You can test the config correctness by listing the accounts and their balances:
+Puede verificar la corrección de la configuración listando las cuentas y sus saldos:
 
 ```text
 $ yarn hardhat --network mainnet list-accts
 ```
 
-## Deployment steps
+## Pasos de despliegue
 
-The deployment process consists of multiple steps. Generally, after each step a set of transaction
-files is generated. These transactions need to be executed in a sequential order: only send the
-next transaction after the previous one is included in a block. After the last transaction from a
-certain step is included in a block, move to the next step.
+El proceso de despliegue consta de varios pasos. Generalmente, después de cada paso se genera un conjunto de archivos de transacción. Estas transacciones deben ejecutarse en orden secuencial: solo envíe la siguiente transacción después de que la anterior se haya incluido en un bloque. Después de que la última transacción de un paso en particular se incluya en un bloque, proceda al siguiente paso.
 
-There's also a couple steps that don't generate any transactions but check the correctness of the
-previous steps instead.
+También hay algunos pasos que no generan transacciones pero verifican la corrección de los pasos anteriores.
 
-## 1. Deploying the base implementations and the template
+## 1. Despliegue de las implementaciones base y la plantilla
 
-Lido uses upgradeable proxy contracts as storage for the state. Each proxy contract points to an
-implementation contract providing the code that reads and mutates the state of the proxy.
-Implementation contracts can be upgraded via DAO voting. Implementations are immutable, they are
-only allowed to modify the caller's (i.e. proxy) contract state.
+Lido utiliza contratos proxy actualizables como almacenamiento para el estado. Cada contrato proxy apunta a un contrato de implementación que proporciona el código que lee y modifica el estado del proxy. Los contratos de implementación pueden actualizarse mediante votación en el DAO. Las implementaciones son inmutables, solo se les permite modificar el estado del contrato llamante (es decir, el proxy).
 
-In order to setup the protocol, one needs to deploy initial versions of the implementations. Some
-popular multisig vaults, e.g. Gnosis Safe, don't support deploying new contracts so this has to be
-done from a usual address.
+Para configurar el protocolo, es necesario desplegar versiones iniciales de las implementaciones. Algunos vaults multisig populares, como Gnosis Safe, no admiten desplegar nuevos contratos, por lo que esto debe hacerse desde una dirección normal.
 
-Part of the protocol deployment logic is incorporated in a contract called `LidoTemplate.sol`, which
-also needs to be deployed prior to running further steps.
+Parte de la lógica de despliegue del protocolo está incorporada en un contrato llamado `LidoTemplate.sol`, que también debe desplegarse antes de ejecutar los pasos siguientes.
 
-### Prepare the network state file
+### Preparar el archivo de estado de la red
 
-The deployment scripts use a JSON file named `deployed-<network_name>.json` to read the initial
-environment and protocol configuration and to store data that needs to be persisted between
-deployment steps. If a deployment step requires anything except RPC endpoint and ETH accounts,
-then it needs to be specified in the network state file. These files are meant to be added under
-the source control. If some data is missing from the file, the deployment step will fail with an
-error saying what's exactly missing.
+Los scripts de despliegue utilizan un archivo JSON llamado `deployed-<nombre_de_red>.json` para leer el entorno inicial y la configuración del protocolo, y para almacenar datos que deben persistir entre los pasos de despliegue. Si un paso de despliegue requiere algo más que el endpoint RPC y las cuentas ETH, debe especificarse en el archivo de estado de la red. Estos archivos están destinados a ser agregados bajo el control de origen. Si falta algún dato en el archivo, el paso de despliegue fallará con un error que indicará exactamente qué falta.
 
-The first step requires the following values:
+El primer paso requiere los siguientes valores:
 
-- `networkId` id of the network
-- `ensAddress` ENS registry address
-- `daoFactoryAddress` Aragon `DAOFactory` contract address
-- `apmRegistryFactoryAddress` Aragon `APMRegistryFactory` address
-- `miniMeTokenFactoryAddress` Aragon `MiniMeTokenFactory` address
-- `aragonIDAddress` aragonID `FIFSResolvingRegistrar` address
-- `multisigAddress` the address of the multisig contract that will be used in the next steps
-  to perform the further deployment
+- `networkId`: identificación de la red
+- `ensAddress`: dirección del registro ENS
+- `daoFactoryAddress`: dirección del contrato `DAOFactory` de Aragon
+- `apmRegistryFactoryAddress`: dirección de `APMRegistryFactory` de Aragon
+- `miniMeTokenFactoryAddress`: dirección de `MiniMeTokenFactory` de Aragon
+- `aragonIDAddress`: dirección de `FIFSResolvingRegistrar` de aragonID
+- `multisigAddress`: la dirección del contrato multisig que se utilizará en los pasos siguientes para realizar el despliegue adicional
 
-For example, a network state file for `mainnet` will be named `deployed-mainnet.json` and will
-initially look like this:
+Por ejemplo, un archivo de estado de red para `mainnet` se llamará `deployed-mainnet.json` y inicialmente se verá así:
 
 ```json
 {
@@ -125,49 +108,46 @@ initially look like this:
   "apmRegistryFactoryAddress": "0xa0BC4B67F5FacDE4E50EAFF48691Cfc43F4E280A",
   "miniMeTokenFactoryAddress": "0x909d05f384d0663ed4be59863815ab43b4f347ec",
   "aragonIDAddress": "0x546aa2eae2514494eeadb7bbb35243348983c59d",
-  "multisigAddress": "YOUR_MULTISIG_CONTRACT_ADDRESS"
+  "multisigAddress": "SU_DIRECCIÓN_DE_CONTRATO_MULTISIG"
 }
 ```
 
-Please note that setting `multisigAddress` correctly is very important: this address will own the
-deployed template contract, and so only this address will be able to perform the deployment steps
-starting from Lido APM deploy (step 5).
+Es importante destacar que configurar `multisigAddress` correctamente es crucial: esta dirección será la propietaria del contrato de plantilla desplegado, y solo esta dirección podrá realizar los pasos de despliegue a partir del despliegue del APM de Lido (paso 5).
 
-### Generate transaction data files
+### Generar archivos de datos de transacción
 
-After preparing the values in network state file, generate a set of JSON files with transaction
-data:
+Después de preparar los valores en el archivo de estado de la red, genere un conjunto de archivos JSON con datos de transacción:
 
 ```text
 $ yarn hardhat --network mainnet run ./scripts/multisig/01-deploy-lido-template-and-bases.js
 ====================
-Network ID: 1
-Reading network state from /Users/me/lido-dao/deployed-mainnet.json...
+ID de Red: 1
+Leyendo estado de red desde /Users/me/lido-dao/deployed-mainnet.json...
 ====================
-Saving deploy TX data for LidoTemplate to tx-01-1-deploy-template.json
-Saving deploy TX data for Lido to tx-01-2-deploy-lido-base.json
-Saving deploy TX data for LidoOracle to tx-01-3-deploy-oracle-base.json
-Saving deploy TX data for NodeOperatorsRegistry to tx-01-4-deploy-nops-base.json
+Guardando datos de TX de despliegue para LidoTemplate en tx-01-1-deploy-template.json
+Guardando datos de TX de despliegue para Lido en tx-01-2-deploy-lido-base.json
+Guardando datos de TX de despliegue para LidoOracle en tx-01-3-deploy-oracle-base.json
+Guardando datos de TX de despliegue para NodeOperatorsRegistry en tx-01-4-deploy-nops-base.json
 ====================
-Before continuing the deployment, please send all contract creation transactions
-that you can find in the files listed above. You may use a multisig address
-if it supports deploying new contract instances.
+Antes de continuar con el despliegue, por favor envíe todas las transacciones de creación de contratos
+que pueda encontrar en los archivos mencionados anteriormente. Puede usar una dirección multisig
+si admite desplegar nuevas instancias de contrato.
 ====================
-Writing network state to /Users/me/lido-dao/deployed-mainnet.json...
-All done!
+Escribiendo estado de red en /Users/me/lido-dao/deployed-mainnet.json...
+¡Todo listo!
 ```
 
-### Send the transactions
+### Envío de las transacciones
 
-You can use the `tx` helper for sending the transactions from files. It supports the following flags:
+Puede utilizar el ayudante `tx` para enviar las transacciones desde los archivos. Admite las siguientes banderas:
 
-- `--from` the sender address
-- `--file` the TX file which may contain the following fields: `to`, `value`, `data`, `gas`, `from`
-- `--gas-price` gas price in wei (optional)
-- `--nonce` sender nonce (optional)
-- `--wait` the number of seconds to wait before sending the tx (optional, default 5)
+- `--from` la dirección del remitente
+- `--file` el archivo TX que puede contener los siguientes campos: `to`, `value`, `data`, `gas`, `from`
+- `--gas-price` precio del gas en wei (opcional)
+- `--nonce` nonce del remitente (opcional)
+- `--wait` el número de segundos para esperar antes de enviar la transacción (opcional, por defecto 5)
 
-Run the following to deploy the implementations and the template:
+Ejecute lo siguiente para desplegar las implementaciones y la plantilla:
 
 ```text
 $ yarn hardhat --network mainnet tx --from $DEPLOYER --file tx-01-1-deploy-template.json
@@ -176,63 +156,58 @@ $ yarn hardhat --network mainnet tx --from $DEPLOYER --file tx-01-3-deploy-oracl
 $ yarn hardhat --network mainnet tx --from $DEPLOYER --file tx-01-4-deploy-nops-base.json
 ```
 
-You're not required to use this helper to send the transactions defined in the generated files;
-it's there for the convenience only.
+No es obligatorio utilizar este ayudante para enviar las transacciones definidas en los archivos generados; está allí solo por conveniencia.
 
-> This step is an exception from the "sequential transactions" rule: you can send all four
-> transactions in parallel from different addresses.
+> Este paso es una excepción a la regla de "transacciones secuenciales": puede enviar las cuatro transacciones en paralelo desde direcciones diferentes.
 
-### Update the network state file
+### Actualización del archivo de estado de la red
 
-After all four transactions are included in the blockchain, update the network state file with
-the following values:
+Después de que las cuatro transacciones se incluyan en la cadena de bloques, actualice el archivo de estado de la red con los siguientes valores:
 
-- `daoTemplateDeployTx` hash of the TX sent from the `tx-01-1-deploy-template.json` file
-- `lidoBaseDeployTx` hash of the TX sent from the `tx-01-2-deploy-lido-base.json` file
-- `oracleBaseDeployTx` hash of the TX sent from the `tx-01-3-deploy-oracle-base.json` file
-- `nodeOperatorsRegistryBaseDeployTx` hash of the TX sent from the `tx-01-4-deploy-nops-base.json` file
+- `daoTemplateDeployTx`: hash de la transacción enviada desde el archivo `tx-01-1-deploy-template.json`
+- `lidoBaseDeployTx`: hash de la transacción enviada desde el archivo `tx-01-2-deploy-lido-base.json`
+- `oracleBaseDeployTx`: hash de la transacción enviada desde el archivo `tx-01-3-deploy-oracle-base.json`
+- `nodeOperatorsRegistryBaseDeployTx`: hash de la transacción enviada desde el archivo `tx-01-4-deploy-nops-base.json`
 
-## 2. Verifying the deployed contracts
+## 2. Verificación de los contratos desplegados
 
-Run the following:
+Ejecute lo siguiente:
 
 ```text
 $ yarn hardhat --network mainnet run ./scripts/multisig/02-obtain-deployed-instances.js
 ```
 
-This step will verify the deployed contracts and add the following fields to the network state file:
+Este paso verificará los contratos desplegados y agregará los siguientes campos al archivo de estado de la red:
 
-- `daoTemplateAddress` address of the `LidoTemplate` contract
-- `app:lido.baseAddress` address of the `Lido` implementation contract
-- `app:oracle.baseAddress` address of the `LidoOracle` implementation contract
-- `app:node-operators-registry.baseAddress` address of the `NodeOperatorsRegistry` implementation contract
+- `daoTemplateAddress`: dirección del contrato `LidoTemplate`
+- `app:lido.baseAddress`: dirección del contrato de implementación `Lido`
+- `app:oracle.baseAddress`: dirección del contrato de implementación `LidoOracle`
+- `app:node-operators-registry.baseAddress`: dirección del contrato de implementación `NodeOperatorsRegistry`
 
-## 3. Register a ENS domain for Lido APM
+## 3. Registro de un dominio ENS para Lido APM
 
-This ENS domain is needed for Aragon Package Manager (APM) instance that the protocol will use for
-the upgrade mechanics. Prior to running the step, add the following keys to the network state file:
+Este dominio ENS es necesario para el Administrador de Paquetes de Aragon (APM) que el protocolo utilizará para los mecanismos de actualización. Antes de ejecutar este paso, agregue las siguientes claves al archivo de estado de la red:
 
-- `lidoApmEnsName` the second-level ENS domain that APM will use to register packages
-- `lidoApmEnsRegDurationSec` the domain lease duration in seconds
+- `lidoApmEnsName`: el nombre ENS de segundo nivel que APM usará para registrar paquetes
+- `lidoApmEnsRegDurationSec`: la duración del arrendamiento del dominio en segundos
 
-Then, run:
+Luego, ejecute:
 
 ```text
 $ yarn hardhat --network mainnet run ./scripts/multisig/03-register-ens-domain.js
 ...
 ====================
-Saving data for commit transaction to tx-02-1-commit-ens-registration.json (projected gas usage is 53667)
-Saving data for register transaction to tx-02-2-make-ens-registration.json
+Guardando datos para la transacción de confirmación en tx-02-1-commit-ens-registration.json (uso de gas proyectado es 53667)
+Guardando datos para la transacción de registro en tx-02-2-make-ens-registration.json
 ====================
-Before continuing the deployment, please send all transactions listed above.
+Antes de continuar con el despliegue, por favor envíe todas las transacciones listadas arriba.
 
-Make sure to send the second transaction at least 60 seconds after the
-first one is included in a block, but no more than 86400 seconds after that.
+Asegúrese de enviar la segunda transacción al menos 60 segundos después de que
+la primera sea incluida en un bloque, pero no más de 86400 segundos después de eso.
 ====================
 ```
 
-The step will generate two transaction files. You'll need to send these transactions one after
-another, waiting no less than one minute between them:
+Este paso generará dos archivos de transacción. Deberá enviar estas transacciones una después de otra, esperando al menos un minuto entre ellas:
 
 ```text
 $ yarn hardhat --network mainnet tx --from $DEPLOYER --file tx-02-1-commit-ens-registration.json
@@ -240,110 +215,94 @@ $ sleep 60
 $ yarn hardhat --network mainnet tx --from $DEPLOYER --file tx-02-2-make-ens-registration.json
 ```
 
-## 4. Deploy Lido frontend apps
+## 4. Despliegue de aplicaciones frontend de Lido
 
-The Lido DAO includes frontend apps for DAO governance and protocol management. They are deployed
-to IPFS, so you'll need to specify `ipfsAPI` key in the network state file pointing to an IPFS
-client API endpoint, e.g. `"ipfsAPI": "http://localhost:5001/api/v0"`. Then, run the following:
+El DAO de Lido incluye aplicaciones frontend para la gobernanza del DAO y la gestión del protocolo. Estas aplicaciones se despliegan en IPFS, por lo que necesitará especificar la clave `ipfsAPI` en el archivo de estado de la red apuntando a un endpoint de API de cliente IPFS, por ejemplo, `"ipfsAPI": "http://localhost:5001/api/v0"`. Luego, ejecute lo siguiente:
 
 ```text
 $ yarn hardhat --network mainnet run ./scripts/multisig/04-publish-app-frontends.js
 ```
 
-Make sure that either the IPFS node you're using is going to be permanently up and publicly
-available, or that you pin the uploaded content to some other permanent public node.
+Asegúrese de que el nodo IPFS que esté utilizando esté permanentemente activo y disponible públicamente, o que el contenido cargado esté anclado (pinned) a algún otro nodo público permanente.
 
-This step will add `ipfsCid` and `contentURI` subkeys for all three Lido apps (`app:lido`,
-`app:oracle`, `app:node-operators-registry`) in the network state file. The first key is the IPFS
-identifier for the root entry of the app frontend, and `contentURI` is the same key encoded to an
-Aragon-specific format.
+Este paso agregará subclaves `ipfsCid` y `contentURI` para las tres aplicaciones de Lido (`app:lido`, `app:oracle`, `app:node-operators-registry`) en el archivo de estado de la red. La primera clave es el identificador IPFS para la entrada raíz del frontend de la aplicación, y `contentURI` es la misma clave codificada en un formato específico de Aragon.
 
-## 5. Deploy Lido APM
+## 5. Despliegue de Lido APM
 
-Run the following:
+Ejecute lo siguiente:
 
 ```text
 $ yarn hardhat --network mainnet run ./scripts/multisig/05-deploy-apm.js
 ...
 ====================
-Parent domain: eth 0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae
-Subdomain label: lidopm-pre 0x1353eb779a45ed66bdb49e45e006df81a69d9f73067e846003b5bb00984191d4
+Dominio padre: eth 0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae
+Etiqueta del subdominio: lidopm-pre 0x1353eb779a45ed66bdb49e45e006df81a69d9f73067e846003b5bb00984191d4
 ====================
-Saving data for APM deploy transaction to tx-03-deploy-apm.json (projected gas usage is 6263517)
+Guardando datos para la transacción de despliegue de APM en tx-03-deploy-apm.json (uso de gas proyectado es 6263517)
 ====================
 ```
 
-The step will generate a transaction file; you'll need to send this transaction from the contract
-at `multisigAddress`. After the transaction is included in a block, move to the next step.
+Este paso generará un archivo de transacción; deberá enviar esta transacción desde el contrato en `multisigAddress`. Después de que la transacción se incluya en un bloque, pase al siguiente paso.
 
-### Using Gnosis Safe
+### Usando Gnosis Safe
 
-If you're using Gnosis Safe, this can be done by choosing `New Transaction > Contract Interaction`
-and enabling the `Use custom data (hex encoded)` option in the popped dialog. Then, copy the contents
-of the `to` key from the transaction JSON file to the `Recipient*` field, the contents of the `value`
-field to the `Value*` field (enter `0` if there's no `value` key in the transaction JSON), and the
-contents of the `data` field to the `Data (hex encoded)*` field.
+Si está utilizando Gnosis Safe, puede hacer esto eligiendo `Nueva Transacción > Interacción con Contrato` y habilitando la opción `Usar datos personalizados (codificados en hexadecimal)` en el cuadro de diálogo que aparece. Luego, copie el contenido del campo `to` del archivo JSON de transacción al campo `Destinatario*`, el contenido del campo `value` al campo `Valor*` (ingrese `0` si no hay una clave `value` en el archivo de transacción), y el contenido del campo `data` al campo `Datos (codificados en hexadecimal)*`.
 
-Make sure to check the gas limit of the transaction: Gnosis Safe frequently sets it too low. As a
-rule of thumb, set it to the value of the `gas` key in the transaction JSON file plus `1500000` (the
-additional gas is used to handle multisig logic).
+Asegúrese de verificar el límite de gas de la transacción: Gnosis Safe a menudo lo establece demasiado bajo. Como regla general, configúrelo al valor del campo `gas` en el archivo JSON de transacción más `1500000` (el gas adicional se usa para manejar la lógica multisig).
 
-## 6. Check the deployed APM
+## 6. Verificación del APM desplegado
 
-Run the following:
+Ejecute lo siguiente:
 
 ```text
 $ yarn hardhat --network mainnet run ./scripts/multisig/06-obtain-deployed-apm.js
 ```
 
-Make sure that it finishes without errors and move to the next step. The following field will
-be added to the network state file:
+Asegúrese de que finalice sin errores y pase al siguiente paso. Se agregará el siguiente campo al archivo de estado de la red:
 
-- `lidoApmAddress` the address of the Lido APM controlling `lidoApmEnsName` ENS domain.
+- `lidoApmAddress`: la dirección del APM de Lido que controla el dominio ENS `lidoApmEnsName`.
 
-## 7. Create application APM repositories
+## 7. Crear repositorios de aplicaciones APM
 
-Run the following:
+Ejecute lo siguiente:
 
 ```text
 yarn hardhat --network mainnet run ./scripts/multisig/07-create-app-repos.js
 ...
 ====================
-Saving data for createRepos transaction to tx-04-create-app-repos.json (projected gas usage is 7160587)
+Guardando datos para la transacción createRepos en tx-04-create-app-repos.json (uso de gas proyectado es 7160587)
 ====================
 ```
 
-The step will generate a transaction file; you'll need to send this transaction from the contract
-at `multisigAddress`. After the transaction is included in a block, move to the next step.
+Este paso generará un archivo de transacción; deberá enviar esta transacción desde el contrato en `multisigAddress`. Después de que la transacción se incluya en un bloque, pase al siguiente paso.
 
-## 8. Deploy DAO and its governance token
+## 8. Desplegar DAO y su token de gobernanza
 
-This step will deploy the instances of the DAO and governance token. You'll need to add a field
-called `daoInitialSettings` to the network state file prior to running the step:
+Este paso desplegará las instancias del DAO y del token de gobernanza. Deberá agregar un campo llamado `daoInitialSettings` al archivo de estado de la red antes de ejecutar el paso:
 
 ```js
   // ...
   "daoInitialSettings": {
-    // Governance token name/symbol; cannot be changed post-deploy
+    // Nombre/símbolo del token de gobernanza; no se puede cambiar después del despliegue
     "token": {
       "name": "Lido DAO Token",
       "symbol": "LDO"
     },
-    // Beacon chain spec; can be changed via DAO voting
+    // Especificación de la cadena de beacons; puede cambiarse mediante votación en el DAO
     "beaconSpec": {
       "depositContractAddress": "0x00000000219ab540356cBB839Cbe05303d7705Fa",
       "slotsPerEpoch": 32,
       "secondsPerSlot": 12,
       "genesisTime": 1606824023,
-      "epochsPerFrame": 225 // Lido oracles report once per epochsPerFrame epochs
+      "epochsPerFrame": 225 // Los oráculos de Lido reportan una vez por cada epochsPerFrame epochs
     },
-    // DAO voting configuration (Aragon Voting app)
+    // Configuración de votación del DAO (app Aragon Voting)
     "voting": {
       "minSupportRequired": "500000000000000000", // 1e18 === 100%
       "minAcceptanceQuorum": "50000000000000000", // 1e18 === 100%
-      "voteDuration": 172800 // in seconds
+      "voteDuration": 172800 // en segundos
     },
-    // Protocol fee configuration; can be changed via DAO voting
+    // Configuración de tarifas del protocolo; puede cambiarse mediante votación en el DAO
     "fee": {
       "totalPercent": 10,
       "treasuryPercent": 0,
@@ -354,101 +313,92 @@ called `daoInitialSettings` to the network state file prior to running the step:
   // ...
 ```
 
-Then, run the following:
+Luego, ejecute lo siguiente:
 
 ```text
 $ yarn hardhat --network mainnet run ./scripts/multisig/08-deploy-dao.js
 ...
-Saving data for newDAO transaction to tx-05-deploy-dao.json (projected gas usage is 7118882)
+Guardando datos para la transacción newDAO en tx-05-deploy-dao.json (uso de gas proyectado es 7118882)
 ```
 
-Send the generated transaction from the contract at `multisigAddress`. After the transaction
-is included in a block, move to the next step.
+Envíe la transacción generada desde el contrato en `multisigAddress`. Después de que la transacción se incluya en un bloque, pase al siguiente paso.
 
-## 9. Check the deployed DAO
+## 9. Verificar el DAO desplegado
 
-Run the following:
+Ejecute lo siguiente:
 
 ```text
 yarn hardhat --network mainnet run ./scripts/multisig/09-obtain-deployed-dao.js
 ```
 
-Make sure that it finishes without errors and move to the next step. The following fields will
-be added to the network state file:
+Asegúrese de que finalice sin errores y pase al siguiente paso. Los siguientes campos se agregarán al archivo de estado de la red:
 
-- `daoAddress` the address of the DAO instance;
-- `daoTokenAddress` the address of the DAO governance token;
-- `proxyAddress` keys under `app:*` keys: addresses of the app instances.
+- `daoAddress`: la dirección de la instancia del DAO;
+- `daoTokenAddress`: la dirección del token de gobernanza del DAO;
+- `proxyAddress`: claves bajo las claves `app:*`: direcciones de las instancias de las aplicaciones.
 
-## 10. Issue DAO governance tokens
+## 10. Emitir tokens de gobernanza del DAO
 
-Add the `vestingParams` key to the network state file containing the following:
+Agregue la clave `vestingParams` al archivo de estado de la red que contenga lo siguiente:
 
 ```js
   // ...
   "vestingParams": {
-    // unvested tokens will be held on the DAO Agent app
+    // Tokens no vestidos serán retenidos en la aplicación DAO Agent
     "unvestedTokensAmount": "10000000000000000000000",
-    // token holder addresses and their respective amounts
+    // Direcciones de los titulares de tokens y sus respectivas cantidades
     "holders": {
       "0xaabbcc0000000000000000000000000000000000": "100000000000000000000",
       // ...
     },
-    // Vesting start date
+    // Fecha de inicio del vesting
     "start": 1608213253,
-    // Vesting cliff date
+    // Fecha del umbral del vesting
     "cliff": 1608213253,
-    // Vesting end date
+    // Fecha de finalización del vesting
     "end": 1608501253,
-    // Whether vestings should be revokable by the DAO
+    // Si los vestings pueden ser revocados por el DAO
     "revokable": false
-    // See https://github.com/aragon/aragon-apps/blob/master/apps/token-manager/contracts/TokenManager.sol
+    // Ver https://github.com/aragon/aragon-apps/blob/master/apps/token-manager/contracts/TokenManager.sol
   }
   // ...
 ```
 
-Then, run the following:
+Luego, ejecute lo siguiente:
 
 ```text
 yarn hardhat --network mainnet run ./scripts/multisig/10-issue-tokens.js
 ...
 ====================
-Total batches: 2
-Saving data for issueTokens (batch 1) transaction to tx-06-1-issue-tokens.json (projected gas usage is 6478755)
-Saving data for issueTokens (batch 2) transaction to tx-06-2-issue-tokens.json
+Total de lotes: 2
+Guardando datos para la transacción issueTokens (lote 1) en tx-06-1-issue-tokens.json (uso de gas proyectado es 6478755)
+Guardando datos para la transacción issueTokens (lote 2) en tx-06-2-issue-tokens.json
 ```
 
-Send the generated transactions sequentially from the contract at `multisigAddress`, waiting until
-the first one is included in a block before sending the second one. After the second transaction
-is included in a block, move to the next step.
+Envíe las transacciones generadas secuencialmente desde el contrato en `multisigAddress`, esperando a que la primera sea incluida en un bloque antes de enviar la segunda. Después de que la segunda transacción se incluya en un bloque, pase al siguiente paso.
 
-## 11. Finalize the DAO
+## 11. Finalizar el DAO
 
-Add the `daoAragonId` key to the network state file, setting it to a name that the DAO will be
-registered by in aragonID, i.e. `<daoAragonId>.aragonid.eth` will resolve to the `daoAddress`.
-Run the following:
+Agregue la clave `daoAragonId` al archivo de estado de la red, estableciéndola como un nombre bajo el cual el DAO será registrado en aragonID, es decir, `<daoAragonId>.aragonid.eth` resolverá a `daoAddress`. Luego, ejecute lo siguiente:
 
 ```text
 yarn hardhat --network mainnet run ./scripts/multisig/11-finalize-dao.js
 ...
 ====================
-Saving data for finalizeDAO transaction to tx-07-finalize-dao.json (projected gas usage is 5011582)
+Guardando datos para la transacción finalizeDAO en tx-07-finalize-dao.json (uso de gas proyectado es 5011582)
 ```
 
-Send the generated transaction from the contract at `multisigAddress`. After the transaction
-is included in a block, move to the next step.
+Envíe la transacción generada desde el contrato en `multisigAddress`. Después de que la transacción se incluya en un bloque, pase al siguiente paso.
 
-## 12. Perform the final checks
+## 12. Realizar las verificaciones finales
 
-At this point, the DAO is fully deployed. Run the following to verify the correctness of the
-configuration and permissions setup:
+En este punto, el DAO está completamente desplegado. Ejecute lo siguiente para verificar la corrección de la configuración y la configuración de permisos:
 
 ```text
 yarn hardhat --network mainnet run ./scripts/multisig/12-check-dao.js
 ```
 
-If there's some error, it will be printed and further checks will be cancelled. This step only
-requires the following fields to be defined in the network state file:
+Si hay algún error, se imprimirá y se cancelarán las verificaciones adicionales. Este paso solo requiere que los siguientes campos estén definidos en el archivo de estado de la red:
 
 - `ensAddress`
 - `lidoApmEnsName`
