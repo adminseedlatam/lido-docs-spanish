@@ -1,51 +1,51 @@
-# Deposit Security Committee manual
+# Comité de Seguridad de Depósitos: Manual
 
-This instruction has been prepared for the participants of the Deposit Security Committee and describes the general points, the preparation steps to act as a guardian, and the details of the protection mechanism. The Deposit Security Committee is necessary to prevent the substitution of withdrawal credentials with frontrunning by node operators. Each member of the committee must perform several actions to ensure the security of deposits made by Lido. To participate in the validation, you will need to deploy a `lido-council-daemon` and prepare a private key for signing messages about the correctness of data or the need to stop deposits in case of attack.
+Esta instrucción ha sido preparada para los participantes del Comité de Seguridad de Depósitos y describe los puntos generales, los pasos de preparación para actuar como guardianes y los detalles del mecanismo de protección. El Comité de Seguridad de Depósitos es necesario para evitar la sustitución de credenciales de retiro con frontrunning por parte de los operadores de nodos. Cada miembro del comité debe realizar varias acciones para garantizar la seguridad de los depósitos realizados en Lido. Para participar en la validación, deberá desplegar un `lido-council-daemon` y preparar una clave privada para firmar mensajes sobre la corrección de datos o la necesidad de detener los depósitos en caso de ataque.
 
 ## TL;DR
 
-Before running in the mainnet all steps should be done in the Holešky testnet.
+Antes de ejecutar en la red principal, todos los pasos deben completarse en la red de prueba Holešky.
 
-1. Prepare an EOA account for signing data with a private key on hand (not in hardware wallet). It will be a moderately sensitive hot private key. Use different accounts for testnet and mainnet.
-2. Send the account address to Lido for submitting it to the smart contract.
-3. Deploy and run `lido-council-daemon` with the private key from the EOA account. It would work in a dry-run mode until your address would be included in the smart contract.
+1. Prepare una cuenta EOA para firmar datos con una clave privada disponible (no en una billetera de hardware). Será una clave privada caliente moderadamente sensible. Use cuentas diferentes para la red de prueba y la red principal.
+2. Envíe la dirección de la cuenta a Lido para que la incluya en el contrato inteligente.
+3. Despliegue y ejecute `lido-council-daemon` con la clave privada de la cuenta EOA. Funcionará en modo de prueba hasta que su dirección esté incluida en el contrato inteligente.
 
-## Detailed description
+## Descripción detallada
 
-### The vulnerability
+### La vulnerabilidad
 
-There is the vulnerability allowing the malicious Node Operator to intercept the user funds on deposits to the Beacon chain in the Lido protocol. The vulnerability could only be exploited by the Node Operator front-running the `Lido.depositBufferedEther` transaction with direct deposit to the DepositContract of no less than 1 ETH with the same validator public key & withdrawal credentials different from the Lido’s ones, effectively getting control over 32 ETH from Lido. To mitigate this, Lido contracts should be able to check that Node Operators’ keys hadn’t been used for malicious pre-deposits.
+Existe una vulnerabilidad que permite a un operador de nodo malicioso interceptar los fondos de los usuarios en los depósitos a la cadena Beacon en el protocolo Lido. La vulnerabilidad solo podría ser explotada si el operador de nodo realiza un frontrunning de la transacción `Lido.depositBufferedEther` con un depósito directo al Contrato de Depósitos de al menos 1 ETH con la misma clave pública del validador y credenciales de retiro diferentes a las de Lido, obteniendo efectivamente el control sobre 32 ETH de Lido. Para mitigar esto, los contratos de Lido deberían poder verificar que las claves de los operadores de nodos no se hayan utilizado para pre-depósitos maliciosos.
 
-### The Deposit Security Committee
+### El Comité de Seguridad de Depósitos
 
-We propose to establish the Deposit Security Committee dedicated to ensuring the safety of deposits on the Beacon chain:
+Proponemos establecer el Comité de Seguridad de Depósitos dedicado a garantizar la seguridad de los depósitos en la cadena Beacon:
 
-- monitoring the history of deposits and the set of Lido keys available for the deposit, signing and disseminating messages allowing deposits;
-- signing the special message allowing anyone to pause deposits once the malicious Node Operator pre-deposits are detected.
+- monitoreando el historial de depósitos y el conjunto de claves de Lido disponibles para el depósito, firmando y difundiendo mensajes que permitan los depósitos;
+- firmando el mensaje especial que permite a cualquiera pausar los depósitos una vez detectados los pre-depósitos maliciosos del operador de nodo.
 
-To make a deposit, we propose to collect a quorum of 2/3 of the signatures of the committee members. Members of the committee can collude with node operators and steal money by signing bad data that contains malicious pre-deposits. To mitigate this we propose to allow single committee member to stop deposits and also enforce space deposits in time (e.g. no more than 150 deposits with 150 blocks in between them), to provide single honest participant an ability to stop further deposits even if the supermajority colludes. The idea was outlined on research forum post as the option [<b>d</b>](https://research.lido.fi/t/mitigations-for-deposit-front-running-vulnerability/1239#d-approving-deposit-contract-merkle-root-7).
+Para realizar un depósito, proponemos reunir un quórum de 2/3 de las firmas de los miembros del comité. Los miembros del comité pueden coludirse con los operadores de nodos y robar dinero firmando datos incorrectos que contengan pre-depósitos maliciosos. Para mitigar esto, proponemos permitir que un único miembro del comité detenga los depósitos y también imponer límites de espacio en el tiempo (por ejemplo, no más de 150 depósitos con 150 bloques entre ellos), para proporcionar a un único participante honesto la capacidad de detener futuros depósitos incluso si la mayoría supermayoritaria coludiera. La idea se delineó en el post del foro de investigación como la opción [d](https://research.lido.fi/t/mitigations-for-deposit-front-running-vulnerability/1239#d-approving-deposit-contract-merkle-root-7).
 
-### Committee membership
+### Membresía del Comité
 
-The first set of guardians is six node operators (Stakefish, Skillz, Chorus one, Blockscape, Staking facilities, P2P) and Lido dev team. In the future, we want to bring as many node operators as possible into the mix, so the expectation will be that while the 7 guardians start the rest of the node operators can also participate via testnet and gradually get pulled into mainnet.
+El primer conjunto de guardianes está compuesto por seis operadores de nodos (Stakefish, Skillz, Chorus one, Blockscape, Staking facilities, P2P) y el equipo de desarrollo de Lido. En el futuro, queremos involucrar a tantos operadores de nodos como sea posible, por lo que se espera que mientras los 7 guardianes comienzan, el resto de los operadores de nodos también puedan participar a través de la red de prueba y gradualmente ser incorporados en la red principal.
 
-### Members responsibilities
+### Responsabilidades de los miembros
 
-Each member must prepare an EOA account to sign the pair `(depositRoot, keysOpIndex)` with its private key. The addresses of the committee members will be added to the smart contract. Also, member has to run `DSC Daemon`that monitors the validators’ public keys in the `DepositContract` and `NodeOperatorRegistry`. The daemon must have access to the committee member’s private key to be able to perform ECDSA signing.
+Cada miembro debe preparar una cuenta EOA para firmar el par `(depositRoot, keysOpIndex)` con su clave privada. Las direcciones de los miembros del comité se agregarán al contrato inteligente. Además, el miembro debe ejecutar `DSC Daemon` que monitorea las claves públicas de los validadores en `DepositContract` y `NodeOperatorRegistry`. El daemon debe tener acceso a la clave privada del miembro del comité para poder realizar la firma ECDSA.
 
-The daemon constantly watches all updates in `DepositContract` and `NodeOperatorRegistry`:
+El daemon vigila constantemente todas las actualizaciones en `DepositContract` y `NodeOperatorRegistry`:
 
-- If the state is correct, it signes the current to_sign struct and emits it to an off-chain message queue.
-- If the state has malicious pre-deposits, it signs the “something’s wrong” message at the current block, emits it to a message queue, and attempts to send pauseDeposits() tx.
+- Si el estado es correcto, firma la estructura actual `to_sign` y la emite a una cola de mensajes fuera de cadena.
+- Si el estado tiene pre-depósitos maliciosos, firma el mensaje de "algo está mal" en el bloque actual, lo emite a una cola de mensajes e intenta enviar la transacción `pauseDeposits()`.
 
-## Preparation steps
+## Pasos de preparación
 
-Before running in the mainnet, all steps should be completed in the Holešky testnet.
+Antes de ejecutar en la red principal, todos los pasos deben completarse en la red de prueba Holešky.
 
-### EOA account
+### Cuenta EOA
 
-It might be any EOA account under the member's control. Send the address of its account to Lido for submitting it to the smart contract. Lido will provide some ETH to make stopping transactions if needed (shouldn't ever be the case). Note, all actions, except sending the stop message, would be done off-chain.
+Puede ser cualquier cuenta EOA bajo el control del miembro. Envíe la dirección de su cuenta a Lido para incluirla en el contrato inteligente. Lido proporcionará ETH para realizar transacciones de detención si fuera necesario (lo cual no debería ocurrir). Tenga en cuenta que todas las acciones, excepto el envío del mensaje de detención, se realizarán fuera de la cadena.
 
-### Run lido-council-daemon
+### Ejecutar lido-council-daemon
 
-To start the application, see the technical documentation in the project [repository](https://github.com/lidofinance/lido-council-daemon#table-of-contents).
+Para iniciar la aplicación, consulte la documentación técnica en el [repositorio del proyecto](https://github.com/lidofinance/lido-council-daemon#table-of-contents).

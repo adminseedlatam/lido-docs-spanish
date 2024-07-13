@@ -22,7 +22,7 @@ El Módulo de Staking Comunitario (CSM) es un módulo de staking sin permisos di
 - **stETH** is an ERC-20 token minted by [`Lido`](https://etherscan.io/address/0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84) smart contract and representing a share of the [`totalPooledEther`](../../contracts/lido.md#rebase);
 - **Deposit data** refers to a structure consisting of the validator’s public key and deposit signature submitted to `DepositContract`. This term can also be referred to as `keys` in the text. Validator private keys are created, stored, and managed by Node Operators exclusively;
 - `DepositContract` is the official Ethereum deposit contract for validator deposits;
-- `DepositSecurityModule` or [**DSM**](../../guías/deposit-security-manual.md) is a set of smart contract and off-chain parts mitigating the [deposit front-run vulnerability](../../guías/deposit-security-manual.md#the-vulnerability);
+- `DepositSecurityModule` or [**DSM**](../../guías/deposit-security-manual.md) is a set of smart contract and off-chain parts mitigating the [deposit front-run vulnerability](../../guías/deposit-security-manual.md#la-vulnerabilidad);
 - A validator is considered to be [**“unbonded”**](join-csm.md#unbonded-validators) when the current Node Operator bond is not sufficient to cover this validator;
 - A validator is considered to be ["**stuck**"](../../contracts/staking-router.md#exited-and-stuck-validators) if it has not been exited timely following an exit signal from the protocol;
 - The **Curated module** is the first Lido staking module previously referred to as [Node Operators Registry](../../contracts/node-operators-registry);
