@@ -1,8 +1,8 @@
-# Specification
+## Especificación
 
-The main goal of integration is to provide the ability to deposit stETH into AAVE and allow to use it as collateral. Borrowing of the stETH (both stable and variable) is not supposed. The motivation behind this design is to encourage using stETH as collateral rather than borrowing it. stETH is pegged steadily to ETH, so using it as collateral involves low liquidation risks.
+El objetivo principal de la integración es proporcionar la capacidad de depositar stETH en AAVE y permitir su uso como colateral. No se supone que se permita el préstamo de stETH (tanto estable como variable). La motivación detrás de este diseño es fomentar el uso de stETH como colateral en lugar de pedirlo prestado. stETH está vinculado de manera estable a ETH, por lo que usarlo como colateral implica bajos riesgos de liquidación.
 
-The stETH is implemented as a rebasing token. In normal conditions balances of users update one per day with Oracle report. Under the hood stETH stores balances of users as holder's shares in the total amount of ether controlled by the Lido protocol. stETH has pair of methods to convert inner shares into the balances and vice versa:
+El stETH se implementa como un token de rebase. En condiciones normales, los saldos de los usuarios se actualizan una vez al día con el informe del Oracle. En el fondo, stETH almacena los saldos de los usuarios como acciones del tenedor en la cantidad total de ether controlada por el protocolo Lido. stETH tiene un par de métodos para convertir acciones internas en saldos y viceversa:
 
 ```solidity
 /// @return the amount of ether that corresponds to `_sharesAmount` token shares.
@@ -10,46 +10,55 @@ function getPooledEthByShares(uint256 _sharesAmount) public view returns (uint25
 
 /// @return the amount of shares that corresponds to `_ethAmount` protocol-controlled ether.
 function getSharesByPooledEth(uint256 _ethAmount) public view returns (uint256);
-
 ```
 
-The aSTETH, similarly to regular aTokens, is a rewards-generating token that is minted and burned upon deposits and withdraws in the LendingPool. The aSTETH value is pegged to the value of the corresponding deposited token at a 1:1 ratio and can be safely stored, transferred, or traded. All interest collected by the aSTETH reserve (from rebasing and AAVE rewards) is distributed to aTokens holders directly by continuously increasing their wallet balance (in case of negative rebases of stETH it might decrease).
+El aSTETH, de manera similar a los aTokens regulares, es un token generador de recompensas que se acuña y quema en los depósitos y retiros en el LendingPool. El valor de aSTETH está vinculado al valor del token depositado correspondiente en una proporción de 1:1 y puede almacenarse, transferirse o negociarse de manera segura. Todos los intereses recaudados por la reserva de aSTETH (de rebase y recompensas AAVE) se distribuyen directamente a los tenedores de aTokens mediante el aumento continuo de su saldo en la cartera (en caso de rebases negativos de stETH, podría disminuir).
 
-The aSTETH implementation guarantees the following always ensured:
+La implementación de aSTETH garantiza lo siguiente:
 
-- **At any time, a user can deposit X stETH to mint X aSTETH \***
-  Total aSTETH supply increases by X.
+- **En cualquier momento, un usuario puede depositar X stETH para acuñar X aSTETH \***
+  La oferta total de aSTETH aumenta en X.
 
-- **At any time, a user can burn x aSTETH for x stETH \***
-  The total aSTETH supply decreases by x.
+- **En cualquier momento, un usuario puede quemar x aSTETH por x stETH \***
+  La oferta total de aSTETH disminuye en x.
 
-- **At any time, userA can transfer X aSTETH to userB \***
-  userA’s aSTETH balance reduces by X.
-  userB’s aSTETH balance increases by X.
-  The total aSTETH supply exactly remains the same.
+- **En cualquier momento, el usuarioA puede transferir X aSTETH al usuarioB \***
+  El saldo de aSTETH del usuarioA se reduce en X.
+  El saldo de aSTETH del usuarioB aumenta en X.
+  La oferta total de aSTETH sigue siendo exactamente la misma.
 
-- **When stETH rebases, aSTETH rebases as well.**
-  Say there are 1000 stETH locked in the reserve. Consider the below situations: 1. Common case: happens positive rebase, and stETH total supply increases by 1%: - totalSupply of aSTETH token becomes equal to 1010 aSTETH. - balance of each aSTETH holder increases by 1% also. 2. Rare case: happens negative rebase, and stETH total supply decreases by 1%: - totalSupply of aSTETH token becomes equal to 990 aSTETH. - balance of each aSTETH holder decreases by 1% also.
+- **Cuando stETH hace rebase, aSTETH también hace rebase.**
+  Supongamos que hay 1000 stETH bloqueados en la reserva. Consideremos las siguientes situaciones:
+  1. Caso común: ocurre un rebase positivo y la oferta total de stETH aumenta en un 1%:
+    - La oferta total del token aSTETH se vuelve igual a 1010 aSTETH.
+    - El saldo de cada tenedor de aSTETH también aumenta en un 1%.
+  2. Caso raro: ocurre un rebase negativo y la oferta total de stETH disminuye en un 1%:
+    - La oferta total del token aSTETH se vuelve igual a 990 aSTETH.
+    - El saldo de cada tenedor de aSTETH también disminuye en un 1%.
 
-**\*** Actual amount of token will be less or equal to X because of integer operations rounding of underlying token rebase rate and AAVE interest rate. However, the actual rounding error will not exceed a couple of WEI at any time.
+**\*** La cantidad real de tokens será menor o igual a X debido a operaciones de redondeo enteras de la tasa de rebase del token subyacente y la tasa de interés de AAVE. Sin embargo, el error de redondeo real no excederá un par de WEI en ningún momento.
 
-## AStETH Token
+## Token AStETH
 
-To implement the above logic `AStETH` contract modifies the implementation of default aToken but keeps it as close as possible to the original contract. Same as default `AToken` contract it inherits from `VersionedInitializable`, `IncentivizedERC20` contracts and implements `IAToken` interface.
+Para implementar la lógica anterior, el contrato `AStETH` modifica la implementación del aToken predeterminado pero se mantiene lo más cercano posible al contrato original. Al igual que el contrato `AToken` predeterminado, hereda de los contratos `VersionedInitializable` y `IncentivizedERC20` e implementa la interfaz `IAToken`.
 
-Default aToken implements the ERC20 interface but has two specific methods:
+El aToken predeterminado implementa la interfaz ERC20 pero tiene dos métodos específicos:
 
-- `scaledBalanceOf(user)` - Returns the **scaled balance** of user as a `uint256`. The scaled balance is the balance of the underlying token of the user (amount deposited), divided by the current liquidity index at the moment of the update. $scaledBalance = amountDeposited/currentLiquidityIndex$
-  This essentially 'marks' when a user has deposited in the reserve pool and can be used to calculate the user's current compounded aToken balance.
-  Example: - User A deposits 1000 DAI at the liquidity index of 1.1 - User B deposits another amount into the same pool - The liquidity index is now 1.2 - Therefore to calculate User A's current compounded aToken balance, the reverse operation should be performed: $aTokenBalance = scaledBalance*currentLiquidityIndex$
+- `scaledBalanceOf(user)` - Devuelve el **saldo escalado** del usuario como un `uint256`. El saldo escalado es el saldo del token subyacente del usuario (cantidad depositada), dividido por el índice de liquidez actual en el momento de la actualización. $scaledBalance = amountDeposited/currentLiquidityIndex$
+  Esto esencialmente 'marca' cuando un usuario ha depositado en el pool de reservas y puede usarse para calcular el saldo actual compuesto de aToken del usuario.
+  Ejemplo:
+  - El usuario A deposita 1000 DAI con un índice de liquidez de 1.1
+  - El usuario B deposita otra cantidad en el mismo pool
+  - El índice de liquidez ahora es 1.2
+  - Por lo tanto, para calcular el saldo compuesto actual de aToken del usuario A, se debe realizar la operación inversa: $aTokenBalance = scaledBalance*currentLiquidityIndex$
 
-- `scaledTotalSupply()` - Returns the scaled total supply of the aToken as `uint256`.
+- `scaledTotalSupply()` - Devuelve la oferta total escalada del aToken como `uint256`.
 
-But above approach can't be used with the stETH token without modifications because it doesn't take into consideration rebases of stETH.
+Pero el enfoque anterior no puede usarse con el token stETH sin modificaciones porque no toma en consideración los rebases de stETH.
 
-If apply above equations to stETH as is, the staking profit will not be distributed across the aSTETH holders but will be accumulated on the balance of the aSTETH token.
+Si se aplican las ecuaciones anteriores a stETH tal cual, el beneficio del staking no se distribuirá entre los tenedores de aSTETH, sino que se acumulará en el saldo del token aSTETH.
 
-To make rebases profit accountable, `AStETH` introduces an additional index - **stETH rebasing index**. The stETH rebasing index - express the rewards from rebases of stETH token in time. StETH rebasing index might be calculated as follows:
+Para hacer que el beneficio de los rebases sea contable, `AStETH` introduce un índice adicional - **índice de rebase de stETH**. El índice de rebase de stETH expresa las recompensas de los rebases del token stETH en el tiempo. El índice de rebase de stETH puede calcularse de la siguiente manera:
 
 ```solidity
 function _stEthRebasingIndex() returns (uint256) {
@@ -59,10 +68,9 @@ function _stEthRebasingIndex() returns (uint256) {
   // counted in RAY's (decimals with 27 digits).
   return stETH.getPooledEthByShares(WadRayMath.RAY);
 }
-
 ```
 
-With stETH rebasing index, `AStETH` allows to make rebases profit accountable, applying additional scaling when minting or burning of token happens:
+Con el índice de rebase de stETH, `AStETH` permite que el beneficio de los rebases sea contable, aplicando un escalado adicional cuando ocurre la acuñación o quema del token:
 
 ```solidity
 function mint(address user, uint256 amount, uint256 liquidityIndex) {
@@ -88,7 +96,7 @@ function _toInternalAmount(
   }
 ```
 
-Then, according to AAVE's definitions, `scaledTotalSupply()` and `scaledBalanceOf()` might be calculated as:
+Luego, de acuerdo con las definiciones de AAVE, `scaledTotalSupply()` y `scaledBalanceOf()` pueden calcularse como:
 
 ```solidity
 function scaledTotalSupply() returns (uint256) {
@@ -98,13 +106,12 @@ function scaledTotalSupply() returns (uint256) {
 function scaledBalanceOf(address user) returns (uint256) {
   return _balances[user].mul(_stEthRebasingIndex()).div(WadRayMath.RAY);
 }
-
 ```
 
-Additionally, `AStETH` contract introduces the following methods:
+Además, el contrato `AStETH` introduce los siguientes métodos:
 
-- `internalBalanceOf(user)` - returns **internal balance** of the user. The internal balance is the balance of the underlying token of the user (sum of deposits of the user), divided by the current liquidity index at the moment of the update and by the current stETH rebasing index.
-- `internalTotalSupply()` - Returns the internal total supply of the aSTETH.
+- `internalBalanceOf(user)` - devuelve el **saldo interno** del usuario. El saldo interno es el saldo del token subyacente del usuario (suma de los depósitos del usuario), dividido por el índice de liquidez actual en el momento de la actualización y por el índice de rebase de stETH actual.
+- `internalTotalSupply()` - Devuelve la oferta total interna del aSTETH.
 
 ```solidity
 function internalTotalSupply(address user) returns (uint256) {
@@ -114,15 +121,14 @@ function internalTotalSupply(address user) returns (uint256) {
 function internalBalanceOf(address user) returns (uint256) {
   return _balances[user];
 }
-
 ```
 
-## StableDebtSTETH & VariableDebtSTETH Tokens
+## Tokens StableDebtSTETH y VariableDebtSTETH
 
-The current integration doesn't support borrowing, neither with variable nor with stable interest rates. Because of that, the StableDebtSTETH and VariableDebtSTETH contract extends default `StableDebtToken` and `VariableDebtToken` contracts accordingly, and override `mint()` method with the stub, which reverts with error `CONTRACT_NOT_ACTIVE`. This was done to make it impossible to use borrowing with aSTETH because default debt tokens are not compatible with the `AStETH` contract.
+La integración actual no soporta préstamos, ni con tasas de interés variables ni estables. Debido a esto, los contratos StableDebtSTETH y VariableDebtSTETH extienden los contratos `StableDebtToken` y `VariableDebtToken` predeterminados, respectivamente, y anulan el método `mint()` con un stub, que revierte con el error `CONTRACT_NOT_ACTIVE`. Esto se hizo para hacer imposible el uso de préstamos con aSTETH porque los tokens de deuda predeterminados no son compatibles con el contrato `AStETH`.
 
-In the future, borrowing might be activated, by updating the implementation of debt tokens. But `StableDebtToken` and `VariableDebtToken` contracts **MUST NOT** be used with `AStETH` because they don't take into consideration rebases of stETH token and will break the math of the integration.
+En el futuro, se puede activar el préstamo actualizando la implementación de los tokens de deuda. Pero los contratos `StableDebtToken` y `VariableDebtToken` **NO DEBEN** usarse con `AStETH` porque no toman en consideración los rebases del token stETH y romperán la matemática de la integración.
 
-## Incentives Controller
+## Controlador de Incentivos
 
-At the launch of the stETH integration in the AAVE protocol, the incentives controller is not supposed to be used. If in the future Lido decides to add incentives to the integration, it might be done via updating the implementation of aSTETH token. The example of implementation of `IncentivesController` for `AStETH` contract might be found here: https://github.com/lidofinance/aave-asteth-incentives-controller
+Al inicio de la integración de stETH en el protocolo AAVE, no se supone que se use el controlador de incentivos. Si en el futuro Lido decide agregar incentivos a la integración, puede hacerse actualizando la implementación del token aSTETH. El ejemplo de implementación del `IncentivesController` para el contrato `AStETH` puede encontrarse aquí: https://github.com/lidofinance/aave-asteth-incentives-controller
