@@ -1,12 +1,12 @@
-# Lido V2 mainnet parameters
+# Parámetros de Lido V2 en la red principal
 
-## Tests setup configuration
+## Configuración de prueba
 
-Tests setup based upon parameters specified in [this config file](https://github.com/lidofinance/scripts/blob/shapella-upgrade/configs/config_mainnet.py) . This document can be used to validate the values.
+La configuración de prueba se basa en los parámetros especificados en [este archivo de configuración](https://github.com/lidofinance/scripts/blob/shapella-upgrade/configs/config_mainnet.py). Este documento se puede utilizar para validar los valores.
 
-## Mainnet addresses
+## Direcciones en la red principal
 
-Some of the proposed addresses are listed in this section, but for the full list see [this document](/deployed-contracts/).
+Algunas de las direcciones propuestas se enumeran en esta sección, pero para ver la lista completa, consulte [este documento](/deployed-contracts/).
 
 ```python
 LIDO_LOCATOR = 0xC1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb
@@ -32,7 +32,7 @@ LIDO_MAX_STAKE_LIMIT_ETH = 150_000
 
 ## NodeOperatorsRegistry
 
-Single staking module named "Curated" added to StakingRouter. For the details see [LIP-20: Staking Router forum post](https://research.lido.fi/t/lip-20-staking-router/3790)
+Módulo de stakeo único llamado "Curated" añadido a StakingRouter. Para más detalles, consulta el [post del foro sobre LIP-20: Staking Router](https://research.lido.fi/t/lip-20-staking-router/3790).
 
 ```python
 # See https://snapshot.org/#/lido. snapshot.eth/proposal/0xa4eb1220a15d46a1825d5a0f44de1b34644d4aa6bb95f910b86b29bb7654e330 for "Their status shall revert to “In good standing” after **5 days** (i.e. provided any newly received validator exit requests are processed timely"
@@ -163,7 +163,7 @@ DSM_PAUSE_INTENT_VALIDITY_PERIOD_BLOCKS = 6646
 
 ## AccountingOracle
 
-And its corresponding `HashConsensus`.
+Y su correspondiente `HashConsensus`.
 
 ```python
 # Once per day
@@ -187,7 +187,7 @@ LEGACY_ORACLE = 0x442af784A788A5bd6F42A01Ebe9F287a871243fb
 
 ## ValidatorsExitBusOracle
 
-And its corresponding `HashConsensus`.
+Y su correspondiente `HashConsensus`.
 
 ```python
 # Thrice per day
@@ -259,17 +259,17 @@ GATE_SEAL_PAUSE_DURATION = 518400  # 6 days as seconds
 GATE_SEAL_EXPIRY_TIMESTAMP = 1714521600  # 2024-05-01 00:00 UTC
 ```
 
-## Roles setup
+## Configuración de roles
 
-For the roles setup in tests see [the permissions test](https://github.com/lidofinance/scripts/blob/shapella-upgrade/tests/regression/test_permissions.py).
+Para la configuración de roles en las pruebas, consulte [la prueba de permisos](https://github.com/lidofinance/scripts/blob/shapella-upgrade/tests/regression/test_permissions.py).
 
-Contracts ACL denotation:
+Denotación de ACL de contratos:
 
-- mark "*Aragon app*" means the contract is Aragon app which uses [Aragon ACL model](https://hack.aragon.org/developers/tools/aragonos/reference-documentation)
-- mark "*OZ*" means the contract uses [OpenZeppelin ACL model](https://github.com/lidofinance/lido-dao/blob/feature/shapella-upgrade/contracts/0.8.9/utils/access/AccessControlEnumerable.sol)
-- mark "*Proxy*" means the contract is deployed behind a proxy so has an additional [ACL model related to the proxy](https://github.com/lidofinance/lido-dao/blob/feature/shapella-upgrade/contracts/0.8.9/proxy/OssifiableProxy.sol)
-- mark "*Plain owner*" means has custom simple ACL model with single owner and setter for it
-- mark "*No access control*" means there is no any ACL
+- El marcado "*Aragon app*" significa que el contrato es una aplicación Aragon que utiliza el [modelo ACL de Aragon](https://hack.aragon.org/developers/tools/aragonos/reference-documentation).
+- El marcado "*OZ*" significa que el contrato utiliza el [modelo ACL de OpenZeppelin](https://github.com/lidofinance/lido-dao/blob/feature/shapella-upgrade/contracts/0.8.9/utils/access/AccessControlEnumerable.sol).
+- El marcado "*Proxy*" significa que el contrato está desplegado detrás de un proxy y tiene un modelo adicional de [ACL relacionado con el proxy](https://github.com/lidofinance/lido-dao/blob/feature/shapella-upgrade/contracts/0.8.9/proxy/OssifiableProxy.sol).
+- El marcado "*Plain owner*" significa que tiene un modelo ACL simple personalizado con un único propietario y un setter para ello.
+- El marcado "*No access control*" significa que no tiene ningún ACL.
 
 ### **Lido**
 
@@ -292,7 +292,7 @@ Contracts ACL denotation:
   - Voting
 
 **Obsolete**
-*To be revoked at voting.*
+*Para ser revocado en una votación.*
 
 - `MANAGE_FEE`
   - revoke from Voting
@@ -463,7 +463,7 @@ None
 
 ### **DepositSecurityModule**
 
-*Plain Owner, No Proxy*
+*Este Plain Owner, No Proxy*
 
 - owner
   - Before vote start:
@@ -479,7 +479,7 @@ None
 
 ### **HashConsensus for ValidatorsExitBusOracle**
 
-*OZ, No Proxy*
+*OZ, Sin Proxy*
 
 - `DEFAULT_ADMIN_ROLE`
   - Before vote start:
@@ -505,7 +505,7 @@ None
 
 ### **OracleDaemonConfig**
 
-*OZ, No Proxy*
+*OZ, Sin Proxy*
 
 - `DEFAULT_ADMIN_ROLE`
   - Agent
@@ -514,7 +514,7 @@ None
 
 ### **OracleReportSanityChecker**
 
-*OZ, No Proxy*
+*OZ, Sin Proxy*
 
 - `DEFAULT_ADMIN_ROLE` (set in constructor)
   - Agent
@@ -594,7 +594,7 @@ None
 
 ### **WithdrawalVault**
 
-*No access control, Proxy*
+*Sin control de acceso, Proxy*
 
 - PROXY ADMIN
   - Voting
