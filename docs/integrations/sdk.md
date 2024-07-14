@@ -1,12 +1,10 @@
-# SDKs and UI libraries
+# SDKs y Bibliotecas de UI
 
-<!--  -->
+### Biblioteca de UI de Lido
 
-### Lido UI Library
+**Clientes objetivo**: aquellos que desean utilizar componentes de la UI de Lido en sus proyectos.
 
-**Target clients**: those who want to use Lido UI components in their projects.
-
-React components for Lido Finance projects.
+Componentes de React para proyectos de Lido Finance.
 
 - Storybook: [https://ui.lido.fi](https://ui.lido.fi/)
 - GitHub: [https://github.com/lidofinance/ui](https://github.com/lidofinance/ui)
@@ -14,19 +12,19 @@ React components for Lido Finance projects.
 
 ### Lido Ethereum SDK
 
-**Target clients**: those who want to interact/integrate with the Lido protocol in JavaScript/TypeScript projects.
+**Clientes objetivo**: aquellos que desean interactuar/integrarse con el protocolo de Lido en proyectos de JavaScript/TypeScript.
 
-Library for interaction with the Lido on Ethereum protocol.
+Biblioteca para la interacción con el protocolo de Lido en Ethereum.
 
-- Documentation: [https://lidofinance.github.io/lido-ethereum-sdk/](https://lidofinance.github.io/lido-ethereum-sdk/)
+- Documentación: [https://lidofinance.github.io/lido-ethereum-sdk/](https://lidofinance.github.io/lido-ethereum-sdk/)
 - GitHub: [https://github.com/lidofinance/lido-ethereum-sdk](https://github.com/lidofinance/lido-ethereum-sdk)
 - NPM: [https://www.npmjs.com/package/@lidofinance/lido-ethereum-sdk](https://www.npmjs.com/package/@lidofinance/lido-ethereum-sdk)
 
 ### Lido Python SDK
 
-**Target clients**: Lido-participating Node Operators and [LNOSG](https://lido.fi/governance#lnosg) contributors.
+**Clientes objetivo**: Operadores de nodo que participan en Lido y contribuyentes de [LNOSG](https://lido.fi/governance#lnosg).
 
-Library to efficiently load network data for Lido, validate node operator keys and find key duplicates.
+Biblioteca para cargar eficientemente datos de la red para Lido, validar claves de operadores de nodo y encontrar claves duplicadas.
 
 - GitHub: [https://github.com/lidofinance/lido-python-sdk](https://github.com/lidofinance/lido-python-sdk)
 - Pypi: [https://pypi.org/project/lido-sdk/](https://pypi.org/project/lido-sdk/)
