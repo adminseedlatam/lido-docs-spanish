@@ -1,67 +1,67 @@
-# Verifying address ownership for Lido DAO ops
+# Verificación de propiedad de dirección para operaciones del Lido DAO
 
-Using EOA across Lido DAO ops or protocol contracts requires providing a public "proof of ownership". Main use-cases here are using address as a signer in Lido DAO ops multisigs or using EOAs for offchain tooling where specific rights might be required.
+El uso de una cuenta externa (EOA) en las operaciones del Lido DAO o contratos del protocolo requiere proporcionar una "prueba de propiedad" pública. Los principales casos de uso son utilizar la dirección como firmante en las multisigs del Lido DAO o usar EOAs para herramientas fuera de la cadena donde se pueden requerir derechos específicos.
 
-## Preparing and sharing address & signature
+## Preparación y compartición de dirección y firma
 
-### In case of using externally owned account (EOA)
+### En caso de usar una cuenta externa (EOA)
 
-1. Sign the message along the lines of `@my_social_handle is looking to join X Lido DAO multisig with address 0x...` with the private key you're looking to use as signing key. One of the options is going using MyEtherWallet web UI:
-   1. Connect your wallet to https://www.myetherwallet.com/wallet/access.
-   2. Go to https://www.myetherwallet.com/wallet/sign (UI link is under "Message" dropdown on the left).
-   3. Enter the message, click "sign" and sign the message on the wallet.
-   4. The `sig` field in the result json is the signature hash.
-2. Publish the message along with the signature hash on twitter or other easily accessible social media.
-3. Share the link to the post as a comment at the relevant [Lido DAO forum](https://research.lido.fi) post.
-4. Make sure to follow the [general rules of thumb](./multisig-signer-manual) for being a signer in Lido DAO ops multisigs.
+1. Firma el mensaje con algo como `@my_social_handle is looking to join X Lido DAO multisig with address 0x...` con la clave privada que estás buscando usar como clave de firma. Una de las opciones es usar la interfaz web de MyEtherWallet:
+   1. Conecta tu billetera a https://www.myetherwallet.com/wallet/access.
+   2. Ve a https://www.myetherwallet.com/wallet/sign (el enlace de la interfaz está bajo el desplegable "Message" a la izquierda).
+   3. Ingresa el mensaje, haz clic en "sign" y firma el mensaje en la billetera.
+   4. El campo `sig` en el resultado json es el hash de la firma.
+2. Publica el mensaje junto con el hash de la firma en Twitter u otra red social fácilmente accesible.
+3. Comparte el enlace a la publicación como un comentario en la publicación relevante del [foro de Lido DAO](https://research.lido.fi).
+4. Asegúrate de seguir las [reglas generales](./multisig-signer-manual) para ser un firmante en las multisigs del Lido DAO.
 
-### In case of using Safe multisig
+### En caso de usar Safe multisig
 
-1. In https://app.safe.global home screen of your multisig wallet hit the button "New transaction" and select "Contract interaction" in the appeared screen.
-2. At the New Transaction screen toggle "Custom data" switch.
-3. Fill any EOA address (for example `0x0000000000000000000000000000000000000000`) into "Enter Address or ENS Name" field.
-4. Use any hex encoder (like https://www.duplichecker.com/hex-to-text.php) to encode a message that consists info about who is joining what Lido committee or multisig with which address, for example `@my_social_handle is looking to join X Lido DAO multisig with address 0x...`.
-5. Paste a code generated at the previous step into "Data (Hex encoded)" field of "New Transaction" screen in the multisig interface (add "0x" in the start of a HEX code if it's missing), put "0" in the ETH value field.
-6. Publish the message along with the transaction hash on twitter or other easily accessible social media.
-7. Share the transaction hash in the post as a comment at the relevant [Lido DAO forum](https://research.lido.fi) post.
+1. En la pantalla principal de tu billetera multisig en https://app.safe.global, presiona el botón "New transaction" y selecciona "Contract interaction" en la pantalla que aparece.
+2. En la pantalla de Nueva Transacción, activa el interruptor "Custom data".
+3. Ingresa cualquier dirección EOA (por ejemplo `0x0000000000000000000000000000000000000000`) en el campo "Enter Address or ENS Name".
+4. Usa cualquier codificador hexadecimal (como https://www.duplichecker.com/hex-to-text.php) para codificar un mensaje que consista en información sobre quién se une a qué comité o multisig del Lido con qué dirección, por ejemplo, `@mi_manejo_social está buscando unirse a X multisig del Lido DAO con la dirección 0x...`.
+5. Pega el código generado en el paso anterior en el campo "Data (Hex encoded)" de la pantalla de Nueva Transacción en la interfaz multisig (agrega "0x" al inicio del código HEX si falta), pon "0" en el campo de valor ETH.
+6. Publica el mensaje junto con el hash de la transacción en Twitter u otra red social fácilmente accesible.
+7. Comparte el hash de la transacción en la publicación como un comentario en la publicación relevante del [foro del Lido DAO](https://research.lido.fi).
 
-## Ethereum signature verification
+## Verificación de la firma de Ethereum
 
-### In case of using EOA
+### En caso de usar EOA
 
-To verify the shared signature one can use Etherscan or MyEtherWallet UIs.
+Para verificar la firma compartida, se puede usar las interfaces de Etherscan o MyEtherWallet.
 
-### Etherscan UI
+### Interfaz de Etherscan
 
-1. Go to https://etherscan.io/verifiedSignatures.
-2. Click `Verify Signature` button.
-3. Input address, message & signature hash data & click `Continue`.
-4. See whether the signature provided is valid.
+1. Ve a https://etherscan.io/verifiedSignatures.
+2. Haz clic en el botón `Verify Signature`.
+3. Ingresa los datos de la dirección, el mensaje y el hash de la firma y haz clic en `Continue`.
+4. Verifica si la firma proporcionada es válida.
 
 ### MyEtherWallet
 
-1. Go to https://www.myetherwallet.com/tools?tool=verify.
-2. Encode the message text as hex string (use the tool like https://appdevtools.com/text-hex-converter).
-3. Enter json & click `Verify`:
-  ```
-  {
-    "address": "0x...",
-    "msg": "0x...",
-    "sig": "signature_hash"
-  }
-  ```
-  Note that "msg" is hex text starting with `0x` (add `0x` before the hex encoded string if necessary).
-4. See whether the signature provided is valid.
+1. Ve a https://www.myetherwallet.com/tools?tool=verify.
+2. Codifica el texto del mensaje como una cadena hexadecimal (usa una herramienta como https://appdevtools.com/text-hex-converter).
+3. Ingresa el json y haz clic en `Verify`:
+   ```
+   {
+     "address": "0x...",
+     "msg": "0x...",
+     "sig": "signature_hash"
+   }
+   ```
+   Nota que "msg" es texto hexadecimal que comienza con `0x` (agrega `0x` antes de la cadena codificada en hexadecimal si es necesario).
+4. Verifica si la firma proporcionada es válida.
 
-### Publishing the signature on Etherscan
+### Publicación de la firma en Etherscan
 
-1. Go to https://etherscan.io/verifiedSignatures and click "Verify Signature".
-2. Enter address, plain text message (not hex version MyEtherWallet will give!) & the signature (with `0x` prefix), choose "Verify & publish" option & click "Continue".
-3. After the signature is verified you'll get the link for sharing.
+1. Ve a https://etherscan.io/verifiedSignatures y haz clic en "Verify Signature".
+2. Ingresa la dirección, el mensaje en texto plano (no la versión hexadecimal que MyEtherWallet dará) y la firma (con el prefijo `0x`), elige la opción "Verify & publish" y haz clic en "Continue".
+3. Después de que se verifique la firma, obtendrás el enlace para compartir.
 
-### In case of using Safe multisig
+### En caso de usar Safe multisig
 
-1. Go to the signed transaction at the [Etherscan](https://etherscan.io/).
-2. Click to show more details and find "input Data" field, click on "Decode input data".
-3. Copy a hex code in the "data" row and take it to any hex decoder (like [duplichecker](https://www.duplichecker.com/hex-to-text.php)).
-4. Decode and verify the message (please note, that you may need to delete leading `0x` from the hex code acquired in the previous step).
+1. Ve a la transacción firmada en [Etherscan](https://etherscan.io/).
+2. Haz clic para mostrar más detalles y encuentra el campo "input Data", haz clic en "Decode input data".
+3. Copia el código hexadecimal en la fila "data" y llévalo a cualquier decodificador hexadecimal (como [duplichecker](https://www.duplichecker.com/hex-to-text.php)).
+4. Decodifica y verifica el mensaje (ten en cuenta que es posible que necesites eliminar el `0x` inicial del código hexadecimal obtenido en el paso anterior).
