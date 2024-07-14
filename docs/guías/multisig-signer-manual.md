@@ -1,14 +1,16 @@
-# Guide to being a signer at any Lido DAO multisigs
+# Guía para ser un firmante en cualquier multisig del Lido DAO
 
-Lido DAO uses multisig wallet for different ops for flexibility and fast reaction times. Here's a list of general tips & rules around being the signer:
+Lido DAO utiliza billeteras multisig para diferentes operaciones, brindando flexibilidad y tiempos de reacción rápidos. Aquí hay una lista de consejos y reglas generales sobre cómo ser un firmante:
 
-1. Use hardware wallet & back up the seed phrase.
-2. Upon joining to any multisig make sure to verify the address according [to the guide](./address-ownership-guide).
-3. Check transactions you see on the multisig. If it's unclear to what the transaction should do and why — don't sign it and ask for explanation.
-4. Every transaction should have "how to check" guide.
-   1. Addresses & sums in question should be verifiable through third party sources (message from your fellow multisig co-signer doesn't cut it).
-   2. Technical checks, if those are required (i.e.for smart contract interaction), should rely on ready-made third party software and not custom scripts & UIs.
-5. While requesting the signatures tell explicitly whether the transaction can be executed right away or would need to wait for something.
-6. Communicate once you've checked and signed the transaction ("checked, signed, X more required").
-7. If the transaction can be executed right away — the last signer does it. If they can't do for any reason — communicate it.
-8. If you're executing already signed transaction — make sure to check it as if you were signing it.
+1. Usa una billetera de hardware y respalda la frase semilla.
+2. Al unirte a cualquier multisig, asegúrate de verificar la dirección de acuerdo con [la guía](./address-ownership-guide).
+3. Revisa las transacciones que veas en la multisig. Si no está claro qué debería hacer la transacción y por qué, no la firmes y pide una explicación.
+4. Cada transacción debe tener una guía de "cómo verificar".
+   1. Las direcciones y sumas en cuestión deben ser verificables a través de fuentes de terceros (un mensaje de tu compañero co-firmante de la multisig no es suficiente).
+   2. Las verificaciones técnicas, si son necesarias (por ejemplo, para la interacción con contratos inteligentes), deben basarse en software de terceros ya hecho y no en scripts personalizados e interfaces de usuario.
+5. Al solicitar las firmas, indica explícitamente si la transacción puede ejecutarse de inmediato o necesita esperar algo.
+6. Comunica una vez que hayas revisado y firmado la transacción ("revisado, firmado, se requieren X más").
+7. Si la transacción puede ejecutarse de inmediato, el último firmante lo hace. Si no pueden hacerlo por alguna razón, comunícalo.
+8. Si estás ejecutando una transacción ya firmada, asegúrate de revisarla como si fueras a firmarla.
+
+Seguir estas pautas asegurará un proceso seguro y transparente para todas las operaciones multisig en Lido DAO.
