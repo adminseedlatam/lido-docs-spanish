@@ -1,58 +1,58 @@
-# How to claim Lido early stakers airdrop
-This is how to claim Lido early stakers airdrop with Etherscan UI
+# Cómo reclamar el airdrop para los primeros stakers de Lido (LDO)
+Este es el proceso para reclamar el airdrop para los primeros stakers de Lido utilizando la interfaz de Etherscan.
 
-## Introduction
+El airdrop LDO puede ser reclamado por los primeros stakers de Lido. Puedes verificar si eres elegible y reclamar tu airdrop siguiendo estos pasos:
 
-### Who is eligible to claim Lido early stakers airdrop?
+## Introducción
 
-LDO Airdrop could be claimed by early Lido stakers. [Here](https://github.com/lidofinance/airdrop-data/blob/main/early_stakers_airdrop.csv) you can find a list of addresses for which airdrops are available.
+### ¿Quién es elegible para reclamar el airdrop para los primeros stakers de Lido?
 
-### How to find out the volume of available airdrop?
+El airdrop LDO puede ser reclamado por los primeros stakers de Lido. Puedes encontrar una lista de direcciones elegibles [aquí](https://github.com/lidofinance/airdrop-data/blob/main/early_stakers_airdrop.csv).
 
-[Here](https://github.com/lidofinance/airdrop-data/blob/main/early_stakers_airdrop.csv) you can see your airdrop LDO amount. The formula is detailed in the [proposal](https://research.lido.fi/t/proposal-16-retroactive-airdrop-0-5-ldo-to-early-steth-users/69/18).
+### ¿Cómo averiguar el volumen del airdrop disponible?
 
-## Airdrop claiming
+Puedes ver la cantidad de LDO de tu airdrop disponible [aquí](https://github.com/lidofinance/airdrop-data/blob/main/early_stakers_airdrop.csv). La fórmula detallada se encuentra en la [propuesta](https://research.lido.fi/t/proposal-16-retroactive-airdrop-0-5-ldo-to-early-steth-users/69/18).
 
-### 1. Check if you are eligible to claim airdrop
+## Reclamación del airdrop
 
-Find your address [here](https://github.com/lidofinance/airdrop-data/blob/main/early_stakers_airdrop.csv) and get your index.
+### 1. Verifica si eres elegible para reclamar el airdrop
 
-If there is no your address [here](https://github.com/lidofinance/airdrop-data/blob/main/early_stakers_airdrop.csv) you are not eligible to claim airdrop.
+Encuentra tu dirección [aquí](https://github.com/lidofinance/airdrop-data/blob/main/early_stakers_airdrop.csv) y obtén tu índice.
 
-### 2. Check if you haven’t already claimed your airdrop
-2.1 Go to [Etherscan](https://etherscan.io/address/0x4b3edb22952fb4a70140e39fb1add05a6b49622b) (contract address  - [0x4b3EDb22952Fb4A70140E39FB1adD05A6B49622B](https://etherscan.io/address/0x4b3edb22952fb4a70140e39fb1add05a6b49622b))
+Si tu dirección no aparece [aquí](https://github.com/lidofinance/airdrop-data/blob/main/early_stakers_airdrop.csv), no eres elegible para reclamar el airdrop.
 
-2.2 Paste your index on `isClaimed` method (1 row on [“Contract/Read contract”](https://etherscan.io/address/0x4b3edb22952fb4a70140e39fb1add05a6b49622b#readContract) tab)
+### 2. Verifica si no has reclamado tu airdrop anteriormente
 
-2.3 Press the “Query” button
+2.1 Ve a [Etherscan](https://etherscan.io/address/0x4b3edb22952fb4a70140e39fb1add05a6b49622b) (dirección del contrato: [0x4b3EDb22952Fb4A70140E39FB1adD05A6B49622B](https://etherscan.io/address/0x4b3edb22952fb4a70140e39fb1add05a6b49622b))
 
-2.4 Make sure that the method result is `false`
+2.2 Pega tu índice en el método `isClaimed` (primera fila en la pestaña [“Contract/Read contract”](https://etherscan.io/address/0x4b3edb22952fb4a70140e39fb1add05a6b49622b#readContract))
+
+2.3 Presiona el botón “Query”
+
+2.4 Asegúrate de que el resultado del método sea `false`
 
 :::note
-if you get `true` as a result of this step, it means that this reward was claimed earlier, and you can’t claim it once again
-
+Si obtienes `true` como resultado de este paso, significa que este airdrop ya fue reclamado anteriormente y no puedes reclamarlo nuevamente.
 :::
 
-### 3. Claim your LDO airdrop
+### 3. Reclama tu airdrop LDO
 
-3.1 Open [“Contract/Write contract”](https://etherscan.io/address/0x4b3edb22952fb4a70140e39fb1add05a6b49622b#writeContract) tab on Etherscan
+3.1 Abre la pestaña [“Contract/Write contract”](https://etherscan.io/address/0x4b3edb22952fb4a70140e39fb1add05a6b49622b#writeContract) en Etherscan
 
-3.2 Connect your wallet to Etherscan with either MetaMask or WalletConnect
+3.2 Conecta tu cartera a Etherscan con MetaMask o WalletConnect
 
-3.3 Fill-in `Claim` method fields with data from [here](https://github.com/lidofinance/airdrop-data/blob/main/early_stakers_airdrop.csv)
-- index (uint256)
-- account (address)
-- amount (uint256)
+3.3 Completa los campos del método `Claim` con los datos de [aquí](https://github.com/lidofinance/airdrop-data/blob/main/early_stakers_airdrop.csv)
+- índice (uint256)
+- cuenta (address)
+- cantidad (uint256)
 - merkleProof (bytes32[])
 
-3.4 Press the “Write” button and confirm the transaction in your wallet
+3.4 Presiona el botón “Write” y confirma la transacción en tu cartera
 
-3.5 Wait for the transaction to succeed
+3.5 Espera a que la transacción sea exitosa
 
 :::note
-in case of invalid input transaction can be reverted
-
+En caso de que la entrada sea inválida, la transacción puede revertirse.
 :::
 
-
-That's it! 💪🎉🏝
+¡Eso es todo! 💪🎉🏝
