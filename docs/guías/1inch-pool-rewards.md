@@ -40,7 +40,7 @@ Si obtienes `true` como resultado de este paso, significa que esta recompensa ya
 
 3.5 Espera a que la transacción sea exitosa
 
-:::not3
+:::note
 En caso de que la entrada sea inválida, la transacción puede revertirse.
 :::
 
