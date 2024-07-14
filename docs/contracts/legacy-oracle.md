@@ -361,7 +361,7 @@ event PostTotalShares(
 ```
 
 :::note
-The new [`TokenRebased`](/docs/integrations/api.md#last-lido-apr-for-steth) event emitted from the main Lido contract should be used instead because it provides the pre-report total shares amount as well which is essential to properly estimate a token rebase and its projected APR.
+The new [`TokenRebased`](/docs/integrations/api.md#ultimo-apr-de-lido-para steth) event emitted from the main Lido contract should be used instead because it provides the pre-report total shares amount as well which is essential to properly estimate a token rebase and its projected APR.
 :::
 
 #### Parameters
