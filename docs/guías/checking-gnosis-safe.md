@@ -1,11 +1,11 @@
-# How to verify the multisig is a Gnosis one
+# Cómo verificar que el multisig es uno de Gnosis
 
-Gnosis multisig contracts are usually deployed from the Gnosis factory contracts. Gnosis has the list of `proxy_factory` contracts addresses deployed to different networks — https://github.com/safe-global/safe-deployments/tree/main/src/assets
+Los contratos multisig de Gnosis generalmente se despliegan desde los contratos de la fábrica de Gnosis. Gnosis tiene una lista de direcciones de contratos `proxy_factory` desplegados en diferentes redes — https://github.com/safe-global/safe-deployments/tree/main/src/assets
 
-## How to verify my multisig is deployed from Gnosis factory
+## Cómo verificar que mi multisig se desplegó desde la fábrica de Gnosis
 
-1. Pick the contract version in gnosis UI (settings->safe details) — those usually are `1.0.0`, `1.1.1`, `1.2.0` or `1.3.0`.
-2. Open the safe address in network explorer
-3. Find the safe creation tx (should be the oldest one in "Internal Transactions" tab & have "Contract Creation" note)
-4. Get the address the safe creation tx went to — should be a factory contract
-5. Open the corresponding version's folder on github https://github.com/safe-global/safe-deployments/tree/main/src/assets, open `proxy_factory.json` file & find the address in the list of deployed addresses
+1. Selecciona la versión del contrato en la interfaz de usuario de Gnosis (configuración -> detalles del safe) — suelen ser `1.0.0`, `1.1.1`, `1.2.0` o `1.3.0`.
+2. Abre la dirección del safe en el explorador de la red.
+3. Encuentra la transacción de creación del safe (debería ser la más antigua en la pestaña de "Transacciones Internas" y tener la nota "Creación de Contrato").
+4. Obtén la dirección a la que fue la transacción de creación del safe — debería ser un contrato de la fábrica.
+5. Abre la carpeta correspondiente a la versión en GitHub https://github.com/safe-global/safe-deployments/tree/main/src/assets, abre el archivo `proxy_factory.json` y encuentra la dirección en la lista de direcciones desplegadas.
