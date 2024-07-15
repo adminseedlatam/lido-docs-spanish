@@ -7,7 +7,7 @@
 
 A simple contract that accumulates partial and full withdrawals that comes from
 the Beacon Chain. Its address corresponds to the type-0x01 Lido withdrawal credentials.
-During the accounting oracle report, the vault is emptied by Lido to the internal buffer; see [Lido contract docs](lido.md#oracle-report) for details.
+During the accounting oracle report, the vault is emptied by Lido to the internal buffer; see [Lido contract docs](lido.md#informe-de-oráculo) for details.
 
 The vault is recoverable, so any ERC-20 and ERC-721 tokens can be transferred to the treasury by DAO.
 
