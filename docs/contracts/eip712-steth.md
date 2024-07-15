@@ -1,46 +1,46 @@
 # EIP712StETH
 
-- [Source code](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/EIP712StETH.sol)
-- [Deployed contract](https://etherscan.io/address/0x8F73e4C2A6D852bb4ab2A45E6a9CF5715b3228B7)
+- [Código fuente](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/EIP712StETH.sol)
+- [Contrato desplegado](https://etherscan.io/address/0x8F73e4C2A6D852bb4ab2A45E6a9CF5715b3228B7)
 
-`EIP712StETH` serves as a dedicated helper contract for `stETH`, crucial for complete support of [ERC-2612 compliant signed approvals](https://eips.ethereum.org/EIPS/eip-2612).
+`EIP712StETH` sirve como un contrato auxiliar dedicado para `stETH`, crucial para el soporte completo de las [aprobaciones firmadas compatibles con ERC-2612](https://eips.ethereum.org/EIPS/eip-2612).
 
-## Why This Helper Is Needed
+## Por qué se necesita este auxiliar
 
-The original [`Lido/StETH`](/contracts/lido) contract is implemented in Solidity `0.4.24`, while this helper is implemented in Solidity `0.8.9`. The newer compiler version enables access to the current network's chain id via the globally available variable [`block.chainid`](https://docs.soliditylang.org/en/v0.8.9/units-and-global-variables.html#block-and-transaction-properties). The chain id is mandatory for signature inclusion as per [EIP-155](https://eips.ethereum.org/EIPS/eip-155) to prevent replay attacks, wherein an attacker intercepts a valid network transmission and then rebroadcasts it on another network fork. Consequently, `EIP-155` compliance is critical for securing [`ERC-2612`](https://eips.ethereum.org/EIPS/eip-2612) signed approvals.
+El contrato original [`Lido/StETH`](/contracts/lido) está implementado en Solidity `0.4.24`, mientras que este auxiliar está implementado en Solidity `0.8.9`. La versión más nueva del compilador permite acceder al `chain id` actual de la red a través de la variable globalmente disponible [`block.chainid`](https://docs.soliditylang.org/en/v0.8.9/units-and-global-variables.html#block-and-transaction-properties). El `chain id` es obligatorio para incluir en la firma según [EIP-155](https://eips.ethereum.org/EIPS/eip-155) para prevenir ataques de repetición, donde un atacante intercepta una transmisión válida de red y luego la retransmite en otro fork de la red. Por lo tanto, el cumplimiento de `EIP-155` es crucial para asegurar las aprobaciones firmadas de [`ERC-2612`](https://eips.ethereum.org/EIPS/eip-2612).
 
-## View Methods
+## Métodos de vista
 
 ### domainSeparatorV4()
 
-This method returns the `EIP712`-compatible hashed [domain separator](https://eips.ethereum.org/EIPS/eip-712#definition-of-domainseparator), which is valid for `stETH` token permit signatures. The domain separator is essential in preventing a signature intended for one dApp from functioning in another (thereby averting a signature collision in a broader sense).
+Este método devuelve el [separador de dominio](https://eips.ethereum.org/EIPS/eip-712#definition-of-domainseparator) hash compatible con `EIP712`, que es válido para las firmas de permisos del token `stETH`. El separador de dominio es esencial para evitar que una firma destinada a una dApp funcione en otra (evitando así colisiones de firma en un sentido más amplio).
 
 ```sol
 function domainSeparatorV4(address _stETH) returns (bytes32)
 ```
 
-Also, consider the [`eip712Domain()`](/contracts/eip712-steth#eip712domain) method that can construct a domain separator from `StETH`-specific fields on the client's side, such as within a dApp or a wallet. For instance, Metamask relies on [`eth_signTypedData_v4`](https://docs.metamask.io/wallet/how-to/sign-data/#use-eth_signtypeddata_v4), which requires a non-hashed domain separator being provided.
+También considera el método [`eip712Domain()`](/contracts/eip712-steth#eip712domain) que puede construir un separador de dominio a partir de campos específicos de `StETH` en el lado del cliente, como dentro de una dApp o una cartera. Por ejemplo, Metamask utiliza [`eth_signTypedData_v4`](https://docs.metamask.io/wallet/how-to/sign-data/#use-eth_signtypeddata_v4), que requiere que se proporcione un separador de dominio no hash.
 
 ### hashTypedDataV4()
 
-This method returns the hash of a fully encoded `EIP712`-compatible message for this domain. The method can validate the input data against the provided `v, r, s` secp256k1 components.
+Este método devuelve el hash de un mensaje totalmente codificado compatible con `EIP712` para este dominio. El método puede validar los datos de entrada contra los componentes `v, r, s` secp256k1 proporcionados.
 
 ```sol
 function hashTypedDataV4(address _stETH, bytes32 _structHash) returns (bytes32)
 ```
 
-#### Parameters
+#### Parámetros
 
-| Name         | Type      | Description                           |
-| ------------ | --------- | ------------------------------------- |
-| `_stETH`     | `address` | Address of the deployed `stETH` token |
-| `_structHash`| `bytes32` | Hash of the data structure            |
+| Nombre         | Tipo      | Descripción                           |
+| -------------- | --------- | ------------------------------------- |
+| `_stETH`       | `address` | Dirección del token `stETH` desplegado |
+| `_structHash`  | `bytes32` | Hash de la estructura de datos         |
 
-For a specific use case, see the [StETHPermit.permit()](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.4.24/StETHPermit.sol#L99-L112) implementation.
+Para un caso de uso específico, consulta la implementación de [StETHPermit.permit()](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.4.24/StETHPermit.sol#L99-L112).
 
 ### eip712Domain()
 
-This method returns the fields and values necessary to construct a domain separator on the client's side. The method resembles the one proposed in [ERC-5267](https://eips.ethereum.org/EIPS/eip-5267), with the only difference being that it doesn't return unused fields.
+Este método devuelve los campos y valores necesarios para construir un separador de dominio en el lado del cliente. El método se asemeja al propuesto en [ERC-5267](https://eips.ethereum.org/EIPS/eip-5267), con la única diferencia de que no devuelve campos no utilizados.
 
 ```sol
 function eip712Domain(address _stETH) returns (
@@ -51,29 +51,29 @@ function eip712Domain(address _stETH) returns (
 )
 ```
 
-#### Parameters
+#### Parámetros
 
-| Name     | Type      | Description                           |
-| -------- | --------- | ------------------------------------- |
-| `_stETH` | `address` | Address of the deployed `stETH` token |
+| Nombre     | Tipo      | Descripción                           |
+| ---------- | --------- | ------------------------------------- |
+| `_stETH`   | `address` | Dirección del token `stETH` desplegado |
 
-#### Returns
+#### Devoluciones
 
-| Name              | Type       | Description                   |
-| ----------------- | ---------- | ----------------------------- |
-| `name`            | `string`   | Name of the token            |
-| `version`         | `string`   | Version of the token         |
-| `chainId`         | `uint256`  | Chain identifier             |
-| `verifyingContract`| `address` | Address of the token contract |
+| Nombre             | Tipo       | Descripción                   |
+| ------------------ | ---------- | ----------------------------- |
+| `name`             | `string`   | Nombre del token              |
+| `version`          | `string`   | Versión del token             |
+| `chainId`          | `uint256`  | Identificador de la cadena    |
+| `verifyingContract`| `address`  | Dirección del contrato del token |
 
 :::note
-Provided the correct `_stETH` [deployed](/deployed-contracts) address, it returns:
+Dada la dirección `_stETH` [desplegada](/deployed-contracts) correcta, devuelve:
 
-- ("Liquid staked Ether 2.0", "2", 1, 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84) for Mainnet.
-- ("Liquid staked Ether 2.0", "2", 5, 0x1643E812aE58766192Cf7D2Cf9567dF2C37e9B7F) for Görli.
+- ("Liquid staked Ether 2.0", "2", 1, 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84) para Mainnet.
+- ("Liquid staked Ether 2.0", "2", 5, 0x1643E812aE58766192Cf7D2Cf9567dF2C37e9B7F) para Görli.
 :::
 
-This method facilitates domain separator construction on the client's side, such as in a wallet or widget:
+Este método facilita la construcción del separador de dominio en el lado del cliente, como en una cartera o widget:
 
 ```js
 function makeDomainSeparator(name, version, chainId, verifyingContract) {
@@ -92,8 +92,9 @@ function makeDomainSeparator(name, version, chainId, verifyingContract) {
 }
 ```
 
-## Useful External Links
+## Enlaces Externos Útiles
 
-- [The Magic of Digital Signatures on Ethereum](https://medium.com/mycrypto/the-magic-of-digital-signatures-on-ethereum-98fe184dc9c7)
-- [ERC-2612: The Ultimate Guide to Gasless ERC-20 Approvals](https://medium.com/frak-defi/erc-2612-the-ultimate-guide-to-gasless-erc-20-approvals-2cd32ddee534)
+- [La magia de las firmas digitales en Ethereum](https://medium.com/mycrypto/the-magic-of-digital-signatures-on-ethereum-98fe184dc9c7)
+- [ERC-2612: La guía definitiva para aprobaciones ERC-20 sin gas](https://medium.com/frak-defi/erc-2612-the-ultimate-guide-to-gasless-erc-20-approvals-2cd32ddee534)
 - [Metamask sign-data](https://docs.metamask.io/wallet/how-to/sign-data/#use-eth_signtypeddata_v4)
+
