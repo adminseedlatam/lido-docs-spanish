@@ -8,7 +8,7 @@ Una vez incluido en el protocolo, un Operador de Nodo debe generar y enviar un c
 
 - `pubkey`: Derivado de la clave privada utilizada para firmar el mensaje.
 - `amount`: Debe ser igual a 32 ether.
-- `withdrawal_credentials`: Debe coincidir con las credenciales de retiro establecidas por el DAO.
+- `withdrawal_credentials`: Debe coincidir con las credenciales de retiro establecidas por la DAO.
 
 ### Credenciales de Retiro
 
@@ -36,7 +36,7 @@ Como resultado de ejecutar esto, se creará el directorio `validator_keys` en el
 
 Si opta por utilizar la interfaz de usuario para enviar las claves, deberá pasar los datos JSON encontrados en el archivo de datos de depósito al protocolo (ver la siguiente sección). Si lo desea, puede eliminar cualquier otro campo excepto `pubkey` y `signature` de los elementos del array.
 
-Nunca comparta la mnemotécnica generada ni sus claves privadas con nadie, incluidos los miembros del protocolo y los titulares del DAO.
+Nunca comparta la mnemotécnica generada ni sus claves privadas con nadie, incluidos los miembros del protocolo y los titulares de la DAO.
 
 [`staking-deposit-cli`]: https://github.com/ethereum/staking-deposit-cli/releases
 
@@ -57,7 +57,7 @@ Necesitará un punto final RPC: un nodo local / proveedor de RPC (por ejemplo, A
 
 ## Envío de las Claves
 
-> Tenga en cuenta que la dirección de retiro debe agregarse al Registro de Operadores de Nodo de Lido antes de poder enviar las claves de firma. Agregar una dirección al Registro de Operadores de Nodo sucede a través de votación del DAO. Al proporcionar la dirección de retiro para que se agregue al Registro de Operadores de Nodo, tenga en cuenta lo siguiente:
+> Tenga en cuenta que la dirección de retiro debe agregarse al Registro de Operadores de Nodo de Lido antes de poder enviar las claves de firma. Agregar una dirección al Registro de Operadores de Nodo sucede a través de votación de la DAO. Al proporcionar la dirección de retiro para que se agregue al Registro de Operadores de Nodo, tenga en cuenta lo siguiente:
 >
 > - Es la dirección que recibirá las recompensas.
 > - Es la dirección que utilizará para enviar claves a Lido.

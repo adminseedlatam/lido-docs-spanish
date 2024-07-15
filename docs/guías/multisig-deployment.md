@@ -4,7 +4,7 @@
 Esta página está muy desactualizada con el último lanzamiento de [Lido V2](https://github.com/lidofinance/lido-dao/releases/tag/v2.0.0).
 :::
 
-Este tutorial describe el despliegue del DAO utilizando un firmante multisig/airgapped, paso a paso.
+Este tutorial describe el despliegue de la DAO utilizando un firmante multisig/airgapped, paso a paso.
 
 ## Preparación
 
@@ -78,7 +78,7 @@ También hay algunos pasos que no generan transacciones pero verifican la correc
 
 ## 1. Despliegue de las implementaciones base y la plantilla
 
-Lido utiliza contratos proxy actualizables como almacenamiento para el estado. Cada contrato proxy apunta a un contrato de implementación que proporciona el código que lee y modifica el estado del proxy. Los contratos de implementación pueden actualizarse mediante votación en el DAO. Las implementaciones son inmutables, solo se les permite modificar el estado del contrato llamante (es decir, el proxy).
+Lido utiliza contratos proxy actualizables como almacenamiento para el estado. Cada contrato proxy apunta a un contrato de implementación que proporciona el código que lee y modifica el estado del proxy. Los contratos de implementación pueden actualizarse mediante votación en la DAO. Las implementaciones son inmutables, solo se les permite modificar el estado del contrato llamante (es decir, el proxy).
 
 Para configurar el protocolo, es necesario desplegar versiones iniciales de las implementaciones. Algunos vaults multisig populares, como Gnosis Safe, no admiten desplegar nuevos contratos, por lo que esto debe hacerse desde una dirección normal.
 
@@ -217,7 +217,7 @@ $ yarn hardhat --network mainnet tx --from $DEPLOYER --file tx-02-2-make-ens-reg
 
 ## 4. Despliegue de aplicaciones frontend de Lido
 
-El DAO de Lido incluye aplicaciones frontend para la gobernanza del DAO y la gestión del protocolo. Estas aplicaciones se despliegan en IPFS, por lo que necesitará especificar la clave `ipfsAPI` en el archivo de estado de la red apuntando a un endpoint de API de cliente IPFS, por ejemplo, `"ipfsAPI": "http://localhost:5001/api/v0"`. Luego, ejecute lo siguiente:
+la DAO de Lido incluye aplicaciones frontend para la gobernanza de la DAO y la gestión del protocolo. Estas aplicaciones se despliegan en IPFS, por lo que necesitará especificar la clave `ipfsAPI` en el archivo de estado de la red apuntando a un endpoint de API de cliente IPFS, por ejemplo, `"ipfsAPI": "http://localhost:5001/api/v0"`. Luego, ejecute lo siguiente:
 
 ```text
 $ yarn hardhat --network mainnet run ./scripts/multisig/04-publish-app-frontends.js
@@ -278,7 +278,7 @@ Este paso generará un archivo de transacción; deberá enviar esta transacción
 
 ## 8. Desplegar DAO y su token de gobernanza
 
-Este paso desplegará las instancias del DAO y del token de gobernanza. Deberá agregar un campo llamado `daoInitialSettings` al archivo de estado de la red antes de ejecutar el paso:
+Este paso desplegará las instancias de la DAO y del token de gobernanza. Deberá agregar un campo llamado `daoInitialSettings` al archivo de estado de la red antes de ejecutar el paso:
 
 ```js
   // ...
@@ -288,7 +288,7 @@ Este paso desplegará las instancias del DAO y del token de gobernanza. Deberá 
       "name": "Lido DAO Token",
       "symbol": "LDO"
     },
-    // Especificación de la cadena de beacons; puede cambiarse mediante votación en el DAO
+    // Especificación de la cadena de beacons; puede cambiarse mediante votación en la DAO
     "beaconSpec": {
       "depositContractAddress": "0x00000000219ab540356cBB839Cbe05303d7705Fa",
       "slotsPerEpoch": 32,
@@ -296,13 +296,13 @@ Este paso desplegará las instancias del DAO y del token de gobernanza. Deberá 
       "genesisTime": 1606824023,
       "epochsPerFrame": 225 // Los oráculos de Lido reportan una vez por cada epochsPerFrame epochs
     },
-    // Configuración de votación del DAO (app Aragon Voting)
+    // Configuración de votación de la DAO (app Aragon Voting)
     "voting": {
       "minSupportRequired": "500000000000000000", // 1e18 === 100%
       "minAcceptanceQuorum": "50000000000000000", // 1e18 === 100%
       "voteDuration": 172800 // en segundos
     },
-    // Configuración de tarifas del protocolo; puede cambiarse mediante votación en el DAO
+    // Configuración de tarifas del protocolo; puede cambiarse mediante votación en la DAO
     "fee": {
       "totalPercent": 10,
       "treasuryPercent": 0,
@@ -323,7 +323,7 @@ Guardando datos para la transacción newDAO en tx-05-deploy-dao.json (uso de gas
 
 Envíe la transacción generada desde el contrato en `multisigAddress`. Después de que la transacción se incluya en un bloque, pase al siguiente paso.
 
-## 9. Verificar el DAO desplegado
+## 9. Verificar la DAO desplegado
 
 Ejecute lo siguiente:
 
@@ -333,11 +333,11 @@ yarn hardhat --network mainnet run ./scripts/multisig/09-obtain-deployed-dao.js
 
 Asegúrese de que finalice sin errores y pase al siguiente paso. Los siguientes campos se agregarán al archivo de estado de la red:
 
-- `daoAddress`: la dirección de la instancia del DAO;
-- `daoTokenAddress`: la dirección del token de gobernanza del DAO;
+- `daoAddress`: la dirección de la instancia de la DAO;
+- `daoTokenAddress`: la dirección del token de gobernanza de la DAO;
 - `proxyAddress`: claves bajo las claves `app:*`: direcciones de las instancias de las aplicaciones.
 
-## 10. Emitir tokens de gobernanza del DAO
+## 10. Emitir tokens de gobernanza de la DAO
 
 Agregue la clave `vestingParams` al archivo de estado de la red que contenga lo siguiente:
 
@@ -357,7 +357,7 @@ Agregue la clave `vestingParams` al archivo de estado de la red que contenga lo 
     "cliff": 1608213253,
     // Fecha de finalización del vesting
     "end": 1608501253,
-    // Si los vestings pueden ser revocados por el DAO
+    // Si los vestings pueden ser revocados por la DAO
     "revokable": false
     // Ver https://github.com/aragon/aragon-apps/blob/master/apps/token-manager/contracts/TokenManager.sol
   }
@@ -377,9 +377,9 @@ Guardando datos para la transacción issueTokens (lote 2) en tx-06-2-issue-token
 
 Envíe las transacciones generadas secuencialmente desde el contrato en `multisigAddress`, esperando a que la primera sea incluida en un bloque antes de enviar la segunda. Después de que la segunda transacción se incluya en un bloque, pase al siguiente paso.
 
-## 11. Finalizar el DAO
+## 11. Finalizar la DAO
 
-Agregue la clave `daoAragonId` al archivo de estado de la red, estableciéndola como un nombre bajo el cual el DAO será registrado en aragonID, es decir, `<daoAragonId>.aragonid.eth` resolverá a `daoAddress`. Luego, ejecute lo siguiente:
+Agregue la clave `daoAragonId` al archivo de estado de la red, estableciéndola como un nombre bajo el cual la DAO será registrado en aragonID, es decir, `<daoAragonId>.aragonid.eth` resolverá a `daoAddress`. Luego, ejecute lo siguiente:
 
 ```text
 yarn hardhat --network mainnet run ./scripts/multisig/11-finalize-dao.js
@@ -392,7 +392,7 @@ Envíe la transacción generada desde el contrato en `multisigAddress`. Después
 
 ## 12. Realizar las verificaciones finales
 
-En este punto, el DAO está completamente desplegado. Ejecute lo siguiente para verificar la corrección de la configuración y la configuración de permisos:
+En este punto, la DAO está completamente desplegado. Ejecute lo siguiente para verificar la corrección de la configuración y la configuración de permisos:
 
 ```text
 yarn hardhat --network mainnet run ./scripts/multisig/12-check-dao.js

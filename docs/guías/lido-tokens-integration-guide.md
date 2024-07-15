@@ -114,7 +114,7 @@ Normalmente, los rebases de stETH ocurren diariamente cuando el oráculo de Lido
 
 El oráculo de contabilidad tiene controles de integridad tanto en el APR máximo reportado (el APR no puede exceder el 27%, lo que significa que un rebase diario está limitado a `(27/365)%`) como en la disminución del monto total stakeado (la disminución de ether stakeado reportada no puede exceder el 5%).
 
-Actualmente, la red de oráculos incluye 9 oráculos independientes, demonios de oráculo alojados por operadores de nodos establecidos seleccionados por el DAO.
+Actualmente, la red de oráculos incluye 9 oráculos independientes, demonios de oráculo alojados por operadores de nodos establecidos seleccionados por la DAO.
 Tan pronto como cinco de los nueve demonios de oráculo informen los mismos datos, alcanzando el consenso, el informe se envía al contrato inteligente de Lido y ocurre el rebase.
 
 #### Casos especiales del oráculo
@@ -186,7 +186,7 @@ Además, la actualización V2 introdujo `transferSharesFrom` para que coincida c
 
 ### Tarifas
 
-Lido recoge un porcentaje de las recompensas de staking como tarifa del protocolo. El tamaño exacto de la tarifa lo define el DAO y puede cambiarse en el futuro mediante votación del DAO. Para recoger la tarifa, el protocolo emite nuevos shares del token stETH y los asigna a los destinatarios de la tarifa. Actualmente, la tarifa recolectada por el protocolo Lido es del 10% de las recompensas de staking, con la mitad destinada a los operadores de nodos y la otra mitad al tesoro del protocolo.
+Lido recoge un porcentaje de las recompensas de staking como tarifa del protocolo. El tamaño exacto de la tarifa lo define la DAO y puede cambiarse en el futuro mediante votación de la DAO. Para recoger la tarifa, el protocolo emite nuevos shares del token stETH y los asigna a los destinatarios de la tarifa. Actualmente, la tarifa recolectada por el protocolo Lido es del 10% de las recompensas de staking, con la mitad destinada a los operadores de nodos y la otra mitad al tesoro del protocolo.
 
 Dado que el total de ether de Lido en el pool tiende a aumentar, el valor combinado de todos los shares de los titulares denominados en stETH aumenta respectivamente. Por lo tanto, las recompensas se distribuyen efectivamente entre cada titular de token en proporción a su participación en el TVL del protocolo. Así, Lido emite nuevos shares al destinatario de la tarifa de manera que el costo total de los shares recién emitidos corresponda exactamente a la tarifa tomada (calculada en puntos básicos):
 
@@ -271,7 +271,7 @@ Sin la contabilidad de participaciones, el token no puede proporcionar la tasa `
 
 ### ¿Qué es LDO?
 
-LDO es un token de gobernanza utilizado para el proceso de votación del DAO de Lido ([tanto fuera de cadena como en cadena](https://lido.fi/governance#regular-process)). El token está ampliamente disponible en los ecosistemas DeFi y CeFi.
+LDO es un token de gobernanza utilizado para el proceso de votación de la DAO de Lido ([tanto fuera de cadena como en cadena](https://lido.fi/governance#regular-process)). El token está ampliamente disponible en los ecosistemas DeFi y CeFi.
 
 LDO tiene mecanismos internos de instantáneas de saldo ([`balanceOfAt`](https://etherscan.io/address/0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32#readContract#F5) y [`totalSupplyAt`](https://etherscan.io/address/0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32#readContract#F10)) para permitir que el poder de voto no sea manipulado durante el tiempo de la votación en curso.
 

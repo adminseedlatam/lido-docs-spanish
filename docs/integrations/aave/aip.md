@@ -1,220 +1,210 @@
-# AIP
+| título               | estado    | autor                | descripción breve                                        | discusión                                                        | creado      |
+| -------------------- | --------  | -------------------  | -------------------------------------------------------- | ----------------------------------------------------------------- | ---------- |
+| Añadir stETH a AAVE v2| Propuesta | @jbeezy @grstepanov  | Propuesta de gobernanza de AAVE para habilitar stETH como token base | [arc-add-support-for-steth-lido/5793](https://governance.aave.com/t/arc-add-support-for-steth-lido/5793) | 2022-04-02 |
 
-| title                | status   | author              | shortDescription                                         | discussion                                                        | created    |
-| -------------------- | -------- | ------------------- | -------------------------------------------------------- | ----------------------------------------------------------------- | ---------- |
-| Add stETH to AAVE v2 | Proposed | @jbeezy @grstepanov | AAVE governance proposal to enable stETH as a base token | [arc-add-support-for-steth-lido/5793](https://governance.aave.com/t/arc-add-support-for-steth-lido/5793) | 2022-04-02 |
+### Resumen Simple
 
-### Simple Summary
+Lido permite a los usuarios obtener recompensas de staking en la cadena de Ethereum sin bloquear ether ni mantener infraestructura de staking. Esto se logra mediante el token stETH. Los tokens stETH representan un depósito tokenizado de staking con recompensas de staking y penalizaciones por slashing aplicadas. stETH puede ser retenido, negociado o vendido.
+Proponemos incluir stETH en el mercado AAVE v2. Esto permitiría a los usuarios pedir prestado utilizando stETH como garantía.
 
-Lido allows users to get staking rewards on the Ethereum beacon chain without locking ether or maintaining staking infrastructure. This is done through the stETH token. stETH tokens represent a tokenized staking deposit with staking rewards and slashing penalties applied. stETH can be held, traded, or sold.
-We propose listing stETH to AAVE v2 market. This would allow users to borrow against stETH.
+### Referencias
 
-### References
-
-- Website: [lido.fi](https://lido.fi/)
-- [Document portal](https://docs.lido.fi/)
-- [Source code for the system(s) that interact with the proposed token](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.4.24/Lido.sol)
-- [Ethereum addresses contracts](/deployed-contracts)
+- Sitio web: [lido.fi](https://lido.fi/)
+- [Portal de documentos](https://docs.lido.fi/)
+- [Código fuente para los sistemas que interactúan con el token propuesto](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.4.24/Lido.sol)
+- [Contratos de direcciones Ethereum](/deployed-contracts)
 - [ChainLink Oracle](https://etherscan.io/address/0x86392dC19c0b719886221c78AB11eb8Cf5c52812)
-- [Audits](https://github.com/lidofinance/audits)
-- Community
-  - [Governance forum](https://research.lido.fi/)
+- [Auditorías](https://github.com/lidofinance/audits)
+- Comunidad
+  - [Foro de gobernanza](https://research.lido.fi/)
   - [Twitter](https://twitter.com/lidofinance)
   - [Discord](https://discord.gg/vgdPfhZ)
   - [Telegram](https://t.me/lidofinance)
   - [Reddit](https://www.reddit.com/r/LidoFinance)
 
-### Abstract
+### Resumen
 
-The goal of listing stETH on AAVE v2 market is to provide the ability to deposit stETH into AAVE and allow to use it as collateral. There is no intention to enable borrowing of stETH on AAVE v2 market.
+El objetivo de listar stETH en el mercado AAVE v2 es permitir depositar stETH en AAVE y utilizarlo como garantía. No hay intención de permitir el préstamo de stETH en el mercado AAVE v2.
 
-### Motivation
+### Motivación
 
-Listing stETH on AAVE can work to attract a larger audience to both AAVE and Lido. More ETH staked with Lido would subsequently benefit the decentralization and security of the Ethereum network, to the benefit of the community as a whole. stETH would likely bring new borrow demand to AAVE as market participants look to borrow against stETH.
+Listar stETH en AAVE puede atraer a una audiencia más amplia tanto a AAVE como a Lido. Más ETH estacado con Lido beneficiaría la descentralización y la seguridad de la red Ethereum, en beneficio de toda la comunidad. stETH probablemente generaría nueva demanda de préstamos en AAVE, ya que los participantes del mercado buscarían pedir prestado contra stETH.
 
-stETH makes a perfect DeFi collateral and is beneficial for a number of reasons covered in the Specifications section of this AIP.
+stETH es un colateral perfecto para DeFi y es beneficioso por varias razones que se detallan en la sección de Especificaciones de este AIP.
 
-### Specification
+### Especificaciones
 
-1. **What is the link between the author of the AIP and the token?**
+1. **¿Cuál es la relación entre el autor del AIP y el token?**
 
-- Jacob (jbeezy) is a full time member of the DAO working to facilitate integrations for st-tokens across DeFi in protocols such as Aave among others.
-- Gregory (GrStepanov) is a full time protocol contributor working on technical integrations.
+- Jacob (jbeezy) es un miembro a tiempo completo de la DAO que trabaja para facilitar integraciones para st-tokens en DeFi en protocolos como Aave, entre otros.
+- Gregory (GrStepanov) es un contribuyente a tiempo completo del protocolo que trabaja en integraciones técnicas.
 
-2. **Provide a brief high-level overview of the project and the token.**
+2. **Proporcione un resumen breve de alto nivel del proyecto y del token.**
 
-#### Lido Background
+#### Antecedentes de Lido
 
-The Lido Protocol, built on Ethereum’s beacon chain to start, allows users to get staking rewards on the beacon chain without rendering their tokens illiquid or maintaining staking infrastructure.
+El Protocolo Lido, construido en la cadena de beacon de Ethereum inicialmente, permite a los usuarios obtener recompensas de staking en la cadena de beacon sin hacer que sus tokens sean ilíquidos ni mantener infraestructura de staking.
 
-Lido was [announced](https://blog.lido.fi/how-lido-works/) in November 2020. The testnet was released in late November.
+Lido fue [anunciado](https://blog.lido.fi/how-lido-works/) en noviembre de 2020. La red de prueba se lanzó a finales de noviembre.
 
-Lido today has 2 products (stETH, stSOL) managed by teams in separate organizations. Across these products is a multi billion dollar TVL and has pushed Lido to #6 on [DeFi Llama rankings](https://defillama.com/protocol/lido). stETH has also been accepted as part of Nexus Mutual’s treasury as part of their [risk management strategy](https://forum.nexusmutual.io/t/proposal-increase-the-allocation-of-the-capital-pool-to-steth/641).
+Lido hoy tiene 2 productos (stETH, stSOL) administrados por equipos en organizaciones separadas. Entre estos productos hay un TVL de miles de millones de dólares y ha llevado a Lido al puesto #6 en [DeFi Llama rankings](https://defillama.com/protocol/lido). stETH también ha sido aceptado como parte del tesoro de Nexus Mutual como parte de su [estrategia de gestión de riesgos](https://forum.nexusmutual.io/t/proposal-increase-the-allocation-of-the-capital-pool-to-steth/641).
 
-Lido has begun the process to move over to a fully non-custodial solution. Details can be found here: [Withdrawal Credentials in Lido](https://blog.lido.fi/withdrawal-credentials-in-lido/).
+Lido ha comenzado el proceso para pasar a una solución completamente no custodial. Los detalles se pueden encontrar aquí: [Credenciales de retiro en Lido](https://blog.lido.fi/withdrawal-credentials-in-lido/).
 
-The Lido DAO manages the liquid staking protocol by deciding on key parameters (e.g. setting fees, assigning node operators and oracles) through the voting power of governance token holders.
+la DAO de Lido administra el protocolo de staking líquido decidiendo sobre parámetros clave (por ejemplo, estableciendo tarifas, asignando operadores de nodos y oráculos) mediante el poder de voto de los titulares de tokens de gobernanza.
 
-Lido has been audited by Sigma Prime, Quantstamp and MixBytes.
+Lido ha sido auditado por Sigma Prime, Quantstamp y MixBytes.
 
-#### stETH Background
+#### Antecedentes de stETH
 
-Lido allows users to deposit ETH and receive stETH. The deposited ETH is then pooled and staked with node operators selected by the Lido DAO. stETH represents the user’s staked ETH balance of the beacon chain along with staking rewards accrued or penalties inflicted on validators in the beacon chain. When withdrawals are enabled on the beacon chain, stETH can be redeemed for unstaked ETH and accumulated rewards.
+Lido permite a los usuarios depositar ETH y recibir stETH. El ETH depositado se agrupa y se apuesta con operadores de nodos seleccionados por la DAO de Lido. stETH representa el saldo de ETH con stake del usuario en la cadena de beacon junto con las recompensas de staking acumuladas o las penalizaciones infligidas a los validadores en la cadena de beacon. Cuando se habilitan los retiros en la cadena de beacon, stETH se puede canjear por ETH desestacado y recompensas acumuladas.
 
-Unlike beacon chain ETH, stETH can be freely transferred and traded. Onboarding stETH to Aave would allow users to borrow against stETH.
+A diferencia del ETH de la cadena de beacon, stETH se puede transferir y comerciar libremente. Integrar stETH en Aave permitiría a los usuarios pedir prestado contra stETH.
 
-The balance of stETH is based on the total amount of staked ETH plus total staking rewards minus slashing applied on validators. stETH rebases daily.
-The stETH supply stands at 1,697,460 - worth $5.4BN using current stETH prices.
+El saldo de stETH se basa en la cantidad total de ETH apostado más las recompensas totales de staking menos el slashing aplicado a los validadores. stETH se reajusta diariamente.
+El suministro de stETH es de 1,697,460 - valorado en $5.4BN utilizando los precios actuales de stETH.
 
-3. **Explain positioning of token in the AAVE ecosystem. Why would it be a good borrow or collateral token?**
+3. **Explique la posición del token en el ecosistema AAVE. ¿Por qué sería un buen token para préstamos o como colateral?**
 
-stETH as DeFi collateral is beneficial for a number of reasons.
+stETH como colateral DeFi es beneficioso por varias razones.
 
-- stETH is almost as safe as ETH, price-wise: barring catastrophic scenarios, its value tends to hold the ETH peg well;
-- stETH is a productive token. Getting rewards on collateral effectively lowers the cost of borrowing. This could make borrowing more attractive on Aave and help to increase market utilization (and therefore Aave’s protocol revenue from
-  coin reserve factors).
-- stETH is a very liquid token with $5+ billion in liquidity used across [multiple DeFi projects](https://dune.xyz/LidoAnalytical/Integration-monitor-dashboard). stETH:ETH liquidity pool on Curve is the deepest LP in DeFi with $3.8 billion TVL.
+- stETH es casi tan seguro como ETH en términos de precio: excepto en escenarios catastróficos, su valor tiende a mantener bien el anclaje a ETH.
+- stETH es un token productivo. Obtener recompensas sobre el colateral efectivamente reduce el costo del préstamo. Esto podría hacer que el préstamo sea más atractivo en Aave y ayudaría a aumentar la utilización del mercado (y por lo tanto los ingresos del protocolo Aave provenientes de factores de reserva de monedas).
+- stETH es un token muy líquido con más de $5 mil millones en liquidez utilizada en [múltiples proyectos DeFi](https://dune.xyz/LidoAnalytical/Integration-monitor-dashboard). El pool de liquidez stETH:ETH en Curve es el LP más profundo en DeFi con un TVL de $3.8 mil millones.
 
-4. **Provide a brief history of the project and the different components: DAO (is it live?), products (are they live?). How did it overcome some of the challenges it faced?**
+4. **Proporcione un breve historial del proyecto y de los diferentes componentes: DAO (¿está activo?), productos (¿están activos?). ¿Cómo superó algunos de los desafíos que enfrentó?**
 
-Lido protocol background is listed in Question #2.
+El antecedente del protocolo Lido se enumera en la Pregunta #2.
 
-There is a DAO and it is live. The Lido DAO consists of, amongst others, Semantic VC, ParaFi Capital, Libertus Capital, Bitscale Capital, StakeFish, StakingFacilities, Chorus, P2P Capital and KR1, Stani Kulechov of Aave, Banteg of Yearn, Will Harborne of Deversifi, Julien Bouteloup of Stake Capital and Kain Warwick of Synthetix.
+Hay un DAO y está activo. la DAO de Lido está compuesto, entre otros, por Semantic VC, ParaFi Capital, Libertus Capital, Bitscale Capital, StakeFish, StakingFacilities, Chorus, P2P Capital y KR1, Stani Kulechov de Aave, Banteg de Yearn, Will Harborne de Deversifi, Julien Bouteloup de Stake Capital y Kain Warwick de Synthetix.
 
-The Lido treasury has been diversified and DAO members now include Paradigm, Three Arrows Capital, DeFiance Capital, Jump Trading, Alameda Research, iFinex, Dragonfly Capital, Delphi Digital, Robot Ventures, Coinbase Ventures, Digital Currency Group, The LAO and [angels](https://research.lido.fi/t/proposal-ldo-treasury-diversification-part-2/506).
+El tesoro de Lido se ha diversificado y los miembros de la DAO ahora incluyen a Paradigm, Three Arrows Capital, DeFiance Capital, Jump Trading, Alameda Research, iFinex, Dragonfly Capital, Delphi Digital, Robot Ventures, Coinbase Ventures, Digital Currency Group, The LAO y [angels](https://research.lido.fi/t/proposal-ldo-treasury-diversification-part-2/506).
 
-The Lido suite of products consist of st-tokens which represent the underlying staked collateral on various protocols. These are currently stETH and stSOL and are managed by teams in separate organizations to further mitigate centralization risk.
+La suite de productos de Lido consiste en st-tokens que representan el colateral staked subyacente en varios protocolos. Actualmente, estos son stETH y stSOL y son administrados por equipos en organizaciones separadas para mitigar aún más el riesgo de centralización.
 
-There are further wrapped versions to address platform limitations around rebasing tokens or bridging to other ecosystem. These wrapped tokens are minted/burned based on locking of the st-token. Currently there is wstETH.
+Se han superado desafíos iniciales con el apoyo de los miembros de la DAO, la velocidad de ejecución y la utilidad de los st-tokens. Esta última es especialmente crítica para el éxito de cualquier producto líquido.
 
-Early challenges were overcome with DAO member support, speed of execution and utility of st-tokens. The last one is particularly critical in the success of any liquid product.
+5. **¿Cómo se usa actualmente el token?**
 
-5. **How is the token currently used?**
+stETH se utiliza de varias maneras.
 
-stETH is used in a number of ways.
+- un token productivo (por ejemplo, en la estrategia de gestión de riesgos del tesoro de Nexus Mutual);
+- estrategias de recompensas compuestas en DeFi (AMM, autofarms) (por ejemplo, Convex, Yearn, Harvest);
+- colateral multicadena (por ejemplo, wstETH en Ethereum en Maker).
 
-- a productive token (e.g. in Nexus Mutual Treasury risk management strategy);
-- compounding rewards strategies in DeFI (AMMs, autofarms) (e.g. Convex, Yearn, Harvest);
-- multichain collateral (e.g. wstETH on Ethereum on Maker).
+6. **Programa de emisión**
 
-5. **Emission schedule**
+No hay un programa de emisión. Al igual que DAI, stETH se crea bajo demanda cuando los usuarios bloquean ETH en el protocolo.
 
-There is no emission schedule. Similar to DAI, stETH is minted on demand when users lock ETH into the protocol.
+7. **Permisos del Token (& Protocolo) (minting) y capacidad de actualización. ¿Hay un multisig? ¿Qué puede hacer? ¿Quiénes son los firmantes?**
 
-6. **Token (& Protocol) permissions (minting) and upgradability. Is there a multisig? What can it do? Who are the signers?**
+El contrato de stETH es actualizable y se encuentra detrás del proxy `AppProxyUpgradeable` en [`0xae7ab96520de3a18e5e111b5eaab095312d7fe84`](https://etherscan.io/address/0xae7ab96520de3a18e5e111b5eaab095312d7fe84). LA DAO de Lido puede cambiar la implementación con una votación exitosa de la DAO.
 
-stETH token is the upgradable contract behind `AppProxyUpgradeable` proxy at [`0xae7ab96520de3a18e5e111b5eaab095312d7fe84`](https://etherscan.io/address/0xae7ab96520de3a18e5e111b5eaab095312d7fe84). Lido DAO can change the implementation with the successful DAO vote.
+Los roles y direcciones se enumeran en un [informe independiente](https://github.com/lidofinance/audits/?tab=readme-ov-file#10-2023-statemind-lido-roles-analysis) a fines de 2023.
 
-The roles and addresses are listed in the following independent [report](https://github.com/lidofinance/audits/?tab=readme-ov-file#10-2023-statemind-lido-roles-analysis) as of end of 2023.
+Para mitigar los riesgos de retiro, el staking de Lido se activó el 18 de diciembre de 2020 a través de una [ceremonia de clave de retiro](https://blog.lido.fi/lido-withdrawal-key-ceremony/). Chorus One, Staking Facilities, Certus One, Argent, Banteg (yearn.finance), Alex Svanevik (Nansen), Anton Bukov (1inch), Michael Egorov (Curve/Nucypher), Rune Christensen (MakerDAO), Will Harborne (DeversiFi), y Mustafa Al-Bassam (LazyLedger) se reunieron durante cuatro días para generar firmas de umbral para las claves de retiro de Lido en un entorno seguro en máquinas sin conexión a internet.
 
-To mitigate withdrawal risks, Lido staking went live on December 18th, 2020, through a [withdrawal key ceremony](https://blog.lido.fi/lido-withdrawal-key-ceremony/). Chorus One, Staking Facilities, Certus One, Argent, Banteg (yearn.finance), Alex Svanevik (Nansen), Anton Bukov (1inch), Michael Egorov (Curve/Nucypher), Rune Christensen (MakerDAO), Will Harborne (DeversiFi), and Mustafa Al-Bassam (LazyLedger) came together over a four-day event to generate threshold signatures for Lido’s withdrawal keys in a secure environment on air-gapped machines.
-Lido has already migrated to a non-custodial solution and >60% of all stETH already uses this. Details can be found here: [Withdrawal Credentials in Lido](https://blog.lido.fi/withdrawal-credentials-in-lido/).
+Lido ya ha migrado a una solución completamente no custodial y más del 60% de todo el stETH ya utiliza esta solución. Los detalles se pueden encontrar aquí: [Credenciales de Retiro en Lido](https://blog.lido.fi/withdrawal-credentials-in-lido/).
 
-8. **Market data (Market Cap, 24h Volume, Volatility, Exchanges, Maturity)**
+8. **Datos del Mercado (Capitalización de Mercado, Volumen 24h, Volatilidad, Exchanges, Madurez)**
 
-**Market Cap** $5.5B
+**Capitalización de Mercado:** $5.5B
 
-**Volatility** - Over the past year, stETH proved to hold peg extremely well through various market conditions. [stETH:ETH balance data for the Curve pool can be found here](https://dune.xyz/queries/36557/72603).
+**Volatilidad:** Durante el último año, stETH ha demostrado mantener muy bien el anclaje a través de diversas condiciones del mercado. Los datos del balance stETH:ETH para el pool de Curve se pueden encontrar [aquí](https://dune.xyz/queries/36557/72603).
 
-**Volumes and DEXes**
+**Volúmenes y DEXes**
 
 **[Balancer (wstETH/WETH)](https://app.balancer.fi/#/pool/0x32296969ef14eb0c6d29669c550d4a0449130230000200000000000000000080)**
-Liquidity: $409.3M
-Volume (24h): $509,3
-[Dune query](https://dune.xyz/embeds/153863/304423/684fdf22-161c-4352-a41d-81ce8a705c01)
+- Liquidez: $409.3M
+- Volumen (24h): $509,3
+- [Consulta en Dune](https://dune.xyz/embeds/153863/304423/684fdf22-161c-4352-a41d-81ce8a705c01)
 
 **[SushiSwap (wstETH/DAI)](https://analytics.sushi.com/pairs/0xc5578194d457dcce3f272538d1ad52c68d1ce849)**
-Liquidity: $32.2M
-Volume (24h): $756,211
-[Dune query](https://dune.xyz/embeds/153729/304165/5c53e046-47ef-485d-9767-6ec188a5629e)
+- Liquidez: $32.2M
+- Volumen (24h): $756,211
+- [Consulta en Dune](https://dune.xyz/embeds/153729/304165/5c53e046-47ef-485d-9767-6ec188a5629e)
 
 **[Curve (stETH/ETH)](https://curve.fi/steth)**
-Liquidity: $3,75B
-Volume (24h): $5,7M
-[Dune query](https://dune.xyz/embeds/153374/303383/9c8cb193-4538-497e-a774-c33e78bcd34d)
+- Liquidez: $3,75B
+- Volumen (24h): $5,7M
+- [Consulta en Dune](https://dune.xyz/embeds/153374/303383/9c8cb193-4538-497e-a774-c33e78bcd34d)
 
-9. **Social channels data**
+9. **Datos de Canales Sociales**
 
-[Discord](https://discord.gg/vgdPfhZ) - 7400 members
-[Twitter](https://twitter.com/LidoFinance) - 60K followers
-[GitHub](https://github.com/lidofinance) - Active and managed
+[Discord](https://discord.gg/vgdPfhZ) - 7400 miembros
+[Twitter](https://twitter.com/LidoFinance) - 60K seguidores
+[GitHub](https://github.com/lidofinance) - Activo y gestionado
 
-10. **Contracts date of deployments, number of transactions, number of holders for tokens**
+10. **Fecha de Despliegue de Contratos, Número de Transacciones, Número de Titulares de Tokens**
 
-Date of Deployment: December 18th, 2020
-Number of Transactions (stETH): [146,000+](https://etherscan.io/token/0xae7ab96520de3a18e5e111b5eaab095312d7fe84)
-Unique holders: [42,000+](https://etherscan.io/token/0xae7ab96520de3a18e5e111b5eaab095312d7fe84)
+Fecha de Despliegue: 18 de diciembre de 2020
+Número de Transacciones (stETH): [146,000+](https://etherscan.io/token/0xae7ab96520de3a18e5e111b5eaab095312d7fe84)
+Titulares Únicos: [42,000+](https://etherscan.io/token/0xae7ab96520de3a18e5e111b5eaab095312d7fe84)
 
-11. **Unique Depositors**
+11. **Depositantes Únicos**
 
-Unique depositors: [36,000+](https://dune.xyz/queries/20029/41160)
+Depositantes Únicos: [36,000+](https://dune.xyz/queries/20029/41160)
 
-### Technical specification
+### Especificación Técnica
 
-stETH represents the user’s staked ETH balance of the beacon chain along with staking rewards accrued or penalties inflicted on validators in the beacon chain.
-This is implemented via rebasing mechanism.
+stETH representa el saldo de ETH con stake del usuario en la cadena de beacon junto con las recompensas de staking acumuladas o las penalizaciones infligidas a los validadores en la cadena de beacon. Esto se implementa mediante un mecanismo de rebase.
 
-Due to the rebasing nature of stETH, the proposed listing implementation involves few changes to AAVE's generic aToken.
-The proposed aToken uses underlying stETH shares to store balances and implement the rebase ability. Thus, it has 2 private balances and 1 public balance.
+Debido a la naturaleza de rebase de stETH, la implementación propuesta implica pocos cambios al aToken genérico de AAVE.
+El aToken propuesto utiliza acciones subyacentes de stETH para almacenar saldos e implementar la capacidad de rebase. Por lo tanto, tiene 2 saldos privados y 1 saldo público.
 
-1. The internal (fixed-supply) balance and total supply are used for book-keeping. The deposited balance is stored in stETH shares and converted into the amount of the tokens with functions from stETH. Users’ balances are book-kept with the underlying ERC20 token.
-2. The internal (elastic-supply) balance and total supply correspond to the deposited balance without accrued interest. Rebasing of aSTETH according to stETH happens in this layer.
-3. The external (elastic-supply) balance and total supply correspond to the deposited balance with interest.
+1. El saldo interno (de suministro fijo) y el suministro total se utilizan para contabilidad. El saldo depositado se almacena en acciones de stETH y se convierte en la cantidad de tokens con funciones de stETH. Los saldos de los usuarios se llevan contablemente con el token ERC20 subyacente.
+2. El saldo interno (de suministro elástico) y el suministro total corresponden al saldo depositado sin interés acumulado. El rebase de aSTETH según stETH ocurre en esta capa.
+3. El saldo externo (de suministro elástico) y el suministro total corresponden al saldo depositado con interés.
 
-Externally, the aSTETH behaves similar to every other aToken. It always maintains a 1:1 peg with the underlying stETH.
+Externamente, aSTETH se comporta de manera similar a cualquier otro aToken. Siempre mantiene un anclaje 1:1 con el stETH subyacente.
 
-The current implementation doesn't support borrowing, neither with variable nor with stable interest rates. The stableDebtSTETH and variableDebtSTETH contracts extend default stableDebtToken and variableDebtToken contracts accordingly to make it impossible to use borrowing with aSTETH because default debt tokens are not compatible with the AStETH contract.
+La implementación actual no admite préstamos, ni con tasas de interés variables ni estables. Los contratos stableDebtSTETH y variableDebtSTETH extienden los contratos predeterminados stableDebtToken y variableDebtToken respectivamente para hacer imposible el uso de préstamos con aSTETH, ya que los tokens de deuda predeterminados no son compatibles con el contrato AStETH.
 
-#### Code
+#### Código
 
 - [AStETH](https://etherscan.io/address/0xbd233D4ffdAA9B7d1d3E6b18CCcb8D091142893a)
 - [variableDebtSTETH](https://etherscan.io/address/0xde2c414b671d2db93617d1592f0490c13674de24)
 - [stableDebtSTETH](https://etherscan.io/address/0x8180949ac41ef18e844ff8dafe604a195d86aea9)
 - [DefaultReserveInterestRateStrategy](https://etherscan.io/address/0xff04ed5f7a6C3a0F1e5Ea20617F8C6f513D5A77c)
-Steps the proposal will execute: start a vote to add stETH as a new token.
+Pasos que la propuesta ejecutará: iniciar una votación para agregar stETH como nuevo token.
 
-#### Security Considerations
+### Consideraciones de Seguridad
 
-Standard technical risks of smart contracts apply to the AToken implementation.
-The implementation has been audited by MixBytes() and considered safe. Read the full report from [here](https://github.com/lidofinance/audits/blob/main/MixBytes%20AAVE%20stETH%20integration%20Security%20Audit%20Report%2002-22.pdf).
+Se aplican los riesgos técnicos estándar de los contratos inteligentes a la implementación de AToken. La implementación ha sido auditada por MixBytes() y se considera segura. Puede leer el informe completo desde [aquí](https://github.com/lidofinance/audits/blob/main/MixBytes%20AAVE%20stETH%20integration%20Security%20Audit%20Report%2002-22.pdf).
 
-### Proposed Risk Parameters
+### Parámetros de Riesgo Propuestos
 
-LTV: 70%
-Liquidation Threshold: 75%
-Liquidation Bonus: 7.5%
-Reserve Factor: 10%
+- **LTV (Loan-to-Value):** 70%
+- **Umbral de Liquidación:** 75%
+- **Bono de Liquidación:** 7.5%
+- **Factor de Reserva:** 10%
 
-**Interest Rate Model:**
-UOptimal: 60%
-Base: 0%
-Slope 1: 8%
-Slope 2: 200%
+**Modelo de Tasa de Interés:**
+- UÓptimo: 60%
+- Base: 0%
+- Pendiente 1: 8%
+- Pendiente 2: 200%
 
-As stETH is more suited as collateral instead of a borrowing token, we propose listing stETH on AAVE v2 market with borrowing disabled.
+Dado que stETH es más adecuado como garantía en lugar de un token para préstamos, proponemos listar stETH en el mercado AAVE v2 con la función de préstamos deshabilitada.
 
-### Risk Assessment (as of time of ARC)
+### Evaluación de Riesgos (al momento del ARC)
 
-**Smart contract risks**
+**Riesgos de Contratos Inteligentes**
 
-Lido faces smart contract risks. To mitigate these, Lido has been audited multiple times - by Quantstamp, Sigma Prime, and MixBytes (see [Audits](https://github.com/lidofinance/audits)), with no critical issues found.
+Lido enfrenta riesgos de contratos inteligentes. Para mitigar estos riesgos, Lido ha sido auditado varias veces, incluyendo auditorías por Quantstamp, Sigma Prime y MixBytes (ver [Audits](https://github.com/lidofinance/audits)), sin encontrar problemas críticos.
 
-**Counterparty risks**
+**Riesgos de Contraparte**
 
-Lido is a DAO. Decisions in the Lido DAO are made through proposals and votes - community members manage protocol parameters, node operators, oracle members, and more. The Lido staking infrastructure for stETH consists of 22 node operators, with a focus on decentralization.
-Lido relies on a set of oracles to report staking rewards to the smart contracts. Their maximum possible impact is limited by the [recent upgrade](https://github.com/lidofinance/lido-improvement-proposals/blob/develop/LIPS/lip-2.md#sanity-checks-the-oracles-reports-by-configurable-values) (limit oracles report change by 10% APR increase in stake and 5% decrease in stake), and the operators of oracles are all well-known entities: Stakefish, Certus One, Chorus One, Staking Facilities, DSRV, Blockscape, Everstake, SkillZ, RockX, Allnodes, P2P Validator, and others.
-Read further in Lido [documentation](https://docs.lido.fi/gu/steth-superuser-functions/).
+Lido es una DAO. Las decisiones en la DAO de Lido se toman a través de propuestas y votaciones; los miembros de la comunidad gestionan los parámetros del protocolo, los operadores de nodos, los miembros del oráculo y más. La infraestructura de staking de Lido para stETH consta de 22 operadores de nodos, con un enfoque en la descentralización. Lido depende de un conjunto de oráculos para informar las recompensas de staking a los contratos inteligentes. El impacto máximo posible de los oráculos está limitado por la [actualización reciente](https://github.com/lidofinance/lido-improvement-proposals/blob/develop/LIPS/lip-2.md#sanity-checks-the-oracles-reports-by-configurable-values) (cambio máximo de 10% APR en informes de oráculos de aumento y 5% de disminución en stake), y los operadores de oráculos son entidades bien conocidas como Stakefish, Certus One, Chorus One, Staking Facilities, DSRV, Blockscape, Everstake, SkillZ, RockX, Allnodes, P2P Validator, entre otros. Lea más en la [documentación de Lido](https://docs.lido.fi/gu/steth-superuser-functions/).
 
-**Market risk**
+**Riesgos de Mercado**
 
-Over the past year, stETH proved to hold the ETH peg 1:1 steadily.
-Four liquidity pools across different DEXes are incentivized with significant LDO rewards. Curve stETH:ETH LP has grown into the deepest LP across DeFi, which makes it extremely resistant to any attempts of moving the peg.
+Durante el último año, stETH demostró mantener el anclaje ETH 1:1 de manera estable. Cuatro pools de liquidez en diferentes DEX están incentivados con recompensas significativas de LDO. El pool de Curve stETH:ETH se ha convertido en el pool más profundo en DeFi, lo que lo hace extremadamente resistente a cualquier intento de mover el anclaje.
 
-**Staking risks**
+**Riesgos de Staking**
 
-stETH faces staking risks, specifically validator risks including slashing and hostage risks. To mitigate these, Lido works only with best-in-class validators with a track record of success.
-Besides, there's an ongoing [discussion in the community](https://research.lido.fi/t/lip-6-in-protocol-coverage-proposal/1468) about in-protocol coverage options to mitigate slashing risks.
+stETH enfrenta riesgos de staking, específicamente riesgos de validadores incluyendo penalizaciones y riesgos de rehenes. Para mitigar estos riesgos, Lido trabaja solo con validadores de primer nivel con un historial exitoso. Además, hay una [discusión en curso en la comunidad](https://research.lido.fi/t/lip-6-in-protocol-coverage-proposal/1468) sobre opciones de cobertura en el protocolo para mitigar riesgos de penalización.
 
-**Price feed risk**
+**Riesgos de Feed de Precios**
 
-The ChainLink price feed for stETH is based on the pools with extremely deep liquidity. This makes stETH price very stable and resilient. Manipulating stETH price at this point would require staggering amount of resources and potentially render this kind of attack unreasonable.
+El feed de precios de ChainLink para stETH se basa en pools con liquidez extremadamente profunda. Esto hace que el precio de stETH sea muy estable y resistente. Manipular el precio de stETH en este punto requeriría una cantidad considerable de recursos y podría hacer que este tipo de ataque sea poco razonable.

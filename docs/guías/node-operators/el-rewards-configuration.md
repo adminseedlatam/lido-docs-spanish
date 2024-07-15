@@ -44,7 +44,7 @@ Los clientes de Beacon Chain ofrecen una variedad de métodos para configurar el
 
 ## Relés y opciones de MEV-Boost
 
-La lista de relés aprobados por el DAO se puede obtener consultando el método [`get_relays()`](/contracts/mev-boost-relays-allowed-list#get_relays) en el contrato `MevBoostRelayAllowedList`.
+La lista de relés aprobados por la DAO se puede obtener consultando el método [`get_relays()`](/contracts/mev-boost-relays-allowed-list#get_relays) en el contrato `MevBoostRelayAllowedList`.
 
 ### Mainnet
 

@@ -1,4 +1,4 @@
-# Votación en el DAO con Etherscan
+# Votación en la DAO con Etherscan
 
 Así es como se vota en el Aragon DAO de Lido utilizando la interfaz de Etherscan.
 
@@ -10,7 +10,7 @@ Así es como se vota en el Aragon DAO de Lido utilizando la interfaz de Ethersca
 
 ## Preparación
 
-Obtén la dirección del contrato de votación Aragon del DAO de Lido desde la página [Contratos Desplegados](/deployed-contracts/#dao-contracts). Debería ser: [0x2e59A20f205bB85a89C53f1936454680651E618e].
+Obtén la dirección del contrato de votación Aragon la DAO de Lido desde la página [Contratos Desplegados](/deployed-contracts/#dao-contracts). Debería ser: [0x2e59A20f205bB85a89C53f1936454680651E618e].
 
 Obtén el ID del voto, ya sea desde [la interfaz de votación]:
 

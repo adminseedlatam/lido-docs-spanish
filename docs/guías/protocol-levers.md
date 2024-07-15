@@ -1,12 +1,12 @@
 # Palancas del Protocolo
 
-El protocolo proporciona una serie de ajustes controlables por el DAO. Modificar cada uno de ellos requiere que el llamante tenga un permiso específico. Después de implementar el DAO, todos los permisos pertenecen a las aplicaciones DAO `Voting` o `Agent`, las cuales también pueden gestionarlos. Esto significa que, inicialmente, las palancas solo pueden ser modificadas mediante votación del DAO, y otras entidades solo pueden permitirse lo mismo como resultado de esa votación.
+El protocolo proporciona una serie de ajustes controlables por la DAO. Modificar cada uno de ellos requiere que el llamante tenga un permiso específico. Después de implementar la DAO, todos los permisos pertenecen a las aplicaciones DAO `Voting` o `Agent`, las cuales también pueden gestionarlos. Esto significa que, inicialmente, las palancas solo pueden ser modificadas mediante votación de la DAO, y otras entidades solo pueden permitirse lo mismo como resultado de esa votación.
 
 A continuación se enumeran todas las palancas existentes, agrupadas por contrato.
 
 ### Nota sobre la capacidad de actualización
 
-Los siguientes contratos pueden ser actualizables mediante votación del DAO:
+Los siguientes contratos pueden ser actualizables mediante votación de la DAO:
 
 - [`LidoLocator`](/contracts/lido-locator)
 - [`Lido`](/contracts/lido)
@@ -44,7 +44,7 @@ La quema en sí misma es parte de los procedimientos centrales del protocolo:
 Estas responsabilidades están controladas por el rol `REQUEST_BURN_SHARES_ROLE`, que se asigna tanto a los contratos [`Lido`](/contracts/lido) como [`NodeOperatorsRegistry`](/contracts/node-operators-registry).
 Este rol nunca debe asignarse permanentemente a otras entidades.
 
-Además de esto, la quema de tokens `stETH` puede aplicarse para compensar penalizaciones/pérdidas por slashing según la decisión del DAO.
+Además de esto, la quema de tokens `stETH` puede aplicarse para compensar penalizaciones/pérdidas por slashing según la decisión de la DAO.
 Es posible a través de un rol más restrictivo `REQUEST_BURN_MY_STETH_ROLE`, que actualmente no está asignado.
 
 La diferencia clave es que ambos roles dependen de la asignación de `stETH` proporcionada al contrato `Burner`,
