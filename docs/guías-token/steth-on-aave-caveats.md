@@ -1,30 +1,28 @@
-# stETH on AAVE caveats
+# Advertencias de stETH en AAVE 
 
 ### Flashloans
-AAVE protocol allows borrowing any token via flashloans, whether borrowing is enabled or not for the specific token. Any user can borrow stETH on AAVE via a flashloan.  
-Due to internal stETH mechanics required for rebasing support, in most cases stETH transfers are performed for the value of 1 wei less than passed to `transfer` method. That could break returning a flashloan, with transaction reverting with `SafeERC20: low-level call failed` error.
+El protocolo AAVE permite el préstamo de cualquier token a través de flashloans, independientemente de si el préstamo está habilitado o no para el token específico. Cualquier usuario puede pedir prestado stETH en AAVE mediante un flashloan.  
+Debido a las mecánicas internas de stETH necesarias para el soporte de rebase, en la mayoría de los casos las transferencias de stETH se realizan por el valor de 1 wei menos que el valor pasado al método `transfer`. Esto podría causar problemas al devolver un flashloan, con la transacción revirtiendo con el error `SafeERC20: low-level call failed`.
 
-### Workarounds
-There are two workarounds:
+### Soluciones alternativas
+Existen dos soluciones alternativas:
 
-- Have at least 1 stETH wei more than it is required to close the flashoan. In this case, the amount of stETH transferred will be equal to or 1 wei greater than the loaned amount.
-- If leaving an extra wei is somehow not an option, you should check if the amount to transfer actually matches the loaned amount beforehand. This can be done using this formula:
-```
-    uint256 exactTransferedAmount = StETH.getPooledEthByShares(StETH.getSharesByPooledEth(amount))
-```
+- Tener al menos 1 wei más de stETH del necesario para cerrar el flashloan. En este caso, la cantidad de stETH transferida será igual o 1 wei mayor que la cantidad prestada.
+- Si no es posible dejar un wei extra por alguna razón, se debe verificar si la cantidad a transferir coincide realmente con la cantidad prestada antes de tiempo. Esto se puede hacer utilizando la siguiente fórmula:
+  ```
+  uint256 exactTransferedAmount = StETH.getPooledEthByShares(StETH.getSharesByPooledEth(amount))
+  ```
 
-### Why does it happen?
+### ¿Por qué ocurre esto?
 
-Daily rebases of stETH are implemented via `shares`, a basic unit representing the stETH holder's share in the total amount of ether controlled by the Lido protocol.
-Because of math rounding down, there is a common case when the whole stETH balance can't be transferred from the account leaving 1 wei on the sender's account. This happens because the last wei is less than 1 share and gets rounded down to zero at transfer.
+Los rebase diarios de stETH se implementan mediante `shares`, que es la unidad básica que representa la participación del titular de stETH en la cantidad total de ether controlada por el protocolo Lido.
+Debido al redondeo matemático hacia abajo, es común que no se pueda transferir todo el saldo de stETH de una cuenta, dejando 1 wei en la cuenta del remitente. Esto sucede porque el último wei es inferior a 1 share y se redondea a cero en la transferencia.
 
-### Deposits
+### Depósitos
 
-When depositing stETH to the lending pool on AAVE, the following statement is meant to be correct:  
-"At any time, a user can deposit X stETH to mint X astETH. Total astETH supply increases by X."  
-In fact, the actual amount of astETH minted may be less than or equal to X because of double integer division (on stETH token rebase rate and AAVE interest rate). 
-However, the actual rounding error is not expected to exceed a couple of wei at any time. Meanwhile, the event emitted will report the full initially deposited amount.
+Cuando se deposita stETH en el pool de préstamos en AAVE, la siguiente declaración se considera correcta:  
+"En cualquier momento, un usuario puede depositar X stETH para emitir X astETH. El suministro total de astETH aumenta en X."
+De hecho, la cantidad real de astETH emitidos puede ser menor o igual a X debido a la división doble de enteros (en la tasa de rebase del token stETH y la tasa de interés de AAVE). Sin embargo, el error de redondeo real no se espera que exceda un par de wei en cualquier momento. Mientras tanto, el evento emitido reportará la cantidad inicialmente depositada completa.
 
-#### Deposit example
-In this [deposit case](https://etherscan.io/tx/0xd599641193da40080f3effa175874624f49a8efd6f5b748abd8bc7950fc270f0) we can see 369 stETH being deposited to AAVE stETH lending pool. But in fact, 368.999999999999999999 stETH have been transferred from sender and 368.999999999999999998 astETH have been minted on sender's address. 
-However, the events were emitted about exactly 369 stETH transferred and 369 astETH minted.
+#### Ejemplo de depósito
+En este [caso de depósito](https://etherscan.io/tx/0xd599641193da40080f3effa175874624f49a8efd6f5b748abd8bc7950fc270f0) podemos ver que se depositaron 369 stETH en el pool de préstamos stETH de AAVE. Pero de hecho, se transfirieron 368.999999999999999999 stETH desde el remitente y se emitieron 368.999999999999999998 astETH en la dirección del remitente. Sin embargo, los eventos reportaron exactamente 369 stETH transferidos y 369 astETH emitidos.
