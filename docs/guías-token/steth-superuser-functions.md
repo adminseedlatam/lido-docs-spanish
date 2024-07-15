@@ -1,53 +1,53 @@
-# stETH superuser functions
+# Funciones de superusuario de stETH
 
 <!--  -->
 
-## Superuser privileges and accounts
+## Privilegios de superusuario y cuentas
 
-StETH token is the upgradable contract behind `AppProxyUpgradeable` proxy at [https://etherscan.io/address/0xae7ab96520de3a18e5e111b5eaab095312d7fe84](https://etherscan.io/address/0xae7ab96520de3a18e5e111b5eaab095312d7fe84). Lido DAO can change the implementation with the successful DAO vote.
+El token StETH es el contrato actualizable detrás del proxy `AppProxyUpgradeable` en [https://etherscan.io/address/0xae7ab96520de3a18e5e111b5eaab095312d7fe84](https://etherscan.io/address/0xae7ab96520de3a18e5e111b5eaab095312d7fe84). La DAO de Lido puede cambiar la implementación con una votación exitosa de la DAO.
 
-StETH can be stopped by the DAO vote. No operations changing stETH balances can be performed on the stopped contract:
+StETH puede ser detenido mediante votación de la DAO. Ninguna operación que cambie los balances de stETH se puede realizar en el contrato detenido:
 
-1. `transfer` call reverts;
-2. No mints or burns can be performed. Note that StETH contract can mint stETH only in two cases: user deposits (tokens are minted to the depositor's address) or fee distribution (where tokens are minted in accordance to fee calculations to the addresses set in the contract — namely the DAO treasury, the insurance fund and the Node Operator's reward addresses);
-3. Users can't submit their ETH to the Lido;
-4. Oracle can't push updates on the Consensus Layer staking state;
-5. No ETH buffered in Lido can be sent to the Ethereum deposit contract;
-6. Staking withdrawals can't be performed.
+1. La llamada `transfer` revertirá.
+2. No se pueden realizar mint o burn de tokens stETH. Es importante destacar que el contrato de StETH solo puede hacer mint de stETH en dos casos: cuando un usuario deposita (los tokens se emiten a la dirección del depositante) o en la distribución de tarifas (donde se emiten tokens de acuerdo con los cálculos de tarifas a las direcciones establecidas en el contrato: tesorería de la DAO, fondo de seguros y direcciones de recompensa del operador del nodo).
+3. Los usuarios no pueden enviar su ETH a Lido.
+4. El Oracle no puede actualizar el estado de staking en la capa de consenso.
+5. No se puede enviar ETH almacenado en Lido al contrato de depósito de Ethereum.
+6. No se pueden realizar retiros de staking.
 
-## Superuser roles
+## Roles de superusuario
 
-TODO: Outdated `BURN_ROLE`
+TODO: Rol `BURN_ROLE` desactualizado
 
-StETH contract specifies PAUSE_ROLE (address can pause the protocol) and BURN_ROLE (address can burn stETH tokens):
+El contrato de StETH especifica el `PAUSE_ROLE` (dirección que puede pausar el protocolo) y el `BURN_ROLE` (dirección que puede quemar tokens stETH):
 
-* The `PAUSE_ROLE` assigned only to the DAO Voting contract [https://etherscan.io/address/0x2e59a20f205bb85a89c53f1936454680651e618e](https://etherscan.io/address/0x2e59a20f205bb85a89c53f1936454680651e618e)
-* The `BURN_ROLE` assigned to the [`Burner`](/contracts/burner) contract with additional ACL parameters effectively allowing to burn stETH tokens only from the contract own balance. Tokens could be requested to burn only by direct request from the DAO Voting.
+* El `PAUSE_ROLE` está asignado únicamente al contrato de Votación de la DAO [https://etherscan.io/address/0x2e59a20f205bb85a89c53f1936454680651e618e](https://etherscan.io/address/0x2e59a20f205bb85a89c53f1936454680651e618e).
+* El `BURN_ROLE` está asignado al contrato [`Burner`](/contracts/burner), con parámetros ACL adicionales que permiten quemar tokens stETH solo desde el balance propio del contrato. Los tokens solo pueden ser quemados por solicitud directa de la DAO.
 
-Note that there are other roles for DAO management, but they don't affect the token actions. These roles are MANAGE_FEE (set staking fee amount), MANAGE_WITHDRAWAL_KEY (set withdrawal credentials of the protocol), MANAGE_PROTOCOL_CONTRACTS_ROLE (set oracle contract address, set DAO treasury address to send fee to, set DAO insurance address to send fee to). The roles and addresses are listed in the following independent [report](https://github.com/lidofinance/audits/?tab=readme-ov-file#10-2023-statemind-lido-roles-analysis) as of end of 2023.
+Es importante destacar que hay otros roles para la gestión de la DAO, pero no afectan las acciones del token. Estos roles son `MANAGE_FEE` (establecer la cantidad de tarifa de staking), `MANAGE_WITHDRAWAL_KEY` (establecer credenciales de retiro del protocolo), y `MANAGE_PROTOCOL_CONTRACTS_ROLE` (establecer dirección del contrato del Oracle, dirección de tesorería de DAO para enviar tarifas, dirección de seguro de DAO para enviar tarifas). Los roles y direcciones se detallan en el siguiente [informe](https://github.com/lidofinance/audits/?tab=readme-ov-file#10-2023-statemind-lido-roles-analysis) independiente a finales de 2023.
 
-## Oracle rebasing reports
+## Informes de rebase del Oracle
 
-StETH is a rebasable token. It receives reports from the Oracle contract (`handleOracleReport` method) with the state of the protocol's Consensus Layer validators balances, and updates all the balances of stETH holders distributing the protocol's total staking rewards and penalties. The protocol employs distributed Oracle reporting: there are five Oracle daemons running by the Lido Node operators, and the Oracle smart contract formats beacon report on the consensus of three of five daemon reports. On top of the consensus mechanics, there are sanity checks for reports with sudden drops in total Consensus Layer balance or rewards with higher-than-possible APY. Current Oracle contract is [https://etherscan.io/address/0x442af784A788A5bd6F42A01Ebe9F287a871243fb](https://etherscan.io/address/0x442af784A788A5bd6F42A01Ebe9F287a871243fb). Note that: 1) DAO can set another address for the Oracle contact via vote; 2) Oracle implementation can change via vote.
+StETH es un token rebaseable. Recibe informes del contrato de Oracle (`handleOracleReport` método) con el estado de los balances de los validadores de la capa de consenso del protocolo, y actualiza todos los balances de los tenedores de stETH distribuyendo las recompensas totales de staking del protocolo y las penalizaciones. El protocolo emplea reportes distribuidos del Oracle: hay cinco demonios Oracle ejecutados por los operadores de nodo de Lido, y el contrato de Oracle formatea el informe del beacon sobre el consenso de tres de los cinco reportes de demonios. Además de los mecanismos de consenso, existen verificaciones de cordura para reportes con caídas repentinas en el balance total de la capa de consenso o recompensas con APY más altos de lo posible. El contrato de Oracle actual es [https://etherscan.io/address/0x442af784A788A5bd6F42A01Ebe9F287a871243fb](https://etherscan.io/address/0x442af784A788A5bd6F42A01Ebe9F287a871243fb). Tenga en cuenta que: 1) La DAO puede establecer otra dirección para el contrato de Oracle mediante votación; 2) La implementación de Oracle puede cambiar mediante votación.
 
-## Superuser privileges decentralization
+## Descentralización de los privilegios de superusuario
 
-The superuser privileges are managed by the Lido DAO's governance system. To enact any change the DAO has to have a successful vote.
+Los privilegios de superusuario son gestionados por el sistema de gobernanza de la DAO de Lido. Para realizar cualquier cambio, la DAO debe tener una votación exitosa.
 
-Oracles are: 1) limited in impact 2) distributed - there are five of them, all top-tier professional node operators.
+Los Oracles son: 1) limitados en impacto 2) distribuidos - hay cinco de ellos, todos operadores de nodo profesionales de alto nivel.
 
-## Superuser actions thresholds
+## Umbrales de acciones de superusuario
 
-The "superuser actions" with the StETH token are performed via DAO votes. The votes are managed by the Aragon voting. Voting power is proportional to the addresses' LDO token balance ([https://etherscan.io/token/0x5a98fcbea516cf06857215779fd812ca3bef1b32](https://etherscan.io/token/0x5a98fcbea516cf06857215779fd812ca3bef1b32)). For the voting to pass successfully, it should: 1) get at least 5% of the total LDOs to be cast "for" the vote; 2) get at least 50% of votes cast "for" the vote. The voting duration is 72 hours.
+Las "acciones de superusuario" con el token StETH se realizan mediante votaciones de la DAO. Las votaciones son gestionadas por el sistema de votación Aragon. El poder de voto es proporcional al saldo de tokens LDO de las direcciones. Para que la votación sea exitosa, debe: 1) obtener al menos un 5% del total de LDO para ser emitido "a favor" de la votación; 2) obtener al menos el 50% de los votos emitidos "a favor" de la votación. La duración de la votación es de 72 horas.
 
-There are five Oracle daemons running by the Lido Node operators, with 3 of 5 needed to agree on the data they provide. On top of the consensus mechanics, there are sanity checks for reports with sudden drops in total Consensus Layer balance or rewards with higher-than-possible APY.
+Hay cinco demonios Oracle ejecutados por los operadores de nodo de Lido, con 3 de 5 necesarios para estar de acuerdo en los datos que proporcionan. Además de los mecanismos de consenso, existen verificaciones de cordura para reportes con caídas repentinas en el balance total de la capa de consenso o recompensas con APY más altos de lo posible.
 
-## Superuser keys management
+## Gestión de claves de superusuario
 
-Token management roles belong to smart contracts, and any changes in roles must pass through the successful DAO vote.
+Los roles de gestión de tokens pertenecen a contratos inteligentes, y cualquier cambio en los roles debe pasar por una votación exitosa de la DAO.
 
-Oracle operators are: Stakefish, Certus One, Chorus One, Staking Facilities, P2P Validator.
+Los operadores de Oracle son: Stakefish, Certus One, Chorus One, Staking Facilities, P2P Validator.
 
-## Superuser keys generation procedure
+## Procedimiento de generación de claves de superusuario
 
-There was no special keygen ceremony, as the permissions are managed by smart contracts. The votes can be cast by the EOAs and smart contracts with the voting power proportional to the addresses' LDO balance.
+No hubo una ceremonia especial de generación de claves, ya que los permisos son gestionados por contratos inteligentes. Las votaciones pueden ser emitidas por EOAs y contratos inteligentes con el poder de voto proporcional al saldo de LDO de las direcciones.
