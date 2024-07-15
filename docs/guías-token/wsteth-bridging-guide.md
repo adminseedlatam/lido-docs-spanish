@@ -1,389 +1,393 @@
-# wstETH rollup bridging guide
+# Guía de puenteo para wstETH en rollups
 
-:::warning Disclaimer
-This guide provides recommendations provided by the NEW workgroup. NEW is not a representative of the Lido DAO and by giving the feedback NEW makes no warranties, express or implied, and disclaims all implied warranties, including any warranty of the likelihood of the recognition or rejection by the Lido DAO and representation.
+:::warning Descargo de responsabilidad
+Esta guía proporciona recomendaciones proporcionadas por el grupo de trabajo NEW. NEW no representa a la DAO de Lido y al proporcionar la retroalimentación, no ofrece garantías expresas o implícitas, y renuncia a todas las garantías implícitas, incluida cualquier garantía sobre la probabilidad de reconocimiento o rechazo por parte de la DAO de Lido y representación.
 :::
 
-## Intro
+## Introducción
 
-This document is intended for the developers representing network/rollup foundations and DAOs looking to bridge Lido's wstETH on Ethereum L2 (rollup) networks.
+Este documento está dirigido a desarrolladores que representan fundaciones de redes/rollups y DAOs que buscan llevar el token wstETH de Lido a redes Ethereum L2 (rollup).
 
 :::info
-This guide doesn't cover yet bridging of rebasable stETH token nor bridging to non-L2-rollup networks. However, please note that bridging rebasable stETH token in a regular way might cause a loss of user assets due to the rewards accrued being stuck on an L1 bridge.
+Esta guía no cubre aún el puenteo del token stETH rebaseable ni el puenteo hacia redes que no sean L2-rollup. Sin embargo, es importante tener en cuenta que el puenteo de un token stETH rebaseable de manera convencional puede resultar en la pérdida de activos de los usuarios debido a que las recompensas acumuladas quedan atrapadas en un puente L1.
 :::
 
-While technically, it is feasible to bridge the wstETH token on an L2 network as any other standard plain ERC-20 compatible token, it might not be aligned with the long-term vision of the Lido DAO for stETH future-proof adoption and general community sentiment.
+Aunque técnicamente es factible puentear el token wstETH en una red L2 como cualquier otro token ERC-20 estándar y compatible, podría no estar alineado con la visión a largo plazo de la DAO de Lido para la adopción futura de stETH y el sentimiento general de la comunidad.
 
-This guide covers the recommendations as well as provides general guidelines, and reveals the logic behind to smooth the process. **It's essential to understand that conforming to or diverging from these guidelines won't ensure the recognition or rejection of a specific proposal by the Lido DAO.** Nonetheless, adhering to these guidelines substantially increases the likelihood of gaining support from the Network Expansion Workgroup (NEW) and community. Ultimately, the final decision is determined by the outcome of the voting process.
+Esta guía cubre las recomendaciones y proporciona directrices generales, además de explicar la lógica detrás del proceso para facilitar el proceso. **Es fundamental entender que cumplir o divergir de estas directrices no asegura el reconocimiento o rechazo de una propuesta específica por parte de la DAO de Lido.** No obstante, adherirse a estas directrices aumenta sustancialmente la probabilidad de obtener apoyo del Grupo de Trabajo de Expansión de Red (NEW) y la comunidad. Finalmente, la decisión final se determina mediante el proceso de votación.
 
 :::info
-Please send any of your feedback on the guide to the NEW — the doc gets iterative updates.
+Por favor, envía cualquier retroalimentación sobre la guía al grupo NEW; el documento se actualiza de manera iterativa.
 :::
 
-## Why is this guide needed
+## ¿Por qué se necesita esta guía?
 
-As said before, the default way to bridge an ERC-20 token is to deploy on L2 a non-upgradable token and use the general bridge contract, this guide proposes to implement a more complex solution.
+Como se mencionó anteriormente, la forma estándar de puentear un token ERC-20 es desplegar un token no actualizable en L2 y utilizar el contrato de puente general. Sin embargo, esta guía propone implementar una solución más compleja.
 
-The solution involves deploying dedicated bridge endpoint contracts behind proxy on L1 and L2 and an upgradable token on L2, all governed by the Lido DAO on L1 ([Aragon Agent contract](https://etherscan.io/address/0x3e40D73EB977Dc6a537aF587D48316feE66E9C8c)) via a dedicated [governance executor](https://github.com/lidofinance/governance-crosschain-bridges/) contract on L2. This architecture is proposed to provide the following capabilities.
+La solución implica desplegar contratos de punto final de puente dedicados detrás de un proxy en L1 y L2, y un token actualizable en L2, todos gobernados por la DAO de Lido en L1 en el contract ([Aragon Agent](https://etherscan.io/address/0x3e40D73EB977Dc6a537aF587D48316feE66E9C8c)) a través de un contrato de [governance executor](https://github.com/lidofinance/governance-crosschain-bridges/) dedicado en L2. Esta arquitectura se propone para proporcionar las siguientes capacidades:
 
-1. Passing arbitrary data. It allows laying the foundation for bridging rebasable stETH in the future (need to pass wstETH/stETH rate).
-2. Revamping the token logic, as stETH is not a general-purpose token but an asset built on top of a living liquid-staking middleware.
-3. Future-proofing the token, for example, to avoid high-cost liquidity migration as Ethereum continues evolving and new standards like [ERC-2612](https://eips.ethereum.org/EIPS/eip-2612)/[ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) are adopted.
-4. Pausing and resuming bridging in an emergency or during upgrades.
+1. Pasar datos arbitrarios. Esto permite sentar las bases para el puenteo futuro del token stETH rebaseable (necesidad de pasar la tasa wstETH/stETH).
+2. Reestructurar la lógica del token, ya que stETH no es un token de propósito general sino un activo construido sobre un middleware de staking líquido.
+3. Asegurar el token para el futuro, por ejemplo, evitando la migración costosa de liquidez a medida que Ethereum continúa evolucionando y se adoptan nuevos estándares como [ERC-2612](https://eips.ethereum.org/EIPS/eip-2612)/[ERC-1271](https://eips.ethereum.org/EIPS/eip-1271).
+4. Pausar y reanudar el puenteo en caso de emergencia o durante actualizaciones.
 
-## The Lido DAO bridging endpoints recognition
+# Reconocimiento de los endpoints de puenteo de wstETH de la DAO de Lido
 
-Lido DAO can recognize the bridged wstETH endpoints by means of a signalling snapshot. For example, it has happened for:
-[Base](https://snapshot.org/#/lido-snapshot.eth/proposal/0x8b35f64fffe67f67d4aeb2de2f3351404c54cd75a08277c035fa77065b6792f4),
-[zkSync Era](https://snapshot.org/#/lido-snapshot.eth/proposal/0xe35f56a6117599eeb9dbef982613c0545710d91403a828d1fba00ab21d5188f3),
-[Mantle](https://snapshot.org/#/lido-snapshot.eth/proposal/0x1d38c11b27590ab5c69ca21c5d2545d53b7f5150dada7e05f89d500ede5becad),
-[Linea](https://snapshot.org/#/lido-snapshot.eth/proposal/0x9382624eeee68a175dd7d1438347dbad4899ba0d2bfcf7c3955f087cb9f5cfc4),
-[Scroll](https://snapshot.org/#/lido-snapshot.eth/proposal/0xcdb7d84ea80d914a4abffd689ecf9bdc4bb05d47f1fdbdda8793d555381a0493)
+La DAO de Lido puede reconocer los puntos de puenteo de wstETH mediante una instantánea de señalización. Por ejemplo, esto ha ocurrido con:
 
-If Lido DAO recognizes the bridged wstETH endpoints, in general, it means:
+- [Base](https://snapshot.org/#/lido-snapshot.eth/proposal/0x8b35f64fffe67f67d4aeb2de2f3351404c54cd75a08277c035fa77065b6792f4)
+- [zkSync Era](https://snapshot.org/#/lido-snapshot.eth/proposal/0xe35f56a6117599eeb9dbef982613c0545710d91403a828d1fba00ab21d5188f3)
+- [Mantle](https://snapshot.org/#/lido-snapshot.eth/proposal/0x1d38c11b27590ab5c69ca21c5d2545d53b7f5150dada7e05f89d500ede5becad)
+- [Linea](https://snapshot.org/#/lido-snapshot.eth/proposal/0x9382624eeee68a175dd7d1438347dbad4899ba0d2bfcf7c3955f087cb9f5cfc4)
+- [Scroll](https://snapshot.org/#/lido-snapshot.eth/proposal/0xcdb7d84ea80d914a4abffd689ecf9bdc4bb05d47f1fdbdda8793d555381a0493)
 
-- the integration is highlighted on the frontend pages: [landing](https://lido.fi/lido-on-l2), [widget](https://stake.lido.fi/), and [ecosystem pages](https://lido.fi/lido-ecosystem);
-- when/if the dedicated bridging Lido UI is implemented, the network will be included;
-- the newly appeared integration announcement is published in the Lido's [blog](https://blog.lido.fi/category/l2/) and [twitter](https://twitter.com/LidoFinance);
-- the endpoint contracts are under the Lido's [bug bounty program](https://immunefi.com/bug-bounty/lido/);
-- the endpoint contracts get monitored by means of [Lido alerting system](https://github.com/lidofinance/alerting-forta/);
-- the opportunity for obtaining extra support, potentially from [LEGO](https://lido.fi/lego) or [Liquidity observation Labs](https://lido.fi/governance#liquidity-observation-labs), becomes available. For the details one should [reach out to ProRel](https://tally.so/r/waeRLX).
+Si la DAO de Lido reconoce los endpoints de puenteo de wstETH, generalmente significa:
 
-Usually, the Lido DAO recognizes the bridged wstETH endpoints if the specific set of security and design recommendations are followed. These recommendations are set out in the [Recommendations](#recommendations) section in paragraphs **R-1..R-8**. The rest of the recommendations (**R-9...**) are also important and foster the recognition's likelihood.
+- La integración se destaca en las páginas frontend: [página de inicio](https://lido.fi/lido-on-l2), [widget](https://stake.lido.fi/) y [páginas del ecosistema](https://lido.fi/lido-ecosystem).
+- Cuando/se implementa la interfaz de usuario de puenteo dedicada de Lido, se incluirá la red.
+- Se publica un anuncio de integración recién aparecido en el [blog](https://blog.lido.fi/category/l2/) y [Twitter](https://twitter.com/LidoFinance) de Lido.
+- Los contratos de punto final están bajo el programa de recompensas por errores de seguridad de Lido [bug bounty program](https://immunefi.com/bug-bounty/lido/).
+- Los contratos de punto final son monitoreados mediante el sistema de alertas de Lido [Lido alerting system](https://github.com/lidofinance/alerting-forta/).
+- Se abre la oportunidad para obtener soporte adicional, potencialmente de [LEGO](https://lido.fi/lego) o [Liquidity observation Labs](https://lido.fi/governance#liquidity-observation-labs). Para más detalles, se debe [contactar a ProRel](https://tally.so/r/waeRLX).
 
-If the recommendations **R-1...R-4** are followed, the token may have a chance of being acknowledged by NEW as following the security and future-proofing baseline.
+Por lo general, la DAO de Lido reconoce los puntos de puenteo de wstETH si se siguen un conjunto específico de recomendaciones de seguridad y diseño. Estas recomendaciones se detallan en la sección [Recomendaciones](#recomendaciones) en los párrafos **R-1..R-8**. El cumplimiento de las recomendaciones **R-9...** también es importante y fomenta la probabilidad de reconocimiento.
 
-If any of **R-1...R-4** isn’t followed, there can be less likelihood of the Lido DAO’s recognition or the NEW's acknowledgment.
+Si se siguen las recomendaciones **R-1...R-4**, el token puede tener la posibilidad de ser reconocido por NEW como cumpliendo con las bases de seguridad y futurización.
 
-## General scenario towards the Lido DAO recognition
+Si no se sigue alguna de las recomendaciones **R-1...R-4**, puede haber menos probabilidad de reconocimiento por parte de la DAO de Lido o de reconocimiento por NEW.
 
-This section describes an approximate path to bridging wstETH to an L2 network. The order of the steps is not strict but follows the general flow.
+## Escenario general hacia el reconocimiento de la DAO de Lido
 
-🐾 Study the bridging guide and fill in [the questionnaire](#questionnaire) about your solution and send it to the NEW.
+Esta sección describe un camino aproximado para puenteo de wstETH a una red L2. El orden de los pasos no es estricto pero sigue el flujo general.
 
-🐾 Coordinate on priority lane, timings, and reviews with the NEW.
+🐾 Estudiar la guía de puenteo y completar [el cuestionario](#cuestionario) sobre tu solución y enviarlo a NEW.
 
-🐾 Get the architecture and the deploy configuration verified by the NEW.
+🐾 Coordinar sobre la prioridad, tiempos y revisiones con NEW.
 
-🐾 Deploy the contracts to testnet. Get the testnet deployment verified by coordinating through the NEW.
+🐾 Verificar la arquitectura y la configuración de despliegue por NEW.
 
-🐾 Express intention to bridge wstETH on the forum, outlining the details and technical plan. Consider:
+🐾 Desplegar los contratos en testnet. Obtener la verificación del despliegue en testnet coordinando con NEW.
 
-- Target one network per proposal to make the discussion more focused.
-- The post should be published in advance, ideally at least two weeks before any potential snapshot vote, to allow time for discussion and verification of the proposal.
-- The deployment addresses are not required at once but must be proposed at least a week before the snapshot voting starts.
-- If the proposed solution does not include some of the recommendations (**R-5...**), consider including the roadmap and committing to deliver it.
-- Examples:
-  - [wstETH to Base](https://research.lido.fi/t/wsteth-deployment-to-base-and-ownership-acceptance-by-lido-dao/5668)
-  - [wstETH to zkSync Era](https://research.lido.fi/t/wsteth-deployment-on-zksync/5701)
-  - [wstETH to Mantle](https://research.lido.fi/t/wsteth-deployment-on-mantle/5991)
-  - [wstETH to Linea](https://research.lido.fi/t/wsteth-on-linea-ownership-acceptance-by-lido-dao/5961)
-  - [wstETH to Scroll](https://research.lido.fi/t/wsteth-deployment-on-scroll/6603)
-  - [wstETH to Mode](https://research.lido.fi/t/wsteth-deployment-on-mode/7365)
+🐾 Expresar la intención de puentear wstETH en el foro, detallando los detalles y plan técnico. Considerar:
 
-🐾 Deploy the contracts to mainnet. Get the mainnet deployment verified by the external security group (getting in touch with NEW).
+- Apuntar a una red por propuesta para enfocar la discusión.
+- El post debe ser publicado con anticipación, idealmente al menos dos semanas antes de cualquier voto de instantánea potencial, para permitir tiempo para la discusión y verificación de la propuesta.
+- Las direcciones de despliegue no son necesarias de inmediato pero deben ser propuestas al menos una semana antes de que comience la votación de instantánea.
+- Si la solución propuesta no incluye algunas de las recomendaciones (**R-5...**), considera incluir el roadmap y comprometerte a entregarlo.
+- Ejemplos:
+  - [wstETH a Base](https://research.lido.fi/t/wsteth-deployment-to-base-and-ownership-acceptance-by-lido-dao/5668)
+  - [wstETH a zkSync Era](https://research.lido.fi/t/wsteth-deployment-on-zksync/5701)
+  - [wstETH a Mantle](https://research.lido.fi/t/wsteth-deployment-on-mantle/5991)
+  - [wstETH a Linea](https://research.lido.fi/t/wsteth-on-linea-ownership-acceptance-by-lido-dao/5961)
+  - [wstETH a Scroll](https://research.lido.fi/t/wsteth-deployment-on-scroll/6603)
+  - [wstETH a Mode](https://research.lido.fi/t/wsteth-deployment-on-mode/7365)
 
-🐾 Pass snapshot voting on https://snapshot.org/#/lido-snapshot.eth/. It should contain the final mainnet addresses and audits according to **R-1**. Otherwise, one more snapshot voting with the addresses would have been required.
+🐾 Desplegar los contratos en mainnet. Obtener la verificación del despliegue en mainnet por parte de un grupo de seguridad externo (contactando con NEW).
 
-Here is also an approximate decision tree to guide on this scenario.
+🐾 Pasar la votación de snapshot en https://snapshot.org/#/lido-snapshot.eth/. Debe contener las direcciones finales de mainnet y auditorías según **R-1**. De lo contrario, se requeriría una votación adicional de snapshot con las direcciones.
+
+Aquí también hay un árbol de decisiones aproximado para guiar este escenario.
 
 ```mermaid
 graph TD;
-  A("Is wstETH already bridged and has got adoption?")
-  B("Is the bridged token deployed behind a proxy (follows R-4)?")
-  C("Follow the general scenario <br> towards DAO recognition")
-  D("Consider migrating liquidity and redeploying, <br> following the general scenario towards <br> DAO recognition")
-  F["Consider delivering and/or committing <br> to deliver the missing parts.<br>Contact NEW for the best way forward"]
+  A("¿Está wstETH ya puentado y tiene adopción?")
+  B("¿El token puentado está desplegado detrás de un proxy (sigue R-4)?")
+  C("Seguir el escenario general <br> hacia el reconocimiento de la DAO")
+  D("Considerar migrar la liquidez y redeployar, <br> siguiendo el escenario general hacia <br> el reconocimiento de la DAO")
+  F["Considerar entregar y/o comprometerse <br> a entregar las partes faltantes.<br>Contactar a NEW para el mejor camino a seguir"]
 
-  A-- Yes -->B
-  B-- Yes -->F
+  A-- Sí -->B
+  B-- Sí -->F
   A-- No -->C
   B-- No -->D
 ```
 
 :::warning
-Ensure that the official bridging UI utilizes the customized bridge endpoint contract. Using the default bridge contract in the past caused problems, leading to deposited funds becoming locked within the contract.
+Asegúrate de que la interfaz de puenteo oficial utilice el contrato de punto final de puente personalizado. El uso del contrato de puente predeterminado en el pasado causó problemas, haciendo que los fondos depositados quedaran bloqueados dentro del contrato.
 :::
 
-## Recommendations
+Si necesitas más detalles o ayuda con algún punto específico, estaré aquí para ayudarte.
 
-This section enumerates design and security recommendations for a wstETH bridging solution.
+## Recomendaciones
 
-### Security and future-proof baseline
+Esta sección enumera recomendaciones de diseño y seguridad para una solución de puente de wstETH.
 
-The baseline recommendations: the following of the recommendations are highly encouraged to increase the chance of the Lido DAO recognition or NEW acknowledgment.
+### Baseline de seguridad y preparación para el futuro
 
-#### R-1: Audited code and verifiable deployment
+Se recomienda encarecidamente seguir las siguientes recomendaciones para aumentar las posibilidades de reconocimiento por parte de Lido DAO o la aprobación por NEW.
 
-The entire on-chain codebase (rollup, bridge, token) must be audited by a third party. Please, contact the NEW to check the temperature if the audit provider isn't familiar with the Lido protocol codebase (see the providers here: https://github.com/lidofinance/audits/)
+#### R-1: Código auditado y despliegue verificable
 
-The deployment must be verifiable:
+Todo el código en cadena (rollup, puente, token) debe ser auditado por un tercero. Por favor, contacte a NEW para verificar si el proveedor de auditoría no está familiarizado con el código base del protocolo Lido (ver proveedores aquí: https://github.com/lidofinance/audits/).
 
-- all code accessible and the final deployed smart contracts' commit **strictly** corresponds to the audit report;
-- source code verified on the explorer;
-- verifiable bytecode (e.g. via the explorer or RPC calls);
-- correct levers setup.
+El despliegue debe ser verificable:
 
-For submitting sources for verification on explorer, please use standard JSON input - not flattened.
+- todo el código accesible y el commit final de los contratos inteligentes desplegados **corresponde estrictamente** al informe de auditoría;
+- código fuente verificado en el explorador;
+- bytecode verificable (por ejemplo, a través del explorador o llamadas RPC);
+- configuración correcta de los mecanismos.
 
-To speed up the process and make it more robust, please provide the artifacts (i.e., open Pull Requests) for the automated tools:
+Para enviar fuentes para su verificación en el explorador, por favor use la entrada JSON estándar, no aplanada.
 
-- verify the sources via [diffyscan](https://github.com/lidofinance/diffyscan), examples:
-  - [wstETH on Scroll](https://github.com/lidofinance/diffyscan/pull/35)
-  - [wstETH on Linea](https://github.com/lidofinance/diffyscan/pull/29)
-  - [wstETH on Mode](https://github.com/lidofinance/diffyscan/pull/41)
+Para acelerar el proceso y hacerlo más robusto, por favor proporcione los artefactos (es decir, Pull Requests abiertos) para las herramientas automatizadas:
 
-- verify the configuration and storage state via [state-mate](https://github.com/lidofinance/state-mate), examples:
-  - [wstETH on Mantle](https://github.com/lidofinance/state-mate/tree/main/configs/mantle)
-  - [a.DI on BNB](https://github.com/lidofinance/state-mate/tree/main/configs/binance)
+- verificar las fuentes a través de [diffyscan](https://github.com/lidofinance/diffyscan), ejemplos:
+  - [wstETH en Scroll](https://github.com/lidofinance/diffyscan/pull/35)
+  - [wstETH en Linea](https://github.com/lidofinance/diffyscan/pull/29)
+  - [wstETH en Mode](https://github.com/lidofinance/diffyscan/pull/41)
 
-#### R-2: "Lock and mint" bridge mechanics
+- verificar la configuración y estado de almacenamiento a través de [state-mate](https://github.com/lidofinance/state-mate), ejemplos:
+  - [wstETH en Mantle](https://github.com/lidofinance/state-mate/tree/main/configs/mantle)
+  - [a.DI en BNB](https://github.com/lidofinance/state-mate/tree/main/configs/binance)
 
-Use the lock-and-mint bridging mechanism.
+#### R-2: Mecánica de puente "Lock and mint"
 
-The general security approach here is to isolate L2/cross-chain risks, ensuring no additional risks are imposed on Lido protocol on Ethereum or to other L2s and alt L1s with already bridged wstETH. This is almost unachievable with a ‘burn-and-mint’ architecture.
+Utilizar el mecanismo de puente "lock-and-mint".
 
-#### R-3: Usage of canonical bridge
+El enfoque de seguridad general aquí es aislar los riesgos de L2/cross-chain, asegurando que no se impongan riesgos adicionales al protocolo Lido en Ethereum ni a otros L2 y L1 alternativos con wstETH ya puenteados. Esto es casi imposible con una arquitectura de "burn-and-mint".
 
-Usage of the bridge, canonical for the L2 network, is highly encouraged. If the native bridge does not exist, is not a public good, or is closed-sourced. Most "canonical like " options may be suitable.
+#### R-3: Uso de puente canónico
 
-#### R-4: L2 wstETH token upgradable
+Se recomienda encarecidamente el uso del puente canónico para la red L2. Si el puente nativo no existe, no es un bien público o es de código cerrado, pueden ser adecuadas las opciones "canónicas similares".
 
-The bridged token contract should be deployed behind a proxy with the ability to set the proxy admin on a case-by-case basis (or even eventually ossify). This allows the token to be future-proof (support of new standards, passing additional data, etc.) and provides a foundation for potential stETH bridging without incurring liquidity fragmentation.
+#### R-4: Token wstETH en L2 debe ser actualizable
 
-If a dedicated bridge endpoint contract is not deployed behind a proxy (**R-5**), it must provide the capability to set/change the bridge contract instance used.
+El contrato de token puenteador debe ser desplegado detrás de un proxy con la capacidad de establecer el administrador del proxy caso por caso (o incluso eventualmente osificarse). Esto permite que el token sea resistente al futuro (soporte de nuevos estándares, paso de datos adicionales, etc.) y proporciona una base para el puenteador potencial de stETH sin incurrir en fragmentación de liquidez.
 
-### The Lido DAO recognition recommendations by the NEW
+Si no se despliega un contrato de puenteador dedicado detrás de un proxy (**R-5**), debe proporcionar la capacidad de establecer/cambiar la instancia del contrato de puente usado.
 
-The recommendations **R-5...R-8** are highly encouraged to follow for the recognition of the bridged wstETH endpoints by the Lido DAO.
+### Recomendaciones para el reconocimiento por Lido DAO por NEW
 
-The recommendations starting from **R-9** are also encouraged and may significantly contribute to the likelihood of the Lido DAO recognition.
+Las recomendaciones **R-5...R-8** son muy recomendadas para seguir para el reconocimiento de los endpoints de wstETH puenteados por Lido DAO.
 
-#### R-5: Bridging L1 Lido DAO decisions
+Las recomendaciones a partir de **R-9** también son recomendadas y pueden contribuir significativamente a la probabilidad de reconocimiento por parte de Lido DAO.
 
-A dedicated governance executor contract should be set as an admin the of the L2 endpoint contracts.
+#### R-5: Decisiones de la Lido DAO sobre el puenteado L1
 
-Examples:
+Se debe establecer un contrato de ejecutor de gobernanza dedicado como administrador de los contratos de endpoint de L2.
+
+Ejemplos:
 
 - [`OptimismBridgeExecutor`](https://optimistic.etherscan.io/address/0xefa0db536d2c8089685630fafe88cf7805966fc3);
-- [Bridge executor on Base](https://basescan.org/address/0x0E37599436974a25dDeEdF795C848d30Af46eaCF) - reused `OptimismBridgeExecutor` contract;
+- [Ejecutor de puente en Base](https://basescan.org/address/0x0E37599436974a25dDeEdF795C848d30Af46eaCF) - reutilización del contrato `OptimismBridgeExecutor`;
 - [`ZkSyncBridgeExecutor`](https://explorer.zksync.io/address/0x13f46b59067f064c634fb17e207ed203916dccc8#contract)
 - [`LineaBridgeExecutor`](https://lineascan.build/address/0x74Be82F00CC867614803ffd7f36A2a4aF0405670)
-- [`ScrollBridgeExecutor`]https://scrollscan.com/address/0x0c67D8D067E349669dfEAB132A7c03A90594eE09)
+- [`ScrollBridgeExecutor`](https://scrollscan.com/address/0x0c67D8D067E349669dfEAB132A7c03A90594eE09)
 
-For more examples, see Governance Bridge Executors at https://docs.lido.fi/deployed-contracts/#lido-on-l2. The contracts originate from [Aave Governance Cross-Chain Bridges](https://github.com/aave/governance-crosschain-bridges) and can be found at https://github.com/lidofinance/governance-crosschain-bridges and [PRs](https://github.com/lidofinance/governance-crosschain-bridges/pulls).
+Para más ejemplos, consulte los Ejecutores de Puente de Gobernanza en https://docs.lido.fi/deployed-contracts/#lido-on-l2. Los contratos provienen de [Puentes Cruzados de Gobernanza de Aave](https://github.com/aave/governance-crosschain-bridges) y se pueden encontrar en https://github.com/lidofinance/governance-crosschain-bridges y [PRs](https://github.com/lidofinance/governance-crosschain-bridges/pulls).
 
-#### R-6: Dedicated upgradable bridge instances
+#### R-6: Instancias dedicadas de puente actualizables
 
-Deploy dedicated instances of bridge contracts on L1 and L2. The contract instances should be deployed behind a proxy with the ability to set the proxy admin on a case-by-case basis (or even eventually ossify). This allows to lay the foundation for the emergency capabilities (**R-7**) and for possible bridging of rebasable stETH. For more details on why, see for section [Why is this guide needed](#why-is-this-guide-needed). For the architecture outline, see section [Reference architecture and permissions setup](#reference-architecture-and-permissions-setup).
+Despliega instancias dedicadas de contratos de puente en L1 y L2. Las instancias del contrato deben ser desplegadas detrás de un proxy con la capacidad de establecer el administrador del proxy caso por caso (o incluso eventualmente osificarse). Esto permite establecer las bases para las capacidades de emergencia (**R-7**) y para el posible puenteado de stETH rebaseable. Para más detalles sobre por qué, ver la sección [¿Por qué se necesita esta guía?](#por-qué-se-necesita-esta-guía). Para el esquema de referencia y configuración de permisos, ver la sección [Arquitectura de referencia y configuración de permisos](#arquitectura-de-referencia-y-configuración-de-permisos).
 
-#### R-7: Pausable deposits and withdrawals
+#### R-7: Depósitos y retiros pausables
 
-To provide the capability to react fast and reduce losses in case of a security contingency, depositing and withdrawing should be pausable. Namely:
+Para proporcionar la capacidad de reaccionar rápidamente y reducir pérdidas en caso de una contingencia de seguridad, los depósitos y retiros deben poder pausarse. Específicamente:
 
-- L1 bridge endpoint has pausable and resumable deposits;
-- L2 bridge endpoint and has pausable and resumable withdrawals.
+- El punto final del puente en L1 debe permitir depósitos pausables y reanudables;
+- El punto final del puente en L2 debe permitir retiros pausables y reanudables.
 
-The bridge endpoint contracts should have an ability to set the resume and pause roles holders on a case-by-case basis. For the pause role there should be at least two holders possible to be able to assign the dedicated Emergency Multisig which is [ratified by the Lido DAO](https://snapshot.org/#/lido-snapshot.eth/proposal/0xfe2a6a6506a642b616118363bc29aa83dd9ef2ec80447bb607a8f52c0a96aed0) as the second role holder.
+Los contratos de punto final del puente deben tener la capacidad de establecer roles de resumen y pausa caso por caso. Para el rol de pausa, debe haber al menos dos titulares posibles para poder asignar el Multisig de Emergencia dedicado, ratificado por Lido DAO, como segundo titular del rol.
 
-To curb the multisig's power, it is proposed to use the "Gate Seals" mechanic. The mechanic limits the pause duration and restricts the capability to pause to a single use. To grant the capability repeatedly, the Lido DAO vote is required. The mechanic has been implemented, e.g., for withdrawals in Lido protocol on Ethereum in two parts:
-- one-time disposable pauser contact [Gate Seals](https://github.com/lidofinance/gate-seals);
-- [PausableUntil](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/utils/PausableUntil.sol) contract (inherited by [WithdrawalQueue](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/WithdrawalQueue.sol)).
+Para limitar el poder del Multisig, se propone utilizar el mecanismo "Gate Seals". Este mecanismo limita la duración de la pausa y restringe la capacidad de pausar a un solo uso. Para otorgar la capacidad repetidamente, se requiere un voto de Lido DAO. El mecanismo ha sido implementado, por ejemplo, para retiros en el protocolo Lido en Ethereum en dos partes:
+- pausador desechable de un solo uso [Gate Seals](https://github.com/lidofinance/gate-seals);
+- contrato [PausableUntil](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/utils/PausableUntil.sol) (heredado por [WithdrawalQueue](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/WithdrawalQueue.sol)).
 
-#### R-8: Support of ERC-2612 permit enhanced with EIP-1271
+#### R-8: Soporte para permiso ERC-2612 mejorado con EIP-1271
 
-The bridged wstETH should support [EIP-2612 permit ERC-20 token extension](https://eips.ethereum.org/EIPS/eip-2612) with [EIP-1271 standard signature validation method for contracts](https://eip1271.io/). The latter paves the way to Account Abstraction adoption, see https://eip1271.io/.
+El wstETH puenteador debe soportar la [extensión de token ERC-20 con permiso EIP-2612](https://eips.ethereum.org/EIPS/eip-2612) con el [método estándar EIP-1271 para la validación de firmas de contratos](https://eip1271.io/). Esto allana el camino para la adopción de Abstracción de Cuentas, ver https://eip1271.io/.
 
-Please take into account that the [OpenZeppelin ERC20 with permit (EIP-2612) implementation](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/extensions/ERC20Permit.sol) does not support smart contract signatures validation EIP-1271 and thus shouldn't be used as it is. Please consider extending ERC20Permit using [OpenZeppelin SignatureChecker util](https://docs.openzeppelin.com/contracts/4.x/api/utils#SignatureChecker) or [stETHPermit contract](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.4.24/StETHPermit.sol) as a reference implementation. NB, that the wstETH token itself on Ethereum doesn't support this due to non-upgradability.
+Por favor, ten en cuenta que la implementación de [OpenZeppelin ERC20 con permiso (EIP-2612)](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/extensions/ERC20Permit.sol) no soporta la validación de firmas de contratos inteligentes EIP-1271 y por lo tanto no debe ser utilizada tal cual. Considera extender ERC20Permit utilizando [utilidad SignatureChecker de OpenZeppelin](https://docs.openzeppelin.com/contracts/4.x/api/utils#SignatureChecker) o el contrato [StETHPermit](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.4.24/StETHPermit.sol) como implementación de referencia. Es importante destacar que el token wstETH en Ethereum en sí no soporta esto debido a su no-upgradabilidad.
 
-#### R-9: wstETH token/bridge state before snapshot vote
+#### R-9: Estado del token/puente wstETH antes de la votación de snapshot
 
-By the snapshot vote start, deposits and withdrawals should be unpaused unless there are any specific considerations to do otherwise.
-Going with unpaused states provides the following:
+Antes de iniciar la votación de snapshot, los depósitos y retiros deben estar despausados a menos que haya consideraciones específicas para hacer lo contrario.
+Mantener los estados despausados proporciona lo siguiente:
 
-- the bridge being in the final state during the snapshot vote — without any temporary permissions granted to the resumer or other actors;
-- less operational load for contributors and token holders (to re-vote on additional changes).
+- El puente está en el estado final durante la votación de snapshot, sin permisos temporales concedidos al resumidor u otros actores;
+- Menor carga operativa para los contribuyentes y titulares de tokens (para revotar cambios adicionales).
 
-Nevertheless, consider risks of liquidity fragmentation in case the currently deployed setup is not supported by snapshot vote but some wstETH has already been deposited.
+Sin embargo, considera los riesgos de fragmentación de liquidez en caso de que la configuración actualmente desplegada no sea compatible con la votación de snapshot pero algunos wstETH ya hayan sido depositados.
 
-#### R-10: Upgradability mechanics
+#### R-10: Mecánicas de upgradabilidad
 
-- The regular (`ERC1967Proxy`) proxy pattern is good enough; the transparent proxy pattern might be an unnecessary complication.
-- Use ossifiable proxies when possible. For example, consider [OssifiableProxy](https://github.com/lidofinance/lido-l2/blob/main/contracts/proxy/OssifiableProxy.sol), which is used in Lido protocol on Ethereum.
+- El patrón de proxy regular (`ERC1967Proxy`) es suficientemente bueno; el patrón de proxy transparente puede ser una complicación innecesaria.
+- Utiliza proxies osificables cuando sea posible. Por ejemplo, considera [OssifiableProxy](https://github.com/lidofinance/lido-l2/blob/main/contracts/proxy/OssifiableProxy.sol), que se utiliza en el protocolo Lido en Ethereum.
 
-Please have the implementations petrified with dummy values. It helps to reduce confusion, like taking the implementation address instead of the proxy address. For example, see [zkSync Era ERC20BridgedUpgradeable implementation](https://explorer.zksync.io/address/0xc7a0daa1b8fea68532b6425d0e156088b0d2ab2c#contract) (bridge, decimals, name, symbol views).
+Por favor, petrifica las implementaciones con valores ficticios. Esto ayuda a reducir la confusión, como tomar la dirección de implementación en lugar de la dirección del proxy. Por ejemplo, consulta la implementación [zkSync Era ERC20BridgedUpgradeable](https://explorer.zksync.io/address/0xc7a0daa1b8fea68532b6425d0e156088b0d2ab2c#contract) (bridge, vistas de decimales, nombre, símbolo).
 
-#### R-11: Use AccessControlEnumerable for ACL
+#### R-11: Usa AccessControlEnumerable para ACL
 
-For access control, please prefer the standard OpenZeppelin ACL contract and its [enumerable version](https://docs.openzeppelin.com/contracts/4.x/api/access#AccessControlEnumerable) over non-enumerable versions. It allows full on-chain permissions verification — no need to analyze events or transactions as in non-enumerable implementations. For example, see [Lido ValidatorsExitBusOracle contract](https://etherscan.io/address/0xa89ea51fdde660f67d1850e03c9c9862d33bc42c#code).
+Para el control de acceso, prefiera el contrato estándar de OpenZeppelin ACL y su [versión enumerable](https://docs.openzeppelin.com/contracts/4.x/api/access#AccessControlEnumerable) sobre las versiones no enumerables. Permite la verificación completa de permisos en cadena, sin necesidad de analizar eventos o transacciones como en las implementaciones no enumerables. Por ejemplo, consulta el contrato [Lido ValidatorsExitBusOracle](https://etherscan.io/address/0xa89ea51fdde660f67d1850e03c9c9862d33bc42c#code).
 
-#### R-12: Prepare the solution statements and share the deploy artifacts
+#### R-12: Preparar las declaraciones de solución y compartir los artefactos de despliegue
 
-It's advised to have the answered statements of the [questionnaire](#questionnaire) included in the token bridge contracts GitHub repo README. As an example one might see https://github.com/txfusion/lido-l2/tree/main/zksync#statements for wstETH on zkSync Era (but note that the questions are outdated there).
+Se recomienda incluir las declaraciones respondidas del [cuestionario](#cuestionario) en el README del repositorio de GitHub de los contratos de puente de tokens. Como ejemplo, puedes ver https://github.com/txfusion/lido-l2/tree/main/zksync#statements para wstETH en zkSync Era (pero ten en cuenta que las preguntas están desactualizadas allí).
 
-Please share with the NEW: deploy scripts, acceptance tests, deploy plans, rollup-specific documentation on bridging approaches, etc. A PR to the diffyscan repo with [configs like this](https://github.com/lidofinance/diffyscan/tree/main/config_samples/zksync). This would allow the NEW to simplify the deployment verification and make the feedback more specific.
+Por favor, comparte con NEW: scripts de despliegue, pruebas de aceptación, planes de despliegue, documentación específica del rollup sobre enfoques de puenteado, etc. Un PR al repositorio de diffyscan con [configuraciones como esta](https://github.com/lidofinance/diffyscan/tree/main/config_samples/zksync) permitiría a NEW simplificar la verificación del despliegue y hacer los comentarios más específicos.
 
 :::note
-To prepare the deployment actions plan, you might want to refer to the following [wstETH on Optimism deployment log](https://hackmd.io/@lido/By-ANUXT3?type=view) as a reference.
+Para preparar el plan de acciones de despliegue, puede ser útil consultar el [registro de despliegue de wstETH en Optimism](https://hackmd.io/@lido/By-ANUXT3?type=view) como referencia.
 :::
 
-#### R-13: No same contract addresses
+#### R-13: Evitar direcciones de contrato iguales
 
-Please avoid deploying contracts to the same addresses on L1 and L2 and/or testnets, as this might occur when deploying from a single EOA to multiple networks. Following this recommendation helps to avoid potential confusion in the future.
+Por favor, evite desplegar contratos a las mismas direcciones en L1 y L2 y/o en testnets, ya que esto puede ocurrir al desplegar desde una sola EOA a múltiples redes. Seguir esta recomendación ayuda a evitar confusiones potenciales en el futuro.
 
-## Reference architecture and permissions setup
+## Arquitectura de referencia y configuración de permisos
 
-This section describes a kind of minimal bridging contracts setup and its configuration. This setup is a recommendation and might not be the best for a specific network — it serves as a suggestion for the main functional parts and their interconnections.
+Esta sección describe un tipo de configuración mínima de contratos de puente y su configuración. Esta configuración es una recomendación y puede no ser la mejor para una red específica — sirve como sugerencia para las partes funcionales principales y sus interconexiones.
 
-Notation used:
+Notación utilizada:
 
-- `Lido Agent` - Lido DAO [Aragon Agent](https://etherscan.io/address/0x3e40D73EB977Dc6a537aF587D48316feE66E9C8c) on L1;
-- `Emergency Brakes L1 Multisig` - Emergency Multisig on L1 (ratified by the Lido DAO). See https://research.lido.fi/t/emergency-brakes-signer-rotation/5286;
-- `Emergency Brakes L2 Multisig` - Emergency Multisig on L2 (the same participants but using the L2 Safe instance).
+- `Lido Agent` - Agente Aragon de Lido DAO [Aragon Agent](https://etherscan.io/address/0x3e40D73EB977Dc6a537aF587D48316feE66E9C8c) en L1;
+- `Emergency Brakes L1 Multisig` - Multisig de Emergencia en L1 (ratificado por Lido DAO). Ver https://research.lido.fi/t/emergency-brakes-signer-rotation/5286;
+- `Emergency Brakes L2 Multisig` - Multisig de Emergencia en L2 (los mismos participantes pero usando la instancia de L2 Safe).
 
-**L1 Custom Bridge Endpoint**
-- Upgradeable
-	- Proxy admin is `Lido Agent`
-- Admin is `Lido Agent`
-- Deposits pausable by
-	- `Lido Agent`
-	- `Emergency Brakes Multisig`
-- Deposits resumable by
-	- `Lido Agent`
-- Withdrawals pausable by
-	- `Lido Agent`
-	- `Emergency Brakes Multisig`
-- Withdrawals resumable by
-	- `Lido Agent`
+**Punto Final del Puente Personalizado en L1**
+- Actualizable
+  - El administrador del proxy es `Lido Agent`
+- Admin es `Lido Agent`
+- Depósitos pausables por
+  - `Lido Agent`
+  - `Emergency Brakes Multisig`
+- Depósitos reanudables por
+  - `Lido Agent`
+- Retiros pausables por
+  - `Lido Agent`
+  - `Emergency Brakes Multisig`
+- Retiros reanudables por
+  - `Lido Agent`
 
-**L2 Governance Executor**
+**Ejecutor de Gobernanza L2**
 
-- The only allow-listed L1 execution sender is `Lido Agent` (retrieved via `getEthereumExecutor()`)
+- El único remitente de ejecución de L1 permitido en la lista blanca es `Lido Agent` (obtenido mediante `getEthereumExecutor()`)
 
-**L2 Custom Bridge Endpoint**
-- Upgradeable
-	- Proxy admin is `L2 Governance Executor`
-- Admin is `L2 Governance Executor`
-- Deposits pausable by
-	- `L2 Governance Executor`
-	- `Emergency Brakes Multisig`
-- Deposits resumable by
-	- `L2 Governance Executor`
-- Withdrawals pausable by
-	- `L2 Governance Executor`
-	- `Emergency Brakes Multisig`
-- Withdrawals resumable by
-	- `L2 Governance Executor`
+**Punto Final del Puente Personalizado en L2**
+- Actualizable
+  - El administrador del proxy es `Ejecutor de Gobernanza L2`
+- Admin es `Ejecutor de Gobernanza L2`
+- Depósitos pausables por
+  - `Ejecutor de Gobernanza L2`
+  - `Emergency Brakes Multisig`
+- Depósitos reanudables por
+  - `Ejecutor de Gobernanza L2`
+- Retiros pausables por
+  - `Ejecutor de Gobernanza L2`
+  - `Emergency Brakes Multisig`
+- Retiros reanudables por
+  - `Ejecutor de Gobernanza L2`
 
-**L2 Token Bridged**
-- Upgradeable
-	- Proxy admin is `L2 Governance Executor`
-- Mint is allowed only by `L2 Custom Bridge`
-- Optionally applicable (if `L2 Custom Bridge` doesn't support these)
-    - Admin is `L2 Governance Executor`
-    - Withdrawals pausable by
-        - `Emergency Brakes Multisig`
-        - `L2 Governance Executor`
-    - Withdrawals resumable by
-        - `L2 Governance Executor`
-    - Deposits pausable by
-        - `L2 Governance Executor`
-        - `Emergency Brakes Multisig`
-    - Deposits resumable by
-        - `L2 Governance Executor`
+**Token Puenteador en L2**
+- Actualizable
+  - El administrador del proxy es `Ejecutor de Gobernanza L2`
+- La emisión está permitida solo por `Punto Final del Puente Personalizado en L2`
+- Opcionalmente aplicable (si `Punto Final del Puente Personalizado en L2` no admite esto)
+  - Admin es `Ejecutor de Gobernanza L2`
+  - Retiros pausables por
+    - `Emergency Brakes Multisig`
+    - `Ejecutor de Gobernanza L2`
+  - Retiros reanudables por
+    - `Ejecutor de Gobernanza L2`
+  - Depósitos pausables por
+    - `Ejecutor de Gobernanza L2`
+    - `Emergency Brakes Multisig`
+  - Depósitos reanudables por
+    - `Ejecutor de Gobernanza L2`
 
-## The proposed configuration
+## Configuración propuesta
 
 ### Mainnet
 
-- `wstETH` - the wstETH token on L1
-	- `0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0`
-- `Lido Agent` - Lido DAO Aragon Agent
-	- `0x3e40D73EB977Dc6a537aF587D48316feE66E9C8c`
+- `wstETH` - el token wstETH en L1
+  - `0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0`
+- `Lido Agent` - Agente Aragon de Lido DAO
+  - `0x3e40D73EB977Dc6a537aF587D48316feE66E9C8c`
 - `Emergency Brakes L1 Multisig`
-	- `0x73b047fe6337183A454c5217241D780a932777bD`
+  - `0x73b047fe6337183A454c5217241D780a932777bD`
 - `Emergency Brakes L2 Multisig`
-	- ask the NEW for the address (the deployed Safe instance would be needed)
+  - Pide la dirección a NEW (se necesitaría la instancia Safe desplegada)
 
 ### Testnets
 
 :::info
-Please, deploy to Holešky if possible because it has better long-term exposure and more robust Lido protocol deployment.
+Por favor, despliega en Holešky si es posible, ya que tiene una exposición a largo plazo mejor y un despliegue más robusto del protocolo Lido.
 :::
 
-#### Holesky
+#### Holešky
 
-- `wstETH` - the wstETH token on L1
-	- `0x8d09a4502Cc8Cf1547aD300E066060D043f6982D`
-- `Lido Agent` - Lido DAO Aragon Agent
-	- `0xE92329EC7ddB11D25e25b3c21eeBf11f15eB325d`
+- `wstETH` - el token wstETH en L1
+  - `0x8d09a4502Cc8Cf1547aD300E066060D043f6982D`
+- `Lido Agent` - Agente Aragon de Lido DAO
+  - `0xE92329EC7ddB11D25e25b3c21eeBf11f15eB325d`
 - `Emergency Brakes L1 Multisig`
-	- `0xa5F1d7D49F581136Cf6e58B32cBE9a2039C48bA1` (EOA)
+  - `0xa5F1d7D49F581136Cf6e58B32cBE9a2039C48bA1` (EOA)
 - `Emergency Brakes L2 Multisig`
-	- `0xa5F1d7D49F581136Cf6e58B32cBE9a2039C48bA1` (EOA)
+  - `0xa5F1d7D49F581136Cf6e58B32cBE9a2039C48bA1` (EOA)
 
 #### Sepolia
 
-- `wstETH` - the wstETH token on L1
-	- `0xB82381A3fBD3FaFA77B3a7bE693342618240067b`
-- `Lido Agent` - Lido DAO Aragon Agent
-	- `0x32A0E5828B62AAb932362a4816ae03b860b65e83`
+- `wstETH` - el token wstETH en L1
+  - `0xB82381A3fBD3FaFA77B3a7bE693342618240067b`
+- `Lido Agent` - Agente Aragon de Lido DAO
+  - `0x32A0E5828B62AAb932362a4816ae03b860b65e83`
 - `Emergency Brakes L1 Multisig`
-	- `0xa5F1d7D49F581136Cf6e58B32cBE9a2039C48bA1` (EOA)
+  - `0xa5F1d7D49F581136Cf6e58B32cBE9a2039C48bA1` (EOA)
 - `Emergency Brakes L2 Multisig`
-	- `0xa5F1d7D49F581136Cf6e58B32cBE9a2039C48bA1` (EOA)
+  - `0xa5F1d7D49F581136Cf6e58B32cBE9a2039C48bA1` (EOA)
 
-## FAQ
+## Preguntas frecuentes
 
-### Our network is Y-compatible, how about reusing the solution present on Y?
+### Nuestra red es compatible con Y, ¿cómo reutilizar la solución presente en Y?
 
-Yes, sure. For example, [OptimismBridgeExecutor](https://github.com/lidofinance/governance-crosschain-bridges/blob/master/contracts/bridges/OptimismBridgeExecutor.sol) has been [reused](https://basescan.org/address/0x0E37599436974a25dDeEdF795C848d30Af46eaCF#code) on Base network.
-If so, please don't alter the contract's code and use the same names. It allows to keep the audit valid and track origins.
+Sí, por supuesto. Por ejemplo, [OptimismBridgeExecutor](https://github.com/lidofinance/governance-crosschain-bridges/blob/master/contracts/bridges/OptimismBridgeExecutor.sol) ha sido [reutilizado](https://basescan.org/address/0x0E37599436974a25dDeEdF795C848d30Af46eaCF#code) en la red Base.
+Si es así, por favor no altere el código del contrato y use los mismos nombres. Esto permite mantener la auditoría válida y rastrear los orígenes.
 
-To speed up the process, you might perform a deployment verification against the bytecode already used for another network and configuration/storage state comparison to be 1:1 except only for the network specific configuration changes needed.
-Follow the case of [`wstETH on Mode`](https://research.lido.fi/t/wsteth-deployment-on-mode/7365) for the reference.
+Para acelerar el proceso, puedes realizar una verificación de despliegue contra el bytecode ya utilizado para otra red y comparar el estado de configuración/almacenamiento para que sea 1:1, excepto los cambios de configuración específicos de la red necesarios.
+Sigue el caso de [`wstETH en Mode`](https://research.lido.fi/t/wsteth-deployment-on-mode/7365) como referencia.
 
-### What if wstETH is already bridged and has ample liquidity?
+### ¿Qué pasa si wstETH ya está puentado y tiene una gran liquidez?
 
-Please consider getting in touch with the NEW if (**R-1...R-4**) are followed.
+Por favor, considere ponerse en contacto con NEW si se siguen (**R-1...R-4**).
 
-## Questionnaire
+## Cuestionario
 
-To get fast feedback on the likelihood of the wstETH recognized by the Lido DAO, please fill in the questionnaire and send it to the NEW. **Please note: NEW is not a representative of the Lido DAO and by giving the feedback NEW makes no warranties, express or implied, and disclaims all implied warranties, including any warranty of the likelihood of the recognition or rejection by the Lido DAO and representation.**
+Para obtener comentarios rápidos sobre la posibilidad de que wstETH sea reconocido por Lido DAO, complete el cuestionario y envíelo a NEW. **Tenga en cuenta: NEW no es un representante de Lido DAO y al proporcionar comentarios, NEW no ofrece garantías, expresas o implícitas, y renuncia a todas las garantías implícitas, incluyendo cualquier garantía de reconocimiento o rechazo por parte de Lido DAO y representación.**
 
-In the comments section, please provide the relevant details: the artifacts, if present, and/or a description why the recommendation is not followed or followed partially, etc.
+En la sección de comentarios, proporcione los detalles relevantes: artefactos, si los hay, y/o una descripción de por qué no se sigue o se sigue parcialmente la recomendación, etc.
 
-| Question                                                                                                                                     | Is followed and/or comment |
+| Pregunta                                                                                                                                     | ¿Se sigue y/o comentario? |
 | -------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
-| Has wstETH been bridged?                                                                                                                     | yes/no                     |
-| If bridged, how much adoption token has got?                                                                                                 | yes/no                     |
-| R-1: Audited code and verifiable deployment                                                                                                  | yes/no/partially           |
-| R-2: Lock-and-mint bridge mechanics                                                                                                          | yes/no                     |
-| R-3: Usage of canonical bridge                                                                                                               | yes/no                     |
-| R-4: L2 wstETH token upgradable                                                                                                              | yes/no/partially           |
-| R-5: Bridging L1 Lido DAO decisions                                                                                                          | yes/no/partially           |
-| R-6: Dedicated upgradable bridge instances                                                                                                   | yes/no/partially           |
-| R-7: Pausable deposits and withdrawals                                                                                                       | yes/no/partially           |
-| R-8: ERC-2612 permit enhanced with EIP-1271                                                                                                  | yes/no/partially           |
-| R-9: Token/bridge state before snapshot vote                                                                                                 | yes/no/partially           |
-| R-10: Upgradability mechanics                                                                                                                | yes/no/partially           |
-| R-11: Use AccessControlEnumerable for ACL                                                                                                    | yes/no/partially           |
-| R-12: Share the deploy artifacts                                                                                                             | yes/no/partially           |
-| R-13: No same contract addresses                                                                                                             | yes/no                     |
-| Bridges are complicated in that the transaction can succeed on one side and fail on the other. What's the handling mechanism for this issue? |                            |
-| Is there a deployment script that sets all the parameters and authorities correctly?                                                         |                            |
-| Is there a post-deploy check script that, given a deployment, checks that all parameters and authorities are set correctly?                  |                            |
+| ¿Se ha puentado wstETH?                                                                                                                     | sí/no                      |
+| Si está puentado, ¿cuánta adopción ha tenido el token?                                                                                       | sí/no                      |
+| R-1: Código auditado y despliegue verificable                                                                                               | sí/no/parcialmente         |
+| R-2: Mecánica de puente de bloqueo y mint                                                                                                   | sí/no                      |
+| R-3: Uso de puente canónico                                                                                                                 | sí/no                      |
+| R-4: Token wstETH en L2 actualizable                                                                                                         | sí/no/parcialmente         |
+| R-5: Decisiones de puenteador L1 Lido DAO                                                                                                   | sí/no/parcialmente         |
+| R-6: Instancias de puente actualizables dedicadas                                                                                            | sí/no/parcialmente         |
+| R-7: Depósitos y retiros pausables                                                                                                           | sí/no/parcialmente         |
+| R-8: Soporte para permiso ERC-2612 mejorado con EIP-1271                                                                                     | sí/no/parcialmente         |
+| R-9: Estado del token/puente antes de la votación de snapshot                                                                                 | sí/no/parcialmente         |
+| R-10: Mecánicas de upgradabilidad                                                                                                            | sí/no/parcialmente         |
+| R-11: Usar AccessControlEnumerable para ACL                                                                                                  | sí/no/parcialmente         |
+| R-12: Compartir los artefactos de despliegue                                                                                                 | sí/no/parcialmente         |
+| R-13: No usar direcciones de contrato iguales                                                                                                 | sí/no                      |
+| Los puentes son complicados en que la transacción puede tener éxito en un lado y fallar en el otro. ¿Cuál es el mecanismo de manejo para este problema? |                            |
+| ¿Hay un script de despliegue que configure todos los parámetros y autoridades correctamente?                                                  |                            |
+| ¿Hay un script de verificación posterior al despliegue que, dado un despliegue, verifique que todos los parámetros y autoridades estén configurados correctamente?                  |                            |
 
-## References
+## Referencias
 
-- Deployed contracts addresses https://docs.lido.fi/deployed-contracts/#lido-on-l2
+- Direcciones de contratos desplegados https://docs.lido.fi/deployed-contracts/#lido-on-l2
 - LOL (Liquidity Observation Labs) https://research.lido.fi/t/liquidity-observation-lab-lol-liquidity-strategy-and-application-to-curve-steth-eth-pool/5335
-- Lido L2 reference bridging contracts (Arbitrum and Optimism) https://github.com/lidofinance/lido-l2
-- Unofficial guidelines (like the 1st iteration of the guide) https://research.lido.fi/t/unofficial-guidelines-for-bridging-solutions-network-expansion-workgroup/5790
-- Lido emergency multisig https://research.lido.fi/t/emergency-brakes-signer-rotation/5286
-- Lido DAO recognition proposal for wstETH on Base https://research.lido.fi/t/wsteth-deployment-to-base-and-ownership-acceptance-by-lido-dao/5668
-- Lido DAO recognition proposal for wstETH on zkSync Era https://research.lido.fi/t/wsteth-deployment-on-zksync/5701
-- Lido DAO recognition proposal for wstETH on Mantle https://research.lido.fi/t/wsteth-deployment-on-mantle/5991
-- Lido DAO recognition proposal for wstETH on Linea https://research.lido.fi/t/wsteth-on-linea-ownership-acceptance-by-lido-dao/5961
-- Lido DAO recognition proposal for wstETH on Scroll https://research.lido.fi/t/wsteth-deployment-on-scroll/6603
-- Lido DAO recognition proposal for wstETH on Mode https://research.lido.fi/t/wsteth-deployment-on-mode/7365
+- Contratos de puente de referencia Lido L2 (Arbitrum y Optimism) https://github.com/lidofinance/lido-l2
+- Directrices no oficiales (como la primera iteración de la guía) https://research.lido.fi/t/unofficial-guidelines-for-bridging-solutions-network-expansion-workgroup/5790
+- Multisig de emergencia Lido https://research.lido.fi/t/emergency-brakes-signer-rotation/5286
+- Propuesta de reconocimiento de Lido DAO para wstETH en Base https://research.lido.fi/t/wsteth-deployment-to-base-and-ownership-acceptance-by-lido-dao/5668
+- Propuesta de reconocimiento de Lido DAO para wstETH en zkSync Era https://research.lido.fi/t/wsteth-deployment-on-zksync/5701
+- Propuesta de reconocimiento de Lido DAO para wstETH en Mantle https://research.lido.fi/t/wsteth-deployment-on-mantle/5991
+- Propuesta de reconocimiento de Lido DAO para wstETH en Linea https://research.lido.fi/t/wsteth-on-linea-ownership-acceptance-by-lido-dao/5961
+- Propuesta de reconocimiento de Lido DAO para wstETH en Scroll https://research.lido.fi/t/wsteth-deployment-on-scroll/6603
+- Propuesta de reconocimiento de Lido DAO para wstETH en Mode https://research.lido.fi/t/wsteth-deployment-on-mode/7365
+
