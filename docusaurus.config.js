@@ -3,7 +3,7 @@ module.exports = {
   title: 'Lido Docs',
   tagline: 'Documentation for the Lido staking protocol',
   url: 'https://adminseedlatam.github.io',
-  baseUrl: '/lido-docs-spanish/',
+  baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'throw',
   onBrokenAnchors: 'throw',
