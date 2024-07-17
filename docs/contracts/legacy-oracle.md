@@ -1,34 +1,34 @@
 # LegacyOracle
 
-- [Source code](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.4.24/oracle/LegacyOracle.sol)
-- [Deployed contract](https://etherscan.io/address/0x442af784A788A5bd6F42A01Ebe9F287a871243fb)
+- [Código fuente](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.4.24/oracle/LegacyOracle.sol)
+- [Contrato desplegado](https://etherscan.io/address/0x442af784A788A5bd6F42A01Ebe9F287a871243fb)
 
 :::warning
-`LegacyOracle` will be maintained till the end of 2023.
-Afterwards, it will be discontinued and external integrations should rely on [`AccountingOracle`](/contracts/accounting-oracle).
+`LegacyOracle` se mantendrá hasta finales de 2023.
+Después de ese período, será descontinuado y las integraciones externas deberán depender de [`AccountingOracle`](/contracts/accounting-oracle).
 :::
 
-## What is LegacyOracle?
+## ¿Qué es LegacyOracle?
 
-`LegacyOracle` is an Aragon app previously known as `LidoOracle`, used to track changes on the Beacon Chain.
-Following the Lido V2 upgrade, this was replaced by the [`AccountingOracle`](/contracts/accounting-oracle)
-and the oracle workflow was redesigned to deliver synchronized historical data chunks for the same reference slot
-both for the Consensus and Execution Layer parts.
+`LegacyOracle` es una aplicación de Aragon previamente conocida como `LidoOracle`, utilizada para rastrear cambios en la Beacon Chain.
+Tras la actualización a Lido V2, esto fue reemplazado por [`AccountingOracle`](/contracts/accounting-oracle)
+y el flujo del oráculo fue rediseñado para entregar fragmentos de datos históricos sincronizados para el mismo slot de referencia
+tanto para las partes de Capa de Consenso como de Ejecución.
 
-## Key changes
+## Cambios clave
 
-In Lido V2, `LegacyOracle` only supports a subset of view functions and events.
-`AccountingOracle` interacts with it to push data changes on each report.
+En Lido V2, `LegacyOracle` solo soporta un subconjunto de funciones de vista y eventos.
+`AccountingOracle` interactúa con él para enviar cambios de datos en cada reporte.
 
-### How does LegacyOracle receive the AccountingOracle reports anyway (flow)
+### ¿Cómo recibe LegacyOracle los reportes de AccountingOracle de todos modos? (flujo)
 
-The `LegacyOracle` contract receives the data changes on each `AccountingOracle` report using two stages
-(still within the same transaction):
+El contrato `LegacyOracle` recibe los cambios de datos en cada reporte de `AccountingOracle` usando dos etapas
+(aún dentro de la misma transacción):
 
-1. Invoke [`handleConsensusLayerReport`](./legacy-oracle#handleconsensuslayerreport)
-providing the reference slot and validators data from `AccountingOracle` itself.
-1. Invoke [`handlePostTokenRebase`](./legacy-oracle#handleposttokenrebase)
-from [`Lido`](/contracts/lido).
+1. Invoca [`handleConsensusLayerReport`](./legacy-oracle#handleconsensuslayerreport)
+proporcionando el slot de referencia y los datos de los validadores del `AccountingOracle` en sí mismo.
+1. Invoca [`handlePostTokenRebase`](./legacy-oracle#handleposttokenrebase)
+desde [`Lido`](/contracts/lido).
 
 ```mermaid
 graph LR;
@@ -36,15 +36,15 @@ graph LR;
   AccountingOracle--handleOracleReport-->Lido--handlePostTokenRebase-->LegacyOracle
 ```
 
-### Rebase and APR
+### Rebase y APR
 
-To calculate the protocol's daily rebase and APR projections one would use the old `LidoOracle` APIs for a while.
-Although the old way of calculating the APR would still result in relevant numbers, the math might be off in case of significant withdrawals.
+Para calcular las proyecciones diarias de rebase y APR del protocolo, se usarían las API antiguas de `LidoOracle` durante un tiempo.
+Aunque la antigua forma de calcular el APR seguiría dando números relevantes, las matemáticas podrían no ser precisas en caso de retiros significativos.
 
-#### How it was with LidoOracle
+#### Cómo era con LidoOracle
 
 :::note
-The formula is outdated and inaccurate since the [Lido V2 upgrade](https://blog.lido.fi/lido-v2-launch/) happened.
+La fórmula está desactualizada e inexacta desde la [actualización a Lido V2](https://blog.lido.fi/lido-v2-launch/).
 :::
 
 ```javascript
@@ -53,12 +53,12 @@ lidoFeeAsFraction = lidoFee / basisPoint
 userAPR = protocolAPR * (1 - lidoFeeAsFraction)
 ```
 
-#### What's new from Lido V2
+#### Lo nuevo desde Lido V2
 
-See the new Lido API docs with regards to [APR](/docs/integrations/api.md#lido-apr).
+Consulte la nueva documentación de la API de Lido con respecto a [APR](/docs/integrations/api.md#lido-apr).
 
 ```js
-// Emits when token rebased (total supply and/or total shares were changed)
+// Se emite cuando se reajusta el token (se cambió el suministro total y/o las acciones totales)
 event TokenRebased(
     uint256 indexed reportTimestamp,
     uint256 timeElapsed,
@@ -66,7 +66,7 @@ event TokenRebased(
     uint256 preTotalEther, /* preTotalPooledEther */
     uint256 postTotalShares,
     uint256 postTotalEther, /* postTotalPooledEther */
-    uint256 sharesMintedAsFees /* fee part included in `postTotalShares` */
+    uint256 sharesMintedAsFees /* parte de la tarifa incluida en `postTotalShares` */
 );
 
 preShareRate = preTotalEther * 1e27 / preTotalShares
@@ -78,30 +78,30 @@ userAPR =
     ) / timeElapsed
 ```
 
-In short, the new formula takes into account both `preTotalShares` and `postTotalShares` values, while,
-in contrast, the old formula didn't use them. The new formula also doesn't require to calculate `lidoFee`
-at all (because the fee distribution works by changing the total shares amount under the hood).
+En resumen, la nueva fórmula tiene en cuenta tanto los valores de `preTotalShares` como `postTotalShares`, mientras que,
+en contraste, la fórmula antigua no los utilizaba. La nueva fórmula tampoco requiere calcular `lidoFee`
+en absoluto (porque la distribución de tarifas funciona cambiando la cantidad total de acciones bajo el capó).
 
-#### Why does it matter
+#### ¿Por qué es importante?
 
-When Lido V2 protocol finalizes withdrawal requests, the `Lido` contract sends ether to `WithdrawalQueue` (excluding these funds from `totalPooledEther`, i.e., decreasing TVL) and assigns to burn underlying locked requests' `stETH` shares in return.
+Cuando el protocolo Lido V2 finaliza las solicitudes de retiro, el contrato `Lido` envía ether a la `WithdrawalQueue` (excluyendo estos fondos de `totalPooledEther`, es decir, disminuyendo el TVL) y asigna para quemar acciones subyacentes bloqueadas en las solicitudes `stETH`.
 
-In other words, withdrawal finalization decreases both TVL and total shares.
+En otras palabras, la finalización del retiro disminuye tanto el TVL como las acciones totales.
 
-Old formula isn't suitable anymore because it catches TVL changes, but skips total shares changes.
+La fórmula antigua ya no es adecuada porque captura cambios en el TVL, pero omite cambios en las acciones totales.
 
-Illustrative example (using smallish numbers far from the real ones for simplicity):
+Ejemplo ilustrativo (usando números pequeños para simplicidad):
 
 ```javascript
 preTotalEther = 1000 ETH
-preTotalShares = 1000 * 10^18 // 1 share : 1 wei
+preTotalShares = 1000 * 10^18 // 1 acción : 1 wei
 
 postTotalEther = 999 ETH
 postTotalShares = 990 * 10^18
 
-timeElapsed = 24 * 60 * 60 // 1 day, or 86400 seconds
+timeElapsed = 24 * 60 * 60 // 1 día, o 86400 segundos
 
-//!!! using the old (imprecise) method
+//!!! usando el método antiguo (impreciso)
 
 // protocolAPR = (postTotalPooledEther - preTotalPooledEther) * secondsInYear / (preTotalPooledEther * timeElapsed)
 protocolAPR = (999ETH - 1000ETH) * 31557600 / (1000ETH * 86400) = -0.36525
@@ -110,70 +110,70 @@ protocolAPR = (999ETH - 1000ETH) * 31557600 / (1000ETH * 86400) = -0.36525
 
 userAPR = -0.36525 * (1 - 0.1) = -0.328725
 
-//!!! i.e, userAPR now is ~minus 32.9%
+//!!! es decir, userAPR ahora es ~menos 32.9%
 
-//!!! using the updated (proper) method
+//!!! usando el método actualizado (correcto)
 
 preShareRate = 1000 ETH * 1e27 / 1000 * 10^18 = 1e27
 postShareRate = 999 ETH * 1e27 / 990 * 10^18 = 1.009090909090909e+27
 userAPR = 31557600 * ((postShareRate - preShareRate) / preShareRate) / 86400 = 3.320454545454529
 
-//!!! i.e., userAPR now is ~plus 332%
+//!!! es decir, userAPR ahora es ~más 332%
 ```
 
-## View Methods
+## Métodos de vista
 
 ### getLido()
 
-Returns the `Lido` contract address.
+Devuelve la dirección del contrato `Lido`.
 
 ```sol
 function getLido() returns (address)
 ```
 
 :::note
-Always returns the `Lido` address stated in the [deployed addresses](/deployed-contracts) list.
+Siempre devuelve la dirección de `Lido` indicada en la lista de [contratos desplegados](/deployed-contracts).
 :::
 
 ### getAccountingOracle()
 
-Returns the `AccountingOracle` contract address.
+Devuelve la dirección del contrato `AccountingOracle`.
 
 ```sol
 function getAccountingOracle() returns (address)
 ```
 
 :::note
-Always returns the `AccountingOracle` address stated in the [deployed addresses](/deployed-contracts) list.
+Siempre devuelve la dirección de `AccountingOracle` indicada en la lista de [contratos desplegados](/deployed-contracts).
 :::
 
 ### getContractVersion()
 
-Returns the current contract version.
+Devuelve la versión actual del contrato.
 
 ```sol
 function getContractVersion() returns (uint256)
 ```
 
 :::note
-Always returns `4`.
+Siempre devuelve `4`.
 :::
 
 ### getVersion()
 
-Returns the current contract version (compatibility method).
+Devuelve la versión actual del contrato (método de compatibilidad).
 
 ```sol
 function getVersion() returns (uint256)
 ```
 
 :::note
-Always returns `4`, calls `getContractVersion()` internally.
+Siempre devuelve `4`, llama internamente a `getContractVersion()`.
 :::
 
 ### getBeaconSpec()
 
-Returns the `AccountingOracle` frame period together with Ethereum Beacon Chain specification constants.
+Devuelve el período de marco de `AccountingOracle` junto con las constantes de especificación de Ethereum Beacon Chain.
 
 ```sol
 function getBeaconSpec() returns (
@@ -185,21 +185,23 @@ function getBeaconSpec() returns (
 ```
 
 :::note
-Always returns (225, 32, 12, 1606824023) for Mainnet and (225, 32, 12, 1616508000) for Görli.
+Siempre devuelve (225, 32, 12, 1606824023) para Mainnet y (225, 32, 12, 1616508000) para Görli.
 :::
 
-#### Returns
+#### Devoluciones
 
-| Name             | Type     | Description                                                    |
-| ---------------- | -------- | -------------------------------------------------------------- |
-| `epochsPerFrame` | `uint64` | Beacon Chain epochs per single `AccountingOracle` report frame |
-| `slotsPerEpoch`  | `uint64` | Beacon Chain slots per single Beacon Chain epoch               |
-| `secondsPerSlot` | `uint64` | Seconds per single Beacon Chain slot                           |
-| `genesisTime`    | `uint64` | Beacon Chain genesis timestamp                                 |
+| Nombre            | Tipo      | Descripción                                                         |
+| ----------------- | --------- | ------------------------------------------------------------------- |
+| `epochsPerFrame`  | `uint64`  | Épocas de Beacon Chain por marco de reporte de `AccountingOracle`   |
+| `slotsPerEpoch`   | `uint64`  | Slots de Beacon Chain por época de Beacon Chain                      |
+| `secondsPerSlot`  | `uint64`  | Segundos por slot de Beacon Chain                                    |
+| `genesisTime`     | `uint64`  | Marca de tiempo de génesis de Beacon Chain                           |
 
 ### getCurrentEpochId()
 
-Returns the Beacon Chain epoch id calculated from the current timestamp using the [beacon chain spec](./legacy-oracle#getbeaconspec).
+Devuelve el ID de época de
+
+ Beacon Chain calculado a partir del timestamp actual usando la [especificación de cadena de Beacon](./legacy-oracle#getbeaconspec).
 
 ```sol
 function getCurrentEpochId() returns (uint256)
@@ -207,7 +209,7 @@ function getCurrentEpochId() returns (uint256)
 
 ### getCurrentFrame()
 
-Returns the first epoch of the current `AccountingOracle` reporting frame as well as its start and end times in seconds.
+Devuelve la primera época del marco actual de reporte de `AccountingOracle` así como sus tiempos de inicio y fin en segundos.
 
 ```sol
 function getCurrentFrame() returns (
@@ -217,17 +219,17 @@ function getCurrentFrame() returns (
 )
 ```
 
-#### Returns
+#### Devoluciones
 
-| Name              | Type       | Description                                                       |
-| ----------------- | ---------- | ----------------------------------------------------------------- |
-| `frameEpochId`    | `uint256`  | The first epoch of the current `AccountingOracle` reporting frame |
-| `frameStartTime`  | `uint256`  | The start timestamp of the current reporting frame                |
-| `frameEndTime`    | `uint256`  | The end timestamp of the current reporting frame                  |
+| Nombre             | Tipo       | Descripción                                                       |
+| ------------------ | ---------- | ----------------------------------------------------------------- |
+| `frameEpochId`     | `uint256`  | La primera época del marco de reporte actual de `AccountingOracle` |
+| `frameStartTime`   | `uint256`  | El timestamp de inicio del marco de reporte actual                 |
+| `frameEndTime`     | `uint256`  | El timestamp de fin del marco de reporte actual                    |
 
 ### getLastCompletedEpochId()
 
-Returns the starting epoch of the last frame in which the last `AccountingOracle` report was received and applied.
+Devuelve la época de inicio del último marco en el que se recibió y aplicó el último reporte de `AccountingOracle`.
 
 ```sol
 function getLastCompletedEpochId() returns (uint256)
@@ -235,7 +237,7 @@ function getLastCompletedEpochId() returns (uint256)
 
 ### getLastCompletedReportDelta()
 
-Returns the total supply change ocurred with the last completed `AccountingOracle` report.
+Devuelve el cambio en el suministro total ocurrido con el último reporte completado de `AccountingOracle`.
 
 ```sol
 function getLastCompletedReportDelta() returns (
@@ -245,22 +247,22 @@ function getLastCompletedReportDelta() returns (
 )
 ```
 
-#### Returns
+#### Devoluciones
 
-| Name                      | Type       | Description                                                   |
-| ------------------------- | ---------- | ------------------------------------------------------------- |
-| `postTotalPooledEther`    | `uint256`  | Post-report `stETH`` total pooled ether (i.e., total supply)  |
-| `preTotalPooledEther`     | `uint256`  | Pre-report `stETH` total pooled ether (i.e., total supply)    |
-| `timeElapsed`             | `uint256`  | Time elapsed since the previously completed report, seconds   |
+| Nombre                     | Tipo       | Descripción                                                   |
+| -------------------------- | ---------- | ------------------------------------------------------------- |
+| `postTotalPooledEther`     | `uint256`  | `stETH` total pooled ether post-report (es decir, suministro total)  |
+| `preTotalPooledEther`      | `uint256`  | `stETH` total pooled ether pre-report (es decir, suministro total)   |
+| `timeElapsed`              | `uint256`  | Tiempo transcurrido desde el último reporte completado, segundos |
 
-## Methods
+## Métodos
 
 ### handlePostTokenRebase()
 
-Handles a `stETH` token rebase incurred by the succeeded `AccountingOracle` report storing
-the total ether and time elapsed stats.
+Maneja un reajuste del token `stETH` incurrido por el reporte exitoso de `AccountingOracle` almacenando
+las estadísticas de ether total y tiempo transcurrido.
 
-Emits [`PostTotalShares`](./legacy-oracle#posttotalshares)
+Emite [`PostTotalShares`](./legacy-oracle#posttotalshares)
 
 ```sol
 function handlePostTokenRebase(
@@ -275,26 +277,26 @@ function handlePostTokenRebase(
 ```
 
 :::note
-The caller must be `Lido`.
+El llamante debe ser `Lido`.
 :::
 
-#### Parameters
+#### Parámetros
 
-| Name                      | Type       | Description                                                                           |
-| ------------------------- | ---------- | ------------------------------------------------------------------------------------- |
-| `reportTimestamp`         | `uint256`  | The reference timestamp corresponding to the moment of the oracle report calculation  |
-| `timeElapsed`             | `uint256`  | Time elapsed since the previously completed report, seconds                           |
-| `preTotalShares`          | `uint256`  | Pre-report `stETH` total shares                                                       |
-| `preTotalEther`           | `uint256`  | Pre-report `stETH` total pooled ether (i.e., total supply)                            |
-| `postTotalShares`         | `uint256`  | Post-report `stETH` total shares                                                      |
-| `postTotalEther`          | `uint256`  | Post-report `stETH` total pooled ether (i.e., total supply)                           |
-| `totalSharesMintedAsFees` | `uint256`  | Total shares amount minted as the protocol fees on top of the accrued rewards         |
+| Nombre                      | Tipo       | Descripción                                                                             |
+| --------------------------- | ---------- | --------------------------------------------------------------------------------------- |
+| `reportTimestamp`           | `uint256`  | El timestamp de referencia correspondiente al momento del cálculo del reporte del oráculo |
+| `timeElapsed`               | `uint256`  | Tiempo transcurrido desde el último reporte completado, segundos                         |
+| `preTotalShares`            | `uint256`  | `stETH` total shares pre-report                                                         |
+| `preTotalEther`             | `uint256`  | `stETH` total pooled ether pre-report (es decir, suministro total)                        |
+| `postTotalShares`           | `uint256`  | `stETH` total shares post-report                                                        |
+| `postTotalEther`            | `uint256`  | `stETH` total pooled ether post-report (es decir, suministro total)                       |
+| `totalSharesMintedAsFees`   | `uint256`  | Cantidad total de acciones acuñadas como tarifas del protocolo además de las recompensas acumuladas |
 
 ### handleConsensusLayerReport()
 
-Handles a new completed `AccountingOracle` report storing the corresponding Beacon Chain epoch id.
+Maneja un nuevo reporte completado de `AccountingOracle` almacenando el ID de época correspondiente de Beacon Chain.
 
-Emits [`Completed`](./legacy-oracle#completed).
+Emite [`Completed`](./legacy-oracle#completed).
 
 ```sol
 function handleConsensusLayerReport(
@@ -305,25 +307,25 @@ function handleConsensusLayerReport(
 ```
 
 :::note
-The caller must be `AccountingOracle`.
+El llamante debe ser `AccountingOracle`.
 :::
 
-#### Parameters
+#### Parámetros
 
-| Name             | Type       | Description                                                                      |
-| ---------------- | ---------- | -------------------------------------------------------------------------------- |
-| `_refSlot`       | `uint256`  | The reference slot corresponding to the moment of the oracle report calculation  |
-| `_clBalance`     | `uint256`  | Lido-participating validators balance on the Beacon Chain side                   |
-| `_clValidators`  | `uint256`  | Number of the Lido-participating validators on the Beacon Chain side             |
+| Nombre            | Tipo       | Descripción                                                                           |
+| ----------------- | ---------- | ------------------------------------------------------------------------------------- |
+| `_refSlot`        | `uint256`  | El slot de referencia correspondiente al momento del cálculo del reporte del oráculo   |
+| `_clBalance`      | `uint256`  | Balance de validadores participantes de Lido en el lado de Beacon Chain                 |
+| `_clValidators`   | `uint256`  | Número de validadores participantes de Lido en el lado de Beacon Chain                   |
 
-## Events
+## Eventos
 
 ### Completed()
 
-Emits whenever the `AccountingOracle` report landed.
+Se emite cada vez que se recibe el reporte de `AccountingOracle`.
 
-This event is still emitted after oracle committee reaches consensus on a report, but only for compatibility purposes.
-The values in this event are not enough to calculate APR or TVL anymore due to withdrawals, Execution Layer rewards, and Consensus Layer rewards skimming.
+Este evento todavía se emite después de que el comité del oráculo llega a un consenso sobre un reporte, pero solo por compatibilidad.
+Los valores en este evento ya no son suficientes para calcular APR o TVL debido a los retiros, recompensas de Capa de Ejecución y recompensas de Capa de Consenso.
 
 ```solidity
 event Completed(
@@ -334,22 +336,22 @@ event Completed(
 ```
 
 :::note
-Emits inside the [`handleConsensusLayerReport`](./legacy-oracle#handleconsensuslayerreport) methods.
+Se emite dentro de los métodos [`handleConsensusLayerReport`](./legacy-oracle#handleconsensuslayerreport).
 :::
 
-#### Parameters
+#### Parámetros
 
-| Name               | Type      | Description                                                                  |
-| ------------------ | --------- | ---------------------------------------------------------------------------- |
-| `epochId`          | `uint256` | Report reference epoch identifier                                            |
-| `beaconBalance`    | `uint128` | The balance of the Lido-participating validators on the Consensus Layer side |
-| `beaconValidators` | `uint128` | The number of the ever appeared Lido-participating validators                |
+| Nombre               | Tipo      | Descripción                                                                  |
+| -------------------- | --------- | ---------------------------------------------------------------------------- |
+| `epochId`            | `uint256` | Identificador de época de referencia del reporte                             |
+| `beaconBalance`      | `uint128` | El balance de los validadores participantes de Lido en el lado de Consenso    |
+| `beaconValidators`   | `uint128` | El número de los validadores participantes de Lido que han aparecido          |
 
 ### PostTotalShares()
 
-Emits whenever the `AccountingOracle` report landed.
+Se emite cada vez que se recibe el reporte de `AccountingOracle`.
 
-This event is still emitted after each rebase but only for compatibility purposes. The values in this event are not enough to correctly calculate the rebase APR since a rebase can result from shares burning without changing total ETH held by the protocol.
+Este evento todavía se emite después de cada reajuste, pero solo por compatibilidad. Los valores en este evento no son suficientes para calcular correctamente el APR del reajuste, ya que un reajuste puede resultar de la quema de acciones sin cambiar el total de ETH en posesión del protocolo.
 
 ```solidity
 event PostTotalShares(
@@ -361,14 +363,14 @@ event PostTotalShares(
 ```
 
 :::note
-The new [`TokenRebased`](/docs/integrations/api.md#ultimo-apr-de-lido-para steth) event emitted from the main Lido contract should be used instead because it provides the pre-report total shares amount as well which is essential to properly estimate a token rebase and its projected APR.
+El nuevo evento [`TokenRebased`](/docs/integrations/api.md#ultimo-apr-de-lido-para steth) emitido desde el contrato principal de Lido debería utilizarse en su lugar porque proporciona el total de acciones previas al reporte, que es esencial para estimar correctamente un reajuste del token y su APR proyectado.
 :::
 
-#### Parameters
+#### Parámetros
 
-| Name                   | Type      | Description                                     |
-| ---------------------- | --------- | ----------------------------------------------- |
-| `postTotalPooledEther` | `uint256` | Post-report total pooled ether                  |
-| `preTotalPooledEther`  | `uint256` | Pre-report total pooled ether                   |
-| `timeElapsed`          | `uint256` | Time elapsed since the previous report, seconds |
-| `totalShares`          | `uint256` | Post-report total shares                        |
+| Nombre                   | Tipo      | Descripción                                     |
+| ------------------------ | --------- | ----------------------------------------------- |
+| `postTotalPooledEther`   | `uint256` | Ether total post-report (es decir, suministro total) |
+| `preTotalPooledEther`    | `uint256` | Ether total pre-report (es decir, suministro total)  |
+| `timeElapsed`            | `uint256` | Tiempo transcurrido desde el reporte anterior, segundos |
+| `totalShares`            | `uint256` | Acciones totales post-report                          |
