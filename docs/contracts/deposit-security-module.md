@@ -1,28 +1,28 @@
-# DepositSecurityModule
+# Módulo de Seguridad de Depósitos (DepositSecurityModule)
 
-- [Source Code](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/DepositSecurityModule.sol)
-- [Deployed Contract](https://etherscan.io/address/0xC77F8768774E1c9244BEed705C4354f2113CFc09)
+- [Código Fuente](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/DepositSecurityModule.sol)
+- [Contrato Desplegado](https://etherscan.io/address/0xC77F8768774E1c9244BEed705C4354f2113CFc09)
 
-Due to front-running vulnerability, we [proposed](https://github.com/lidofinance/lido-improvement-proposals/blob/develop/LIPS/lip-5.md) to establish the Deposit Security Committee dedicated to ensuring the safety of deposits on the Beacon chain:
+Debido a una vulnerabilidad de front-running, [proponemos](https://github.com/lidofinance/lido-improvement-proposals/blob/develop/LIPS/lip-5.md) establecer el Comité de Seguridad de Depósitos dedicado a garantizar la seguridad de los depósitos en la cadena Beacon:
 
-- monitoring the history of deposits and the set of Lido keys available for the deposit, signing and disseminating messages allowing deposits;
-- signing the special message allowing anyone to pause deposits once the malicious Node Operator pre-deposits are detected.
+- monitorear el historial de depósitos y el conjunto de claves de Lido disponibles para el depósito, firmando y difundiendo mensajes que permitan depósitos;
+- firmar el mensaje especial que permite a cualquier persona pausar los depósitos una vez que se detecten pre-depósitos maliciosos de operadores de nodos.
 
-Each member must generate an EOA address to sign messages with their private key. The addresses of the committee members will be added to the smart contract.
+Cada miembro debe generar una dirección EOA para firmar mensajes con su clave privada. Las direcciones de los miembros del comité se añadirán al contrato inteligente.
 
-To make a deposit, we propose to collect a quorum of 4/6 of the signatures of the committee members. Members of the committee can collude with node operators and steal money by signing bad data that contains malicious pre-deposits. To mitigate this, we propose allowing a single committee member to stop deposits and also enforce space deposits in time (e.g., no more than 150 deposits with 25 blocks in between them) to provide the single honest participant the ability to stop further deposits even if the supermajority colludes.
+Para hacer un depósito, proponemos recolectar un quórum de 4/6 de las firmas de los miembros del comité. Los miembros del comité pueden coludirse con los operadores de nodos y robar dinero firmando datos incorrectos que contienen pre-depósitos maliciosos. Para mitigar esto, proponemos permitir que un solo miembro del comité detenga los depósitos y también hacer cumplir los depósitos espaciales en el tiempo (por ejemplo, no más de 150 depósitos con 25 bloques entre ellos) para proporcionar al participante honesto la capacidad de detener más depósitos incluso si la supermayoría se colude.
 
-The guardian himself, or anyone else who has a signed pause message, can call `pauseDeposits` that pauses `DepositSecurityModule`.
+El guardián mismo, o cualquier otra persona que tenga un mensaje de pausa firmado, puede llamar a `pauseDeposits` que pausa `DepositSecurityModule`.
 
-To prevent a replay attack, the guardians sign the block number when  malicious pre-deposits are observed. After a certain number of blocks (`pauseIntentValidityPeriodBlocks`) message becomes invalid.
+Para prevenir un ataque de repetición, los guardianes firman el número de bloque cuando se observan pre-depósitos maliciosos. Después de un cierto número de bloques (`pauseIntentValidityPeriodBlocks`) el mensaje se vuelve inválido.
 
-Values of the parameters `maxDepositsPerBlock` and `minDepositBlockDistance` are controlled by Lido DAO and must be harmonized with `churnValidatorsPerDayLimit` of [`OracleReportSanityChecker`](/contracts/oracle-report-sanity-checker).
+Los valores de los parámetros `maxDepositsPerBlock` y `minDepositBlockDistance` son controlados por Lido DAO y deben armonizarse con `churnValidatorsPerDayLimit` de [`OracleReportSanityChecker`](/contracts/oracle-report-sanity-checker).
 
-## View Methods
+## Métodos de Vista
 
 ### getOwner()
 
-Returns the contract's owner address.
+Devuelve la dirección del propietario del contrato.
 
 ```sol
 function getOwner() external view returns (address);
@@ -30,7 +30,7 @@ function getOwner() external view returns (address);
 
 ### getPauseIntentValidityPeriodBlocks()
 
-Returns `PAUSE_INTENT_VALIDITY_PERIOD_BLOCKS` (see `pauseDeposits`).
+Devuelve `PAUSE_INTENT_VALIDITY_PERIOD_BLOCKS` (ver `pauseDeposits`).
 
 ```sol
 function getPauseIntentValidityPeriodBlocks() external view returns (uint256)
@@ -38,7 +38,7 @@ function getPauseIntentValidityPeriodBlocks() external view returns (uint256)
 
 ### getMaxDeposits()
 
-Returns max amount of deposits per block (see `depositBufferedEther`).
+Devuelve la cantidad máxima de depósitos por bloque (ver `depositBufferedEther`).
 
 ```sol
 function getMaxDeposits() external view returns (uint256)
@@ -46,7 +46,7 @@ function getMaxDeposits() external view returns (uint256)
 
 ### getMinDepositBlockDistance()
 
-Returns min distance in blocks between deposits (see `depositBufferedEther`).
+Devuelve la distancia mínima en bloques entre depósitos (ver `depositBufferedEther`).
 
 ```sol
 function getMinDepositBlockDistance() external view returns (uint256)
@@ -54,7 +54,7 @@ function getMinDepositBlockDistance() external view returns (uint256)
 
 ### getGuardianQuorum()
 
-Returns the number of valid guardian signatures required to vet (depositRoot, nonce) pair.
+Devuelve el número de firmas válidas de guardianes requeridas para verificar el par (depositRoot, nonce).
 
 ```sol
 function getGuardianQuorum() external view returns (uint256)
@@ -62,7 +62,7 @@ function getGuardianQuorum() external view returns (uint256)
 
 ### getGuardians()
 
-Returns guardian committee member list.
+Devuelve la lista de miembros del comité de guardianes.
 
 ```sol
 function getGuardians() external view returns (address[] memory)
@@ -70,296 +70,288 @@ function getGuardians() external view returns (address[] memory)
 
 ### isGuardian()
 
-Checks whether the given address is a guardian.
+Verifica si la dirección dada es un guardián.
 
 ```sol
 function isGuardian(address addr) external view returns (bool)
 ```
 
-#### Parameters
+#### Parámetros
 
-| Name   | Type      | Description                        |
-| ------ | --------- | ---------------------------------- |
-| `addr` | `address` | Valid ETH-1 address                |
+| Nombre | Tipo      | Descripción            |
+| ------ | --------- | ---------------------- |
+| `addr` | `address` | Dirección ETH-1 válida |
 
 ### getGuardianIndex()
 
-Returns index of the guardian, or -1 if the address is not a guardian.
+Devuelve el índice del guardián, o -1 si la dirección no es un guardián.
 
 ```sol
 function getGuardianIndex(address addr) external view returns (int256)
 ```
 
-#### Parameters
+#### Parámetros
 
-| Name   | Type      | Description                        |
-| ------ | --------- | ---------------------------------- |
-| `addr` | `address` | Valid ETH-1 address                |
+| Nombre | Tipo      | Descripción            |
+| ------ | --------- | ---------------------- |
+| `addr` | `address` | Dirección ETH-1 válida |
 
 ### canDeposit()
 
-Returns whether `LIDO.deposit()` can be called and a deposit can be made for the staking module with
-id `stakingModuleId`, given that the caller will provide guardian attestations of non-stale deposit
-root and `nonce` and the number of such attestations will be enough to reach a quorum.
+Devuelve si se puede llamar a `LIDO.deposit()` y hacer un depósito para el módulo de staking con id `stakingModuleId`, dado que el llamador proporcionará las certificaciones de los guardianes de la raíz de depósito no obsoleta y `nonce`, y el número de tales certificaciones será suficiente para alcanzar un quórum.
 
 ```sol
 function canDeposit(uint256 stakingModuleId) external view returns (bool)
 ```
 
-#### Parameters
+#### Parámetros
 
-| Name              | Type      | Description              |
-| ----------------- | --------- | ------------------------ |
-| `stakingModuleId` | `uint256` | Id of the staking module |
+| Nombre             | Tipo      | Descripción                  |
+| ------------------ | --------- | ---------------------------- |
+| `stakingModuleId`  | `uint256` | Id del módulo de staking     |
 
-## Methods
+## Métodos
 
 ### setOwner()
 
-Sets new owner.
+Establece un nuevo propietario.
 
 ```sol
 function setOwner(address newValue) external;
 ```
 
 :::note
-Reverts if any of the following is true:
+Revierte si alguna de las siguientes condiciones es verdadera:
 
-- `msg.sender` is not the owner;
-- `newValue` is zero address.
+- `msg.sender` no es el propietario;
+- `newValue` es la dirección cero.
 :::
 
-#### Parameters
+#### Parámetros
 
-| Name       | Type      | Description       |
-| ---------- | --------- | ----------------- |
-| `newValue` | `address` | New owner address |
+| Nombre     | Tipo      | Descripción            |
+| ---------- | --------- | ---------------------- |
+| `newValue` | `address` | Nueva dirección del propietario |
 
 ### setPauseIntentValidityPeriodBlocks()
 
-Sets `pauseIntentValidityPeriodBlocks`.
+Establece `pauseIntentValidityPeriodBlocks`.
 
 ```sol
 function setPauseIntentValidityPeriodBlocks(uint256 newValue)
 ```
 
 :::note
-Reverts if any of the following is true:
+Revierte si alguna de las siguientes condiciones es verdadera:
 
-- `msg.sender` is not the owner;
-- `newValue` is 0 (zero).
+- `msg.sender` no es el propietario;
+- `newValue` es 0 (cero).
 :::
 
-#### Parameters
+#### Parámetros
 
-| Name       | Type      | Description                                          |
-| ---------- | --------- | ---------------------------------------------------- |
-| `newValue` | `uint256` | Number of blocks after which message becomes invalid |
+| Nombre     | Tipo      | Descripción                                      |
+| ---------- | --------- | ------------------------------------------------ |
+| `newValue` | `uint256` | Número de bloques después de los cuales el mensaje se vuelve inválido |
 
 ### setMaxDeposits()
 
-Sets `maxDepositsPerBlock`.
+Establece `maxDepositsPerBlock`.
 
-The value must be harmonized with the parameter `churnValidatorsPerDayLimit` of [OracleReportSanityChecker](/contracts/oracle-report-sanity-checker).
+El valor debe armonizarse con el parámetro `churnValidatorsPerDayLimit` de [OracleReportSanityChecker](/contracts/oracle-report-sanity-checker).
 
 ```sol
 function setMaxDeposits(uint256 newValue)
 ```
 
 :::note
-Reverts if any of the following is true:
+Revierte si alguna de las siguientes condiciones es verdadera:
 
-- `msg.sender` is not the owner.
+- `msg.sender` no es el propietario.
 :::
 
-#### Parameters
+#### Parámetros
 
-| Name       | Type      | Description                                    |
-| ---------- | --------- | ---------------------------------------------- |
-| `newValue` | `uint256` | New value of the maxDepositsPerBlock parameter |
+| Nombre     | Tipo      | Descripción                                  |
+| ---------- | --------- | -------------------------------------------- |
+| `newValue` | `uint256` | Nuevo valor del parámetro maxDepositsPerBlock |
 
 ### setMinDepositBlockDistance()
 
-Sets `minDepositBlockDistance`.
+Establece `minDepositBlockDistance`.
 
-The value must be harmonized with the parameter `churnValidatorsPerDayLimit` of [OracleReportSanityChecker](/contracts/oracle-report-sanity-checker).
+El valor debe armonizarse con el parámetro `churnValidatorsPerDayLimit` de [OracleReportSanityChecker](/contracts/oracle-report-sanity-checker).
 
 ```sol
 function setMinDepositBlockDistance(uint256 newValue)
 ```
 
 :::note
-Reverts if any of the following is true:
+Revierte si alguna de las siguientes condiciones es verdadera:
 
-- `msg.sender` is not the owner.
+- `msg.sender` no es el propietario.
 :::
 
-#### Parameters
+#### Parámetros
 
-| Name       | Type      | Description                                    |
-| ---------- | --------- | ---------------------------------------------- |
-| `newValue` | `uint256` | New value of the min DepositsPerBlock parameter |
+| Nombre     | Tipo      | Descripción                                  |
+| ---------- | --------- | -------------------------------------------- |
+| `newValue` | `uint256` | Nuevo valor del parámetro minDepositBlockDistance |
 
 ### setGuardianQuorum()
 
-Sets the number of valid guardian signatures required to vet (depositRoot, nonce) pair (aka "quorum").
+Establece el número de firmas válidas de guardianes requeridas para verificar el par (depositRoot, nonce) (también conocido como "quórum").
 
 ```sol
 function setGuardianQuorum(uint256 newValue)
 ```
 
 :::note
-Reverts if any of the following is true:
+Revierte si alguna de las siguientes condiciones es verdadera:
 
-- `msg.sender` is not the owner;
+- `msg.sender` no es el propietario;
 :::
 
-#### Parameters
+#### Parámetros
 
-| Name        | Type      | Description      |
-| ----------- | --------- | ---------------- |
-| `newValue`  | `uint256` | New quorum value |
+| Nombre     | Tipo      | Descripción      |
+| ---------- | --------- | ---------------- |
+| `newValue` | `uint256` | Nuevo valor del quórum |
 
 ### addGuardian()
 
-Adds a guardian address and sets a new quorum value.
+Añade una dirección de guardián y establece un nuevo valor de quórum.
 
 ```sol
 function addGuardian(address addr, uint256 newQuorum)
 ```
 
 :::note
-Reverts if any of the following is true:
+Revierte si alguna de las siguientes condiciones es verdadera:
 
-- `msg.sender` is not the owner;
-- `addr` is already a guardian.
+- `msg.sender` no es el propietario;
+- `addr` ya es un guardián.
 :::
 
-#### Parameters
+#### Parámetros
 
-| Name        | Type      | Description      |
-| ----------- | --------- | ---------------- |
-| `addr`      | `address` | Guardian address |
-| `newQuorum` | `uint256` | New Quorum value |
+| Nombre      | Tipo      | Descripción        |
+| ----------- | --------- | ------------------ |
+| `addr`      | `address` | Dirección del guardián |
+| `newQuorum` | `uint256` | Nuevo valor del quórum |
 
 ### addGuardians()
 
-Adds a set of guardian addresses and sets a new quorum value.
+Añade un conjunto de direcciones de guardianes y establece un nuevo valor de quórum.
 
 ```sol
 function addGuardians(address[] memory addresses, uint256 newQuorum)
 ```
 
 :::note
-Reverts if any of the following is true:
+Revierte si alguna de las siguientes condiciones es verdadera:
 
-- `msg.sender` is not the owner;
-- any of the `addresses` is already a guardian.
+- `msg.sender` no es el propietario;
+- cualquiera de las `addresses` ya es un guardián.
 :::
 
-#### Parameters
+#### Parámetros
 
-| Name        | Type        | Description                                          |
-| ----------- | ----------- | --------------------------- |
-| `addresses` | `address[]` | Array of Guardian addresses |
-| `newQuorum` | `uint256`   | New Quorum value            |
+| Nombre      | Tipo        | Descripción                    |
+| ----------- | ----------- | ------------------------------ |
+| `addresses` | `address[]` | Array de direcciones de guardianes |
+| `newQuorum` | `uint256`   | Nuevo valor del quórum         |
 
 ### removeGuardian()
 
-Removes a guardian with the given address and sets a new quorum value.
+Elimina un guardián con la dirección dada y establece un nuevo valor de quórum.
 
 ```sol
 function removeGuardian(address addr, uint256 newQuorum)
 ```
 
 :::note
-Reverts if any of the following is true:
+Revierte si alguna de las siguientes condiciones es verdadera:
 
-- `msg.sender` is not the owner;
-- `addr` is not a guardian.
+- `msg.sender` no es el propietario;
+- `addr` no es un guardián.
 :::
 
-#### Parameters
+### Parámetros
 
-| Name        | Type      | Description      |
-| ----------- | --------- | ---------------- |
-| `addr`      | `address` | Guardian address |
-| `newQuorum` | `uint256` | New Quorum value |
+| Nombre               | Tipo         | Descripción                                                                 |
+| -------------------- | ------------ | --------------------------------------------------------------------------- |
+| `addr`               | `address`    | Dirección del guardián                                                     |
+| `newQuorum`          | `uint256`    | Nuevo valor de quórum                                                       |
 
 ### pauseDeposits()
 
-Pauses deposits for staking module given that both conditions are satisfied (reverts otherwise):
+Pausa los depósitos para el módulo de staking siempre que se cumplan ambas condiciones (de lo contrario, revierte):
 
-1. The function is called by the guardian with index guardianIndex OR sig
-      is a valid signature by the guardian with index guardianIndex of the data
-      defined below.
+1. La función es llamada por el guardián con índice `guardianIndex` O `sig` es una firma válida por el guardián con índice `guardianIndex` de los datos definidos a continuación.
 
 2. `block.number - blockNumber <= pauseIntentValidityPeriodBlocks`
 
- The signature, if present, must be produced for keccak256 hash of the following
- message (each component taking 32 bytes):
+La firma, si está presente, debe ser producida para el hash `keccak256` del siguiente mensaje (cada componente tomando 32 bytes):
 
- | PAUSE_MESSAGE_PREFIX | blockNumber | stakingModuleId |
+| PAUSE_MESSAGE_PREFIX | blockNumber | stakingModuleId |
 
-If the staking module is not active does nothing.
-In case of an emergency, the function `pauseDeposits` is supposed to be called
-by all guardians. Thus only the first call will do the actual change. So
-the other calls would be OK operations from the point of view of the protocol logic.
+Si el módulo de staking no está activo, no hace nada.
+En caso de una emergencia, se supone que la función `pauseDeposits` será llamada por todos los guardianes. Por lo tanto, solo la primera llamada realizará el cambio real. Así que las otras llamadas serán operaciones OK desde el punto de vista de la lógica del protocolo.
 
-```sol
+```solidity
 function pauseDeposits(uint256 blockNumber, uint256 stakingModuleId, Signature memory sig)
 ```
 
-#### Parameters
+### Parámetros
 
-| Name              | Type        | Description                                                                          |
-| ----------------- | ----------- | ------------------------------------------------------------------------------------ |
-| `blockNumber`     | `uint256`   | Block number with malicious pre-deposits have been observed by the guardian          |
-| `stakingModuleId` | `uint256`   | Id of the staking module to pause deposits for                                       |
-| `sig`             | `Signature` | Short ECDSA guardian signature as defined in [EIP-2098](https://eips.ethereum.org/EIPS/eip-2098) |
+| Nombre            | Tipo         | Descripción                                                                           |
+| ----------------- | ------------ | ------------------------------------------------------------------------------------- |
+| `blockNumber`     | `uint256`    | Número de bloque donde se han observado pre-depósitos maliciosos por el guardián      |
+| `stakingModuleId` | `uint256`    | Id del módulo de staking para pausar los depósitos                                    |
+| `sig`             | `Signature`  | Firma corta de guardianes ECDSA como se define en [EIP-2098](https://eips.ethereum.org/EIPS/eip-2098) |
 
 ### unpauseDeposits()
 
-Unpauses deposits for staking module.
-If the staking module is not paused, do nothing.
+Reanuda los depósitos para el módulo de staking.
+Si el módulo de staking no está pausado, no hace nada.
 
-```sol
+```solidity
 function unpauseDeposits(uint256 stakingModuleId)
 ```
 
 :::note
-Reverts if any of the following is true:
+Revoca si alguna de las siguientes condiciones es verdadera:
 
-- `msg.sender` is not the owner.
+- `msg.sender` no es el propietario.
 :::
 
-#### Parameters
+### Parámetros
 
-| Name              | Type      | Description              |
-| ----------------- | --------- | ------------------------ |
-| `stakingModuleId` | `uint256` | Id of the staking module |
+| Nombre            | Tipo         | Descripción                  |
+| ----------------- | ------------ | ---------------------------- |
+| `stakingModuleId` | `uint256`    | Id del módulo de staking     |
 
 ### depositBufferedEther()
 
-Verifies the deposit security conditions are met and calls `LIDO.deposit(maxDepositsPerBlock, stakingModuleId, depositCalldata)`. Otherwise reverts.
+Verifica que se cumplan las condiciones de seguridad del depósito y llama a `LIDO.deposit(maxDepositsPerBlock, stakingModuleId, depositCalldata)`. De lo contrario, revoca.
 
 :::note
-Reverts if any of the following is true:
+Revoca si alguna de las siguientes condiciones es verdadera:
 
-1. IDepositContract.get_deposit_root() != depositRoot;
-2. StakingModule.getNonce() != nonce;
-3. The number of guardian signatures is less than getGuardianQuorum();
-4. An invalid or non-guardian signature received;
-5. block.number - StakingModule.getLastDepositBlock() < minDepositBlockDistance;
-6. blockhash(blockNumber) != blockHash.
+1. `IDepositContract.get_deposit_root() != depositRoot`;
+2. `StakingModule.getNonce() != nonce`;
+3. El número de firmas de guardianes es menor que `getGuardianQuorum()`;
+4. Se recibió una firma no válida o no de un guardián;
+5. `block.number - StakingModule.getLastDepositBlock() < minDepositBlockDistance`;
+6. `blockhash(blockNumber) != blockHash`.
 :::
 
-Signatures must be sorted in ascending order by the index of the guardian. Each signature must
-be produced for the keccak256 hash of the following message (each component taking 32 bytes):
+Las firmas deben estar ordenadas en orden ascendente por el índice del guardián. Cada firma debe ser producida para el hash `keccak256` del siguiente mensaje (cada componente tomando 32 bytes):
 
 | ATTEST_MESSAGE_PREFIX | blockNumber | blockHash | depositRoot | stakingModuleId | nonce |
 
-```sol
+```solidity
 function depositBufferedEther(
         uint256 blockNumber,
         bytes32 blockHash,
@@ -371,14 +363,14 @@ function depositBufferedEther(
     )
 ```
 
-#### Parameters
+### Parámetros
 
-| Name                       | Type          | Description                                                                            |
-| -------------------------- | ------------- | -------------------------------------------------------------------------------------- |
-| `blockNumber`              | `uint256`     | Number of the current deposit block                                                    |
-| `blockHash`                | `bytes32`     | Hash of the current deposit block                                                      |
-| `depositRoot`              | `bytes32`     | Deposit root of the Ethereum DepositContract                                           |
-| `stakingModuleId`          | `uint256`     | Id of the staking module to deposit with                                               |
-| `nonce`                    | `uint256`     | Nonce of key operations of the staking module                                          |
-| `depositCalldata`          | `bytes`       | Staking module deposit calldata                                                        |
-| `sortedGuardianSignatures` | `Signature[]` | Short ECDSA guardians signatures as defined in [EIP-2098](https://eips.ethereum.org/EIPS/eip-2098) |
+| Nombre                       | Tipo             | Descripción                                                                                      |
+| ---------------------------- | ---------------- | ------------------------------------------------------------------------------------------------ |
+| `blockNumber`                | `uint256`        | Número del bloque de depósito actual                                                              |
+| `blockHash`                  | `bytes32`        | Hash del bloque de depósito actual                                                                |
+| `depositRoot`                | `bytes32`        | Raíz de depósito del contrato de depósito Ethereum                                                |
+| `stakingModuleId`            | `uint256`        | Id del módulo de staking para realizar el depósito                                                |
+| `nonce`                      | `uint256`        | Nonce de las operaciones clave del módulo de staking                                              |
+| `depositCalldata`            | `bytes`          | Datos de calldata del depósito del módulo de staking                                               |
+| `sortedGuardianSignatures`   | `Signature[]`    | Firmas cortas de guardianes ECDSA según se define en [EIP-2098](https://eips.ethereum.org/EIPS/eip-2098) |
