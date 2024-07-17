@@ -1,74 +1,64 @@
 # Burner
 
-- [Source Code](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/Burner.sol)
-- [Deployed Contract](https://etherscan.io/address/0xD15a672319Cf0352560eE76d9e89eAB0889046D3)
+- [Código Fuente](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/Burner.sol)
+- [Contrato Desplegado](https://etherscan.io/address/0xD15a672319Cf0352560eE76d9e89eAB0889046D3)
 
-The contract provides a way for Lido protocol to burn stETH token shares as a means to finalize withdrawals,
-penalize untimely exiting node operators, and, possibly, cover losses in staking.
+El contrato proporciona una forma para el protocolo Lido de quemar acciones de tokens stETH como un medio para finalizar retiros, penalizar a los operadores de nodos que salen fuera de tiempo y, posiblemente, cubrir pérdidas en el staking.
 
-It relies on the [rebasing](/contracts/lido#rebase) nature of stETH. The `Lido` contract calculates
-user balance using the following equation:
-`balanceOf(account) = shares[account] * totalPooledEther / totalShares`.
-Therefore, burning shares (e.g. decreasing the `totalShares` amount) increases stETH holders' balances.
+Depende de la naturaleza de rebasamiento (rebasing) de stETH. El contrato `Lido` calcula el saldo del usuario utilizando la siguiente ecuación:
+`balanceOf(cuenta) = shares[cuenta] * totalPooledEther / totalShares`.
+Por lo tanto, quemar acciones (por ejemplo, disminuir la cantidad de `totalShares`) aumenta los saldos de los poseedores de stETH.
 
-It's presumed that actual shares burning happens inside the [`Lido`](/contracts/lido) contract as a part of the [`AccountingOracle`](/contracts/accounting-oracle) report.
-`Burner` provides a safe and deterministic way to incur a positive stETH token rebase by gradually
-decreasing `totalShares` that can be correctly handled by 3rd party protocols integrated with stETH.
+Se presume que la quema real de acciones ocurre dentro del contrato [`Lido`](/contracts/lido) como parte del informe del [`AccountingOracle`](/contracts/accounting-oracle).
 
-`Burner` accepts burning requests in the following two ways:
+`Burner` proporciona una manera segura y determinística de incurrir en un rebasamiento positivo del token stETH disminuyendo gradualmente `totalShares`, lo cual puede ser manejado correctamente por protocolos de terceros integrados con stETH.
 
-- Locking **someone's pre-approved** stETH by the caller with the assigned `REQUEST_BURN_SHARES_ROLE`;
-- Locking **caller-provided** stETH with the `REQUEST_BURN_MY_STETH_ROLE` assigned role.
+`Burner` acepta solicitudes de quema de dos maneras:
 
-Those burn requests are initially set by the contract to a pending state.
-Actual burning happens as part of an oracle ([`AccountingOracle`](/contracts/accounting-oracle)) report handling by [`Lido`](/contracts/lido) to prevent
-additional fluctuations of the existing stETH token rebase period (~24h).
+- Bloqueando stETH **preaprobado de alguien** por el llamador con el rol asignado `REQUEST_BURN_SHARES_ROLE`.
+- Bloqueando stETH **provisto por el llamador** con el rol asignado `REQUEST_BURN_MY_STETH_ROLE`.
 
-We also distinguish two types of shares burn requests:
+Estas solicitudes de quema se establecen inicialmente en un estado pendiente. La quema real ocurre como parte de un informe del oráculo ([`AccountingOracle`](/contracts/accounting-oracle)) manejado por [`Lido`](/contracts/lido) para prevenir fluctuaciones adicionales en el período de rebasamiento del token stETH (~24h).
 
-- request to **cover** a slashing event (e.g. decreasing of the total pooled ETH amount
-between the two consecutive oracle reports);
-- request to burn shares for any other cases (**non-cover**).
+También distinguimos dos tipos de solicitudes de quema de acciones:
 
-The contract has two separate counters for the burnt shares: cover and non-cover ones. The contract is
-exclusively responsible for the stETH shares burning by [`Lido`](/contracts/lido) and burning allowed only from the contract's
-own balance only.
+- solicitud para **cubrir** un evento de reducción (por ejemplo, disminución del monto total de ETH agrupado entre dos informes de oráculo consecutivos);
+- solicitud para quemar acciones para cualquier otro caso (**no cubrir**).
 
-## Shares burnt counters
+El contrato tiene dos contadores separados para las acciones quemadas: uno para las que cubren (`cover`) y otro para las que no cubren (`non-cover`). El contrato es exclusivamente responsable de la quema de acciones de stETH por parte de [`Lido`](/contracts/lido) y solo permite la quema desde el propio saldo del contrato.
 
-The contract keeps count of all shares ever burned by way of maintaining two internal counters:
-`totalCoverSharesBurnt` and `totalNonCoverSharesBurnt` for cover and non-cover burns, respectively.
-These counters are increased when actual stETH burn is performed as part of the Lido Oracle report.
+## Contadores de acciones quemadas
 
-This makes it possible to split any stETH rebase into two sub-components: the rewards-induced rebase
-and cover application-induced rebase, which can be done as follows:
+El contrato lleva un registro de todas las acciones quemadas manteniendo dos contadores internos: `totalCoverSharesBurnt` y `totalNonCoverSharesBurnt` para las quemas de cobertura y no cobertura, respectivamente. Estos contadores se incrementan cuando se realiza la quema real de stETH como parte del informe del Oráculo de Lido.
 
-1. Before the rebase, store the previous values of both counters, as well as the value of stETH share price:
+Esto permite dividir cualquier rebasamiento de stETH en dos subcomponentes: el rebasamiento inducido por recompensas y el rebasamiento inducido por la aplicación de cobertura, que se puede hacer de la siguiente manera:
+
+1. Antes del rebasamiento, guardar los valores anteriores de ambos contadores, así como el valor del precio de la acción stETH:
 
    ```sol
    prevCoverSharesBurnt = Burner.totalCoverSharesBurnt()
    prevSharePrice = stETH.totalSupply() / stETH.getTotalShares()
    ```
 
-2. After the rebase, perform the following calculations:
+2. Después del rebasamiento, realizar los siguientes cálculos:
 
    ```sol
    sharesBurntFromOldToNew = Burner.totalCoverSharesBurnt() - prevCoverSharesBurnt;
    newSharePriceAfterCov = stETH.totalSupply() / (stETH.getTotalShares() + sharesBurntFromOldToNew);
    newSharePrice = stETH.totalSupply() / stETH.getTotalShares();
 
-   // rewards-induced share price increase
+   // incremento del precio de la acción inducido por recompensas
    rewardPerShare = newSharePriceAfterCov - prevSharePrice;
 
-   // cover-induced share price increase
+   // incremento del precio de la acción inducido por la cobertura
    nonRewardSharePriceIncrease = newSharePrice - prevSharePrice - rewardPerShare;
    ```
 
-## View methods
+## Métodos de Vista
 
 ### getCoverSharesBurnt()
 
-Returns the total cover shares ever burnt.
+Devuelve el total de acciones de cobertura quemadas hasta el momento.
 
 ```sol
 function getCoverSharesBurnt() external view returns (uint256)
@@ -76,7 +66,7 @@ function getCoverSharesBurnt() external view returns (uint256)
 
 ### getNonCoverSharesBurnt()
 
-Returns the total non-cover shares ever burnt.
+Devuelve el total de acciones no cubiertas quemadas hasta el momento.
 
 ```sol
 function getNonCoverSharesBurnt() external view returns (uint256)
@@ -84,7 +74,7 @@ function getNonCoverSharesBurnt() external view returns (uint256)
 
 ### getExcessStETH()
 
-Returns the stETH amount belonging to the burner contract address but not marked for burning.
+Devuelve la cantidad de stETH perteneciente a la dirección del contrato quemador pero que no está marcada para quemar.
 
 ```sol
 function getExcessStETH() external view returns (uint256)
@@ -92,90 +82,191 @@ function getExcessStETH() external view returns (uint256)
 
 ### getSharesRequestedToBurn()
 
-Returns numbers of cover and non-cover shares requested to burn.
+Devuelve el número de acciones de cobertura y no cobertura solicitadas para quemar.
 
 ```sol
 function getSharesRequestedToBurn() external view returns (uint256 coverShares, uint256 nonCoverShares)
 ```
 
-## Methods
+## Métodos
 
 ### requestBurnMyStETHForCover()
 
-Transfers stETH tokens from the message sender and irreversibly locks these on the burner contract address.
-Internally converts tokens amount into underlying shares amount and marks the converted shares amount
-for cover-backed burning by increasing the internal `coverSharesBurnRequested` counter.
+Transfiere tokens stETH desde el remitente del mensaje y los bloquea de manera irreversible en la dirección del contrato quemador. Internamente convierte la cantidad de tokens en la cantidad subyacente de acciones y marca la cantidad convertida para la quema respaldada por cobertura mediante el aumento del contador interno `coverSharesBurnRequested`.
 
 ```sol
 function requestBurnMyStETHForCover(uint256 _stETHAmountToBurn) external
 ```
 
 :::note
-Reverts if any of the following is true:
+Revoca si alguna de las siguientes condiciones es verdadera:
 
-- `msg.sender` is not a holder of the `REQUEST_BURN_MY_STETH_ROLE` role;
-- no stETH provided (`_stETHAmountToBurn == 0`);
-- no stETH transferred (allowance exceeded).
-
+- El remitente del mensaje no es titular del rol `REQUEST_BURN_MY_STETH_ROLE`.
+- No se proporciona stETH (`_stETHAmountToBurn == 0`).
+- No se transfieren stETH (se excede la asignación).
 :::
 
-#### Parameters
+#### Parámetros
 
-| Name                 | Type      | Description                                     |
-| -------------------- | --------- | ----------------------------------------------- |
-| `_stETHAmountToBurn` | `uint256` | stETH tokens amount (not shares amount) to burn |
+| Nombre               | Tipo      | Descripción                                         |
+| -------------------- | --------- | --------------------------------------------------- |
+| `_stETHAmountToBurn` | `uint256` | cantidad de tokens stETH (no cantidad de acciones) a quemar |
 
 ### requestBurnSharesForCover()
 
-Transfers stETH shares from `_from` and irreversibly locks these on the burner contract address.
-Internally marks the shares amount for cover-backed burning by increasing the internal `coverSharesBurnRequested` counter.
+Transfiere acciones stETH desde `_from` y las bloquea de manera irreversible en la dirección del contrato quemador. Internamente marca la cantidad de acciones para la quema respaldada por cobertura mediante el aumento del contador interno `coverSharesBurnRequested`.
 
-Can be called only by a holder of `REQUEST_BURN_SHARES_ROLE`. After Lido V2 upgrade not actually called by any contract and supposed to be called by Lido DAO Agent in case of a need for cover.
+Solo puede ser llamado por un titular del rol `REQUEST_BURN_SHARES_ROLE`. Después de la actualización a Lido V2, no es llamado realmente por ningún contrato y se supone que es llamado por el Agente de Lido DAO en caso de necesidad de cobertura.
 
 ```sol
 function requestBurnSharesForCover(address _from, uint256 _sharesAmountToBurn)
 ```
 
 :::note
-Reverts if any of the following is true:
+Revoca si alguna de las siguientes condiciones es verdadera:
 
-- `msg.sender` is not a holder of the `REQUEST_BURN_SHARES_ROLE` role;
-- no stETH shares provided (`_sharesAmountToBurn == 0`);
-- no stETH shares transferred (allowance exceeded).
-
+- El remitente del mensaje no es titular del rol `REQUEST_BURN_SHARES_ROLE`.
+- No se proporcionan acciones stETH (`_sharesAmountToBurn == 0`).
+- No se transfieren acciones stETH (se excede la asignación).
 :::
 
-#### Parameters
+#### Parámetros
 
-| Name                  | Type      | Description                                     |
-| --------------------- | --------- | ----------------------------------------------- |
-|        `_from`        | `address` |         address to transfer shares from         |
-| `_sharesAmountToBurn` | `uint256` | shares amount (not stETH tokens amount) to burn |
+| Nombre                  | Tipo      | Descripción                                         |
+| ----------------------- | --------- | --------------------------------------------------- |
+| `_from`                 | `address` | dirección desde la cual transferir las acciones     |
+| `_sharesAmountToBurn`   | `uint256` | cantidad de acciones (no cantidad de tokens stETH) a quemar |
 
 ### requestBurnMyStETH()
 
-Transfers stETH tokens from the message sender and irreversibly locks these on the burner contract address.
-Internally converts tokens amount into underlying shares amount and marks the converted amount for
-non-cover backed burning by increasing the internal `nonCoverSharesBurnRequested` counter.
+Transfiere tokens stETH desde el remitente del mensaje y los bloquea de manera irreversible en la dirección del contrato quemador. Internamente convierte la cantidad de tokens en la cantidad subyacente de acciones y marca la cantidad convertida para la quema no respaldada por cobertura mediante el aumento del contador interno `nonCoverSharesBurnRequested`.
 
 ```sol
 function requestBurnMyStETH(uint256 _stETHAmountToBurn) external
 ```
 
 :::note
-Reverts if any of the following is true:
+Revoca si alguna de las siguientes condiciones es verdadera:
 
-- `msg.sender` is not a holder of the `REQUEST_BURN_MY_STETH_ROLE` role;
-- no stETH provided (`_stETHAmountToBurn == 0`);
-- no stETH transferred (allowance exceeded).
+- El remitente del mensaje no es titular del rol `REQUEST_BURN_MY_STETH_ROLE`.
+- No se proporciona stETH (`_stETHAmountToBurn == 0`).
+- No se transfieren stETH (se excede la asignación).
+:::
+
+#### Parámetros
+
+| Nombre               | Tipo      | Descripción                                         |
+| -------------------- | --------- | --------------------------------------------------- |
+| `_stETHAmountToBurn` | `uint256` | cantidad de tokens stETH (no cantidad de acciones) a quemar.
+
+### requestBurnShares()
+
+Transfiere acciones stETH desde `_from` y las bloquea de manera irreversible en la dirección del contrato quemador. Internamente marca la cantidad de acciones para la quema no respaldada por cobertura mediante el aumento del contador interno `nonCoverSharesBurnRequested`.
+
+Solo puede ser llamado por un titular del rol `REQUEST_BURN_SHARES_ROLE`, que después de la actualización a Lido V2 es [`Lido`](/contracts/lido) o [`NodeOperatorsRegistry`](/contracts/node-operators-registry).
+[`Lido`](/contracts/lido) necesita esto para solicitar acciones bloqueadas en la cola de retiros [`WithdrawalQueueERC721`](/contracts/withdrawal-queue-erc721) y
+[`NodeOperatorsRegistry`](/contracts/node-operators-registry) lo necesita para solicitar la quema de acciones para penalizar las recompensas de operadores de nodos que se comportan incorrectamente.
+
+```sol
+function requestBurnShares(address _from, uint256 _sharesAmountToBurn)
+```
+
+:::note
+Revoca si alguna de las siguientes condiciones es verdadera:
+
+- El remitente del mensaje no es titular del rol `REQUEST_BURN_SHARES_ROLE`.
+- No se proporcionan acciones stETH (`_sharesAmountToBurn == 0`).
+- No se transfieren acciones stETH (se excede la asignación).
+:::
+
+#### Parámetros
+
+| Nombre                  | Tipo      | Descripción                                         |
+| ----------------------- | --------- | --------------------------------------------------- |
+|        `_from`           | `address` | dirección desde la cual transferir las acciones     |
+| `_sharesAmountToBurn` | `uint256` | cantidad de acciones (no cantidad de tokens stETH) a quemar |
+
+### recoverExcessStETH()
+
+Transfiere la cantidad excedente de stETH (por ejemplo, perteneciente a la dirección del contrato quemador pero no marcada para quemar) a la dirección del tesoro de Lido (el contrato `DAO Agent`) configurado durante la construcción del contrato.
+
+No hace nada si la función de vista `getExcessStETH` devuelve 0 (cero), es decir, no hay exceso de stETH en el balance del contrato.
+
+```sol
+function recoverExcessStETH() external
+```
+
+### recoverERC20()
+
+Transfiere una cantidad dada de un token ERC20 (definido por la dirección del contrato proporcionada) perteneciente a la dirección del contrato quemador a la dirección del tesoro de Lido (el contrato `DAO Agent`).
+
+```sol
+function recoverERC20(address _token, uint256 _amount) external
+```
+
+:::note
+Revoca si alguna de las siguientes condiciones es verdadera:
+
+- El valor `_amount` es 0 (cero).
+- La dirección `_token` es 0 (cero).
+- La dirección `_token` es igual a la dirección de `stETH` (usar `recoverExcessStETH` en su lugar).
+:::
+
+#### Parámetros
+
+| Nombre      | Tipo      | Descripción                                 |
+| ----------- | --------- | ------------------------------------------- |
+| `_token`    | `address` | dirección del token ERC20 para recuperar    |
+| `_amount`   | `uint256` | Cantidad a recuperar                        |
+
+### recoverERC721()
+
+Transfiere un NFT compatible con ERC721 dado (definido por la dirección del contrato proporcionada) perteneciente a la dirección del contrato quemador a la dirección del tesoro de Lido (el `DAO Agent`).
+
+```sol
+function recoverERC721(address _token, uint256 _tokenId) external
+```
+
+:::note
+Revoca si alguna de las siguientes condiciones es verdadera:
+
+- La dirección `_token` es 0 (cero).
+- La dirección `_token` es igual a la dirección de `stETH` (usar `recoverExcessStETH` en su lugar).
+:::
+
+#### Parámetros
+
+| Nombre       | Tipo      | Descripción                                 |
+| ------------ | --------- | ------------------------------------------- |
+| `_token`     | `address` | dirección del token compatible con ERC721 para recuperar |
+| `_tokenId`   | `uint256` | ID del token a recuperar                     |
+
+### commitSharesToBurn()
+
+Marca las acciones previamente solicitadas para quemar, tanto las de cobertura como las no de cobertura, como quemadas.
+Emite el evento `StETHBurnt` para las acciones de cobertura y no de cobertura marcadas como quemadas.
+
+Esta función es llamada por el contrato `Lido` junto con (es decir, en la misma transacción) la realización real de la quema de acciones.
+
+Si `_sharesToBurn` es 0, no hace nada.
+
+```sol
+function commitSharesToBurn(uint256 _sharesToBurn) external
+```
+
+:::note
+Revoca si alguna de las siguientes condiciones es verdadera:
+
+- La dirección del `msg.sender` NO es igual a la dirección de `stETH`.
+- `_sharesToBurn` es mayor que las acciones solicitadas para quemar de cobertura más no de cobertura.
 
 :::
 
-#### Parameters
+#### Parámetros
 
-| Name                 | Type      | Description                                     |
-| -------------------- | --------- | ----------------------------------------------- |
-| `_stETHAmountToBurn` | `uint256` | stETH tokens amount (not shares amount) to burn |
+| Nombre            | Tipo      | Descripción                                            |
+| ----------------- | --------- | ------------------------------------------------------ |
+| `_sharesToBurn`   | `uint256` | Cantidad de acciones de cobertura más no de cobertura para marcar como quemadas |
 
 ### requestBurnShares()
 
