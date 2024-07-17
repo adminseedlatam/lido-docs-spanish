@@ -13,5 +13,4 @@ Instancias desplegadas:
 - [ValidatorsExitBusOracle](/contracts/validators-exit-bus-oracle)
 
 Un contrato proxy común utilizado para despliegues de contratos no actualizables de Lido fuera de Aragon.
-Sigue el estándar de proxy [ERC1967](https://eips.ethereum.org/EIPS/eip-1967) y permite la osificación
-(ajuste del propietario del proxy a la dirección cero) para la versión final de implementación.
+Sigue el estándar de proxy [ERC1967](https://eips.ethereum.org/EIPS/eip-1967) y permite la osificación (ajuste del propietario del proxy a la dirección cero) para la versión final de implementación.
