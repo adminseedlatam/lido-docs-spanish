@@ -73,40 +73,44 @@ function getCurrentFrame() external view returns (
 )
 ```
 
-#### Returns
+### Devoluciones
 
-| Name                           | Type      | Description                                                                          |
-| ------------------------------ | --------- | ------------------------------------------------------------------------------------ |
-| `refSlot`                      | `uint256` | The frame's reference slot: if the data the consensus is being reached upon includes or depends on any onchain state, this state should be queried at the reference slot. If the slot contains a block, the state should include all changes from that block. |
-| `reportProcessingDeadlineSlot` | `uint256` | The last slot at which the report can be processed by the report processor contract. |
+#### getCurrentFrame()
 
-### getInitialRefSlot()
+Devuelve el marco de informe actual.
 
-Returns the earliest possible reference slot, i.e. the reference slot of the reporting frame with zero index.
+| Nombre                          | Tipo      | Descripción                                                                          |
+| ------------------------------- | --------- | ------------------------------------------------------------------------------------ |
+| `refSlot`                       | `uint256` | El slot de referencia del marco: Si los datos sobre los que se alcanza el consenso dependen de algún estado en la cadena, este estado debe consultarse en el slot de referencia. Si este slot contiene un bloque, todos los cambios de ese bloque deben incluirse. |
+| `reportProcessingDeadlineSlot`  | `uint256` | El último slot en el cual el informe puede ser procesado por el contrato procesador de informes. |
+
+#### getInitialRefSlot()
+
+Devuelve el slot de referencia más temprano posible, es decir, el slot de referencia del marco de informe con índice cero.
 
 ```solidity
 function getInitialRefSlot() external view returns (uint256)
 ```
 
-### getIsMember()
+#### getIsMember()
 
-Returns whether the given address is currently a member of the consensus.
+Devuelve si la dirección proporcionada es actualmente un miembro del consenso.
 
 ```solidity
 function getIsMember(address addr) external view returns (bool)
 ```
 
-### getIsFastLaneMember()
+#### getIsFastLaneMember()
 
-Returns whether the given address is a fast lane member for the current reporting frame.
+Devuelve si la dirección proporcionada es un miembro del carril rápido para el marco de informe actual.
 
 ```solidity
 function getIsFastLaneMember(address addr) external view returns (bool)
 ```
 
-### getMembers()
+#### getMembers()
 
-Returns all current members, together with the last reference slot each member submitted a report for.
+Devuelve todos los miembros actuales, junto con el último slot de referencia en el que cada miembro presentó un informe.
 
 ```solidity
 function getMembers() external view returns (
@@ -115,9 +119,9 @@ function getMembers() external view returns (
 )
 ```
 
-### getFastLaneMembers()
+#### getFastLaneMembers()
 
-Returns the subset of the oracle committee members (consisting of `quorum` items) that changes each frame.
+Devuelve el subconjunto de miembros del comité oráculo (que consiste en `quorum` elementos) que cambia en cada marco.
 
 ```solidity
 function getFastLaneMembers() external view returns (
@@ -126,25 +130,25 @@ function getFastLaneMembers() external view returns (
 )
 ```
 
-### getQuorum()
+#### getQuorum()
 
-Returns quorum number
+Devuelve el número de quórum.
 
 ```solidity
 function getQuorum() external view returns (uint256)
 ```
 
-### getReportProcessor()
+#### getReportProcessor()
 
-Returns report processor address, i.e oracle address
+Devuelve la dirección del procesador de informes, es decir, la dirección del oráculo.
 
 ```solidity
 function getReportProcessor() external view returns (address)
 ```
 
-### getConsensusState()
+#### getConsensusState()
 
-Returns info about the current frame and consensus state in that frame.
+Devuelve información sobre el marco actual y el estado de consenso en ese marco.
 
 ```solidity
 function getConsensusState() external view returns (
@@ -154,19 +158,19 @@ function getConsensusState() external view returns (
 )
 ```
 
-#### Returns
+##### Devoluciones
 
-Returns info about the current frame and consensus state in that frame.
+Devuelve información sobre el marco actual y el estado de consenso en ese marco.
 
-| Name                 | Type      | Description                                                           |
-| -------------------- | --------- | --------------------------------------------------------------------- |
-| `refSlot`            | `uint256` | Reference slot of the current reporting frame.                        |
-| `consensusReport`    | `bytes32` | Consensus report for the current frame, if any. Zero bytes otherwise. |
-| `isReportProcessing` | `bool`    | If consensus report for the current frame is already being processed. Consensus can be changed before the processing starts. |
+| Nombre                 | Tipo      | Descripción                                                           |
+| ---------------------- | --------- | --------------------------------------------------------------------- |
+| `refSlot`              | `uint256` | Slot de referencia del marco de informe actual.                       |
+| `consensusReport`      | `bytes32` | Informe de consenso para el marco actual, si existe. Cero bytes de lo contrario. |
+| `isReportProcessing`   | `bool`    | Indica si el informe de consenso para el marco actual ya está siendo procesado. El consenso puede cambiar antes de que comience el procesamiento. |
 
-### getReportVariants()
+#### getReportVariants()
 
-Returns report variants and their support for the current reference slot.
+Devuelve las variantes de informe y su soporte para el slot de referencia actual.
 
 ```solidity
 function getReportVariants() external view returns (
@@ -177,23 +181,22 @@ function getReportVariants() external view returns (
 
 ### getConsensusStateForMember()
 
-Returns the extended information related to an oracle committee member with the
-given address and the current consensus state. Provides all the information needed for
-an oracle daemon to decide if it needs to submit a report.
+Devuelve la información extendida relacionada con un miembro del comité oráculo con la dirección proporcionada y el estado de consenso actual. Proporciona toda la información necesaria para que un demonio oráculo decida si necesita enviar un informe.
 
 ```solidity
 function getConsensusStateForMember(address addr) external view returns (MemberConsensusState memory result)
 ```
 
-#### Parameters
+#### Parámetros
 
-| Name   | Type      | Description         |
-| ------ | --------- | ------------------- |
-| `addr` | `address` | The member address. |
+| Nombre   | Tipo      | Descripción         |
+| ------   | --------- | ------------------- |
+| `addr`   | `address` | La dirección del miembro. |
 
-#### Returns
+#### Devoluciones
 
-Returns a new type `MemberConsensusState`
+Devuelve un nuevo tipo `MemberConsensusState`
+
 
 ```solidity
 struct MemberConsensusState {
@@ -223,165 +226,165 @@ struct MemberConsensusState {
 }
 ```
 
-## Methods
+## Métodos
 
 ### updateInitialEpoch()
 
-Sets a new initial epoch given that the current initial epoch is in the future.
+Establece una nueva época inicial dado que la época inicial actual está en el futuro.
 
-Can only be called by users with `DEFAULT_ADMIN_ROLE`.
+Solo puede ser llamado por usuarios con el rol `DEFAULT_ADMIN_ROLE`.
 
 ```solidity
 function updateInitialEpoch(uint256 initialEpoch) external
 ```
 
-- Reverts with `InitialEpochAlreadyArrived()` if current epoch more or equal initial epoch from current frame config.
-- Reverts with `InitialEpochRefSlotCannotBeEarlierThanProcessingSlot()` if initial frame refSlot less than last processing refSlot.
-- Reverts with `EpochsPerFrameCannotBeZero()` if `epochsPerFrame` from frame config is zero.
-- Reverts with `FastLanePeriodCannotBeLongerThanFrame()` if `fastLaneLengthSlots` from config more than frame length.
+- Revierte con `InitialEpochAlreadyArrived()` si la época actual es mayor o igual a la época inicial desde la configuración del marco actual.
+- Revierte con `InitialEpochRefSlotCannotBeEarlierThanProcessingSlot()` si el slot de referencia inicial es menor que el último slot de procesamiento.
+- Revierte con `EpochsPerFrameCannotBeZero()` si `epochsPerFrame` desde la configuración del marco es cero.
+- Revierte con `FastLanePeriodCannotBeLongerThanFrame()` si `fastLaneLengthSlots` desde la configuración del marco es mayor que la longitud del marco.
 
 ### setFrameConfig()
 
-Updates the time-related configuration.
+Actualiza la configuración relacionada con el tiempo.
 
-Can only be called by users with `MANAGE_FRAME_CONFIG_ROLE`.
+Solo puede ser llamado por usuarios con el rol `MANAGE_FRAME_CONFIG_ROLE`.
 
 ```solidity
 function setFrameConfig(uint256 epochsPerFrame, uint256 fastLaneLengthSlots) external
 ```
 
-- Reverts with `EpochsPerFrameCannotBeZero()` if `epochsPerFrame` is zero.
-- Reverts with `FastLanePeriodCannotBeLongerThanFrame()` if `fastLaneLengthSlots` more than frame length.
+- Revierte con `EpochsPerFrameCannotBeZero()` si `epochsPerFrame` es cero.
+- Revierte con `FastLanePeriodCannotBeLongerThanFrame()` si `fastLaneLengthSlots` es mayor que la longitud del marco.
 
-#### Parameters
+#### Parámetros
 
-| Name                  | Type      | Description                                                           |
-| --------------------- | --------- | --------------------------------------------------------------------- |
-| `epochsPerFrame`      | `uint256` | ALength of a frame in epochs.                                         |
-| `fastLaneLengthSlots` | `uint256` | Length of the fast lane interval in slots; see `getIsFastLaneMember`. |
+| Nombre                  | Tipo      | Descripción                                                           |
+| ---------------------   | --------- | --------------------------------------------------------------------- |
+| `epochsPerFrame`        | `uint256` | Longitud de un marco en épocas.                                       |
+| `fastLaneLengthSlots`   | `uint256` | Longitud del intervalo de carril rápido en slots; ver `getIsFastLaneMember`. |
 
 ### setFastLaneLengthSlots()
 
-Sets the duration of the fast lane interval of the reporting frame.
+Establece la duración del intervalo de carril rápido del marco de informe.
 
-Can only be called by users with `MANAGE_FAST_LANE_CONFIG_ROLE`.
+Solo puede ser llamado por usuarios con el rol `MANAGE_FAST_LANE_CONFIG_ROLE`.
 
 ```solidity
 function setFastLaneLengthSlots(uint256 fastLaneLengthSlots) external
 ```
 
-- Reverts with `FastLanePeriodCannotBeLongerThanFrame()` if `fastLaneLengthSlots` more than frame length.
+- Revierte con `FastLanePeriodCannotBeLongerThanFrame()` si `fastLaneLengthSlots` es mayor que la longitud del marco.
 
-#### Parameters
+#### Parámetros
 
-| Name                  | Type      | Description                                                           |
-| --------------------- | --------- | --------------------------------------------------------------------- |
-| `fastLaneLengthSlots` | `uint256` | The length of the fast lane reporting interval in slots. Setting it to zero disables the fast lane subset, allowing any oracle to report starting from the first slot of a frame and until the frame's reporting deadline. |
+| Nombre                  | Tipo      | Descripción                                                           |
+| ---------------------   | --------- | --------------------------------------------------------------------- |
+| `fastLaneLengthSlots`   | `uint256` | La longitud del intervalo de informe rápido en slots. Configurándolo a cero desactiva el subconjunto de carril rápido, permitiendo que cualquier oráculo informe a partir del primer slot de un marco y hasta el plazo de presentación del marco. |
 
 ### addMember()
 
-Add a new member of the consensus.
+Agrega un nuevo miembro al consenso.
 
-Can only be called by users with `DISABLE_CONSENSUS_ROLE` role if `quorum` set as UINT256_MAX.
+Solo puede ser llamado por usuarios con el rol `DISABLE_CONSENSUS_ROLE` si `quorum` está configurado como UINT256_MAX.
 
-Can only be called by users with `MANAGE_MEMBERS_AND_QUORUM_ROLE` role if `quorum` not set as UINT256_MAX.
+Solo puede ser llamado por usuarios con el rol `MANAGE_MEMBERS_AND_QUORUM_ROLE` si `quorum` no está configurado como UINT256_MAX.
 
 ```solidity
 function addMember(address addr, uint256 quorum) external
 ```
 
-- Reverts with `DuplicateMember()` if `addr` address is already the member of consensus.
-- Reverts with `AddressCannotBeZero()` if `addr` address is zero.
-- Reverts with `QuorumTooSmall(uint256 minQuorum, uint256 receivedQuorum)` if `quorum` less or equal than total members of consensus divided by 2  (`quorum <= total members / 2`)
+- Revierte con `DuplicateMember()` si la dirección `addr` ya es miembro del consenso.
+- Revierte con `AddressCannotBeZero()` si la dirección `addr` es cero.
+- Revierte con `QuorumTooSmall(uint256 minQuorum, uint256 receivedQuorum)` si `quorum` es menor o igual que el total de miembros del consenso dividido por 2 (`quorum <= total de miembros / 2`).
 
 ### removeMember()
 
-Remove a member from the consensus.
+Elimina un miembro del consenso.
 
-Can only be called by users with `DISABLE_CONSENSUS_ROLE` role if `quorum` set as UINT256_MAX.
+Solo puede ser llamado por usuarios con el rol `DISABLE_CONSENSUS_ROLE` si `quorum` está configurado como UINT256_MAX.
 
-Can only be called by users with `MANAGE_MEMBERS_AND_QUORUM_ROLE` role if `quorum` not set as UINT256_MAX.
+Solo puede ser llamado por usuarios con el rol `MANAGE_MEMBERS_AND_QUORUM_ROLE` si `quorum` no está configurado como UINT256_MAX.
 
 ```solidity
 function removeMember(address addr, uint256 quorum) external
 ```
 
-- Reverts with `NonMember()` if `addr` address doesn't exists
-- Reverts with `QuorumTooSmall(uint256 minQuorum, uint256 receivedQuorum)` if `quorum` less or equal than total members of consensus divided by 2  (`quorum <= total members / 2`)
+- Revierte con `NonMember()` si la dirección `addr` no existe.
+- Revierte con `QuorumTooSmall(uint256 minQuorum, uint256 receivedQuorum)` si `quorum` es menor o igual que el total de miembros del consenso dividido por 2 (`quorum <= total de miembros / 2`).
 
 ### setQuorum()
 
-Update consensus quorum
+Actualiza el quórum del consenso.
 
-Can only be called by users with `DISABLE_CONSENSUS_ROLE` role if `quorum` set as UINT256_MAX.
+Solo puede ser llamado por usuarios con el rol `DISABLE_CONSENSUS_ROLE` si `quorum` está configurado como UINT256_MAX.
 
-Can only be called by users with `MANAGE_MEMBERS_AND_QUORUM_ROLE` role if `quorum` not set as UINT256_MAX.
+Solo puede ser llamado por usuarios con el rol `MANAGE_MEMBERS_AND_QUORUM_ROLE` si `quorum` no está configurado como UINT256_MAX.
 
 ```solidity
 function setQuorum(uint256 quorum) external
 ```
 
-- Reverts with `QuorumTooSmall(uint256 minQuorum, uint256 receivedQuorum)` if `quorum` less or equal than total members of consensus divided by 2  (`quorum <= total members / 2`)
+- Revierte con `QuorumTooSmall(uint256 minQuorum, uint256 receivedQuorum)` si `quorum` es menor o igual que el total de miembros del consenso dividido por 2 (`quorum <= total de miembros / 2`).
 
 ### disableConsensus()
 
-Disable consensus quorum, i.e set quorum as `UINT256_MAX` (UNREACHABLE_QUORUM)
+Deshabilita el quórum del consenso, es decir, establece el quórum como `UINT256_MAX` (UNREACHABLE_QUORUM).
 
-Can only be called by users with `DISABLE_CONSENSUS_ROLE`
+Solo puede ser llamado por usuarios con el rol `DISABLE_CONSENSUS_ROLE`.
 
 ```solidity
 function disableConsensus() external
 ```
 
-- Reverts with `QuorumTooSmall(uint256 minQuorum, uint256 receivedQuorum)` if `quorum` less or equal than total members of consensus divided by 2  (`quorum <= total members / 2`)
+- Revierte con `QuorumTooSmall(uint256 minQuorum, uint256 receivedQuorum)` si `quorum` es menor o igual que el total de miembros del consenso dividido por 2 (`quorum <= total de miembros / 2`).
 
 ### setReportProcessor()
 
-Set report processor address, i.e oracle address
+Establece la dirección del procesador de informes, es decir, la dirección del oráculo.
 
-Can only be called by users with `MANAGE_REPORT_PROCESSOR_ROLE`.
+Solo puede ser llamado por usuarios con el rol `MANAGE_REPORT_PROCESSOR_ROLE`.
 
 ```solidity
 function setReportProcessor(address newProcessor) external
 ```
 
-- Reverts with `ReportProcessorCannotBeZero()` if `newProcessor` address is zero.
-- Reverts with `NewProcessorCannotBeTheSame()` if `newProcessor` address is equal to the previous processor address.
+- Revierte con `ReportProcessorCannotBeZero()` si la dirección `newProcessor` es cero.
+- Revierte con `NewProcessorCannotBeTheSame()` si la dirección `newProcessor` es igual a la dirección del procesador anterior.
 
 ### submitReport()
 
-Used by oracle members to submit hash of the data calculated for the given reference slot.
+Usado por los miembros del oráculo para enviar el hash de los datos calculados para el slot de referencia dado.
 
 ```solidity
 function submitReport(uint256 slot, bytes32 report, uint256 consensusVersion) external
 ```
 
-#### Parameters
+#### Parámetros
 
-| Name               | Type      | Description                                                           |
-| ------------------ | --------- | --------------------------------------------------------------------- |
-| `slot`             | `uint256` | The reference slot the data was calculated for. Reverts if doesn't match the current reference slot.                                         |
-| `report`           | `bytes32` | Hash of the data calculated for the given reference slot. |
-| `consensusVersion` | `uint256` | Version of the oracle consensus rules. Reverts if doesn't match the version returned by the currently set consensus report processor, or zero if no report processor is set. |
+| Nombre              | Tipo      | Descripción                                                           |
+| ------------------- | --------- | --------------------------------------------------------------------- |
+| `slot`              | `uint256` | El slot de referencia para el que se calcularon los datos. Revierte si no coincide con el slot de referencia actual.                                         |
+| `report`            | `bytes32` | Hash de los datos calculados para el slot de referencia dado. |
+| `consensusVersion`  | `uint256` | Versión de las reglas de consenso del oráculo. Revierte si no coincide con la versión devuelta por el procesador de informes de consenso actualmente configurado, o cero si no se ha establecido un procesador de informes. |
 
-#### Reverts
+#### Revierte
 
-- Reverts with `InvalidSlot()` if `slot` is zero.
-- Reverts with `InvalidSlot()` if `slot` is not equal current frame refSlot.
-- Reverts with `NumericOverflow()` if `slot` is more than `UINT64_MAX`
-- Reverts with `EmptyReport()` if `reports` is zero hash (`bytes32(0)`)
-- Reverts with `NonMember()` if caller address doesn't exists in members array
-- Reverts with `UnexpectedConsensusVersion(uint256 expected, uint256 received)` if `consensusVersion` is not equal report processor consensus version.
-- Reverts with `StaleReport()` if the current frame slot is more than the frame report processing deadline slot.
-- Reverts with `NonFastLaneMemberCannotReportWithinFastLaneInterval()` if the current frame slot is less or equal frame ref slot plus fastlane length AND the member who submits the report is not fastlane member.
-- Reverts with `ConsensusReportAlreadyProcessing()` if the member sends a report for the same slot.
-- Reverts with `DuplicateReport()` if the member already sends the report.
+- Revierte con `InvalidSlot()` si `slot` es cero.
+- Revierte con `InvalidSlot()` si `slot` no es igual al refSlot del marco actual.
+- Revierte con `NumericOverflow()` si `slot` es mayor que `UINT64_MAX`.
+- Revierte con `EmptyReport()` si `report` es un hash cero (`bytes32(0)`).
+- Revierte con `NonMember()` si la dirección del llamador no existe en la lista de miembros.
+- Revierte con `UnexpectedConsensusVersion(uint256 expected, uint256 received)` si `consensusVersion` no es igual a la versión del consenso del procesador de informes.
+- Revierte con `StaleReport()` si el slot del marco actual es mayor que el slot de plazo de procesamiento del informe del marco.
+- Revierte con `NonFastLaneMemberCannotReportWithinFastLaneInterval()` si el slot del marco actual es menor o igual al refSlot del marco más la longitud del carril rápido Y el miembro que envía el informe no es miembro del carril rápido.
+- Revierte con `ConsensusReportAlreadyProcessing()` si el miembro envía un informe para el mismo slot.
+- Revierte con `DuplicateReport()` si el miembro ya ha enviado el informe.
 
-## Events
+## Eventos
 
 ### FrameConfigSet()
 
-Emits when a new frame config set via [`setFrameConfig`](#setframeconfig).
+Emite cuando se establece una nueva configuración de marco a través de [`setFrameConfig`](#setframeconfig).
 
 ```solidity
 event FrameConfigSet(uint256 newInitialEpoch, uint256 newEpochsPerFrame)
@@ -389,7 +392,7 @@ event FrameConfigSet(uint256 newInitialEpoch, uint256 newEpochsPerFrame)
 
 ### FastLaneConfigSet()
 
-Emits when fast lane length changed (i.e., length defined in slots).
+Emite cuando la longitud del carril rápido cambia (es decir, la longitud definida en slots).
 
 ```solidity
 event FastLaneConfigSet(uint256 fastLaneLengthSlots)
@@ -397,7 +400,7 @@ event FastLaneConfigSet(uint256 fastLaneLengthSlots)
 
 ### MemberAdded()
 
-Emits when a new member of consensus is added.
+Emite cuando se agrega un nuevo miembro del consenso.
 
 ```solidity
 event MemberAdded(address indexed addr, uint256 newTotalMembers, uint256 newQuorum)
@@ -405,7 +408,7 @@ event MemberAdded(address indexed addr, uint256 newTotalMembers, uint256 newQuor
 
 ### MemberRemoved()
 
-Emits when an existing member of consensus is removed.
+Emite cuando se elimina un miembro existente del consenso.
 
 ```solidity
 event MemberRemoved(address indexed addr, uint256 newTotalMembers, uint256 newQuorum)
@@ -413,7 +416,7 @@ event MemberRemoved(address indexed addr, uint256 newTotalMembers, uint256 newQu
 
 ### QuorumSet()
 
-Emits when a quorum of consensus members is changed.
+Emite cuando se cambia el quórum de los miembros del consenso.
 
 ```solidity
 event QuorumSet(uint256 newQuorum, uint256 totalMembers, uint256 prevQuorum)
@@ -421,7 +424,7 @@ event QuorumSet(uint256 newQuorum, uint256 totalMembers, uint256 prevQuorum)
 
 ### ReportReceived()
 
-Emits when a new report received for the provided `refSlot` by `member` containing the `report` hash.
+Emite cuando se recibe un nuevo informe para el `refSlot` proporcionado por `member` que contiene el hash del `report`.
 
 ```solidity
  event ReportReceived(uint256 indexed refSlot, address indexed member, bytes32 report)
@@ -429,7 +432,7 @@ Emits when a new report received for the provided `refSlot` by `member` containi
 
 ### ConsensusReached()
 
-Emits when a consensus reached for the provided `refSlot` containing the `report` hash.
+Emite cuando se alcanza un consenso para el `refSlot` proporcionado que contiene el hash del `report`.
 
 ```solidity
 event ConsensusReached(uint256 indexed refSlot, bytes32 report, uint256 support)
@@ -437,7 +440,7 @@ event ConsensusReached(uint256 indexed refSlot, bytes32 report, uint256 support)
 
 ### ConsensusLost()
 
-Emits when the previously established consensus for the provided `refSlot` is disbanded.
+Emite cuando se disuelve el consenso previamente establecido para el `refSlot` proporcionado.
 
 ```solidity
 event ConsensusLost(uint256 indexed refSlot)
@@ -445,8 +448,8 @@ event ConsensusLost(uint256 indexed refSlot)
 
 ### ReportProcessorSet()
 
-Emits when the report processor is changed from `prevProcessor` to `processor`.
-Both addresses must comply with the `IReportAsyncProcessor` interface.
+Emite cuando el procesador de informes se cambia de `prevProcessor` a `processor`.
+Ambas direcciones deben cumplir con la interfaz `IReportAsyncProcessor`.
 
 ```solidity
 event ReportProcessorSet(address indexed processor, address indexed prevProcessor)
