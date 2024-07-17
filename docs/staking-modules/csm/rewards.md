@@ -1,43 +1,42 @@
-# Rewards
+# Recompensas
 ![rewards-1](../../../static/img/csm/rewards-1.png)
 
-There are two types of rewards for CSM Node Operators:
-- **Node Operator rewards;**
-- **Bond rewards;**
+Hay dos tipos de recompensas para los Operadores de Nodo de CSM:
+- **Recompensas del Operador de Nodo;**
+- **Recompensas de bono;**
 
 ![rewards-2](../../../static/img/csm/rewards-2.png)
 
-Node Operator rewards come from the LoE protocol's share of the Consensus and Execution layers rewards. These rewards are calculated as a percentage of the rewards of a full 32 ETH validator. Node Operator rewards are distributed between all staking modules in the same [way](../../contracts/staking-router#distribución-de-tarifas) (proportionally based on the number of active validators per module, where `active == deposited - exited`). Each [Accounting Oracle](../../contracts/accounting-oracle.md) report allocates a new portion of staking rewards to CSM. Allocated rewards are stored on the module. Then, the allocation of the Node Operator rewards for CSM Node Operators using a Merkle tree is provided by CSM Performance Oracle once in a `frame`, making a new portion of the rewards available for claim.
+Las recompensas del Operador de Nodo provienen de la parte del protocolo LoE de las recompensas de las capas de Consenso y Ejecución. Estas recompensas se calculan como un porcentaje de las recompensas de un validador completo de 32 ETH. Las recompensas del Operador de Nodo se distribuyen entre todos los módulos de participación de la misma [manera](../../contracts/staking-router#distribución-de-tarifas) (proporcionalmente basado en el número de validadores activos por módulo, donde `activo == depositado - salido`). Cada reporte del [Oráculo Contable](../../contracts/accounting-oracle.md) asigna una nueva porción de las recompensas de participación a CSM. Las recompensas asignadas se almacenan en el módulo. Luego, la asignación de las recompensas del Operador de Nodo para los Operadores de Nodo de CSM utilizando un árbol de Merkle es proporcionada por el Oráculo de Rendimiento de CSM una vez en un `marco`, haciendo una nueva porción de las recompensas disponible para reclamar.
 
-Bond rewards (rebase) part of the rewards come from stETH being a rebasing token and the bond being stored in stETH. After each Accounting Oracle report, `shareRate` changes (most likely increases). Hence, the same amount of stETH shares will now be equal to a bigger stETH token balance.
+La parte de las recompensas de bono (rebase) proviene de stETH siendo un token de rebase y el bono que se almacena en stETH. Después de cada reporte del Oráculo Contable, `shareRate` cambia (probablemente aumenta). Por lo tanto, la misma cantidad de acciones stETH ahora será igual a un mayor saldo de tokens stETH.
 
-The overall equation for the total rewards looks like this `totalRewards = validatorEffectiveBalance * moduleFee + bondAmount * shareRateChange`. More details on it are published in the [supplementary post](https://research.lido.fi/t/bond-and-staking-fee-napkin-math/5999).
+La ecuación general para las recompensas totales se ve así: `totalRewards = saldoEfectivoValidador * tarifaMódulo + montoBono * cambioTasaAcción`. Más detalles se publican en el [post complementario](https://research.lido.fi/t/bond-and-staking-fee-napkin-math/5999).
 
-A meaningful part of total rewards comes from bond rebase. The bond and the Node Operator rewards are combined before the claim. The final amount of rewards available for claiming is calculated as `bond + nodeOperatorRewards - bondRequired`. This approach also ensures that any missing bond will be recouped by the protocol prior to a rewards claim.
+Una parte significativa de las recompensas totales proviene del rebase del bono. El bono y las recompensas del Operador de Nodo se combinan antes del reclamo. La cantidad final de recompensas disponibles para reclamar se calcula como `bono + recompensasOperadorNodo - bonoRequerido`. Este enfoque también asegura que cualquier bono faltante sea recuperado por el protocolo antes de un reclamo de recompensas.
 
 ![rewards-3](../../../static/img/csm/rewards-3.png)
 
-Also, any excess bond will be treated as a reward.
+Además, cualquier bono en exceso se tratará como una recompensa.
 
 ![rewards-4](../../../static/img/csm/rewards-4.png)
 
+## Oráculo de Rendimiento
+El Oráculo de Rendimiento crea un árbol de Merkle con la asignación de las recompensas de participación y entrega la raíz en la cadena. Para hacer que el árbol original esté disponible para los usuarios, se publica en [IPFS](https://ipfs.tech/) y [GitHub](https://github.com/). En lugar de almacenar múltiples raíces, cada nuevo árbol consta de todas las recompensas del Operador de Nodo adquiridas alguna vez por los Operadores de Nodo de CSM. Por lo tanto, solo se requiere el árbol más reciente para determinar la asignación de recompensas en cualquier momento. La cantidad de recompensas disponibles para reclamar se puede calcular como `recompensasAcumuladasTotales - recompensasReclamadas`.
 
-## Performance Oracle
-The Performance Oracle creates a Merkle tree with the allocation of the staking rewards and delivers the root on-chain. To make the original tree available to users, it is published on [IPFS](https://ipfs.tech/) and [GitHub](https://github.com/). Instead of storing multiple roots, each new tree consists of all Node Operator rewards ever acquired by CSM Node Operators. Hence, only the latest tree is required to determine the reward allocation at any moment of time. The amount of rewards available for claiming can be calculated as `totalAcquiredRewards - claimedRewards`.
-
-The Performance Oracle uses the successful attestation rate `successfulAttestations / totalAssignedAttestations` as a proxy for the overall performance of a validator. A performance threshold is utilized to determine the allocation of the actual Node Operator rewards. Validators with performance above the threshold are included in the allocation pool, while the rest are not. Activation and exit events are accounted for during the Node Operator's share calculation. Once the allocation pool is formed, each validator gets a staking rewards part of `totalStakingRewardsAccumulated / totalValidatorsInAllocationPool`. This effectively means that all rewards acquired by the module will be allocated among well-performers. Then, validator shares are allocated to the corresponding Node Operators, and each Operator can claim rewards for all of their validators in one go.
+El Oráculo de Rendimiento utiliza la tasa de attestations exitosas `attestacionesExitosas / totalAttestationsAsignadas` como un proxy para el rendimiento general de un validador. Se utiliza un umbral de rendimiento para determinar la asignación de las recompensas reales del Operador de Nodo. Los validadores con rendimiento por encima del umbral se incluyen en el grupo de asignación, mientras que los demás no lo son. Los eventos de activación y salida se tienen en cuenta durante el cálculo de la parte del Operador de Nodo. Una vez formado el grupo de asignación, a cada validador se le asigna una parte de las recompensas de participación de `recompensasTotalesAcumuladas / totalValidadoresEnGrupoDeAsignación`. Esto significa efectivamente que todas las recompensas adquiridas por el módulo se distribuirán entre los que tienen un buen desempeño. Luego, las acciones del validador se asignan a los Operadores de Nodo correspondientes, y cada Operador puede reclamar las recompensas de todos sus validadores de una sola vez.
 
 ![rewards-5](../../../static/img/csm/rewards-5.png)
 
-It is crucial to note that the Performance Oracle manages only part of the total rewards. Even if the validator performs below the threshold within a frame, bond rewards (rebase) will still be acquired. One can find an example of the rewards calculation [here](https://docs.google.com/spreadsheets/d/1hLvuOesPVOYHDqO373bdyiKn4_3UXQF1rATbgTrKhWc/edit?usp=sharing). **Note that even when performing below the threshold, the rewards per validator will be higher than those for vanilla solo staking.**
+Es crucial señalar que el Oráculo de Rendimiento gestiona solo parte de las recompensas totales. Incluso si el validador tiene un rendimiento por debajo del umbral dentro de un marco, las recompensas del bono (rebase) aún se adquirirán. Se puede encontrar un ejemplo del cálculo de recompensas [aquí](https://docs.google.com/spreadsheets/d/1hLvuOesPVOYHDqO373bdyiKn4_3UXQF1rATbgTrKhWc/edit?usp=sharing). **Ten en cuenta que incluso cuando el rendimiento es inferior al umbral, las recompensas por validador serán mayores que las del staking en solitario convencional.**
 
-The `frame` for the Performance Oracle report is set to 28 days. This makes the `frame` long enough to account for short performance outages (with a smaller frame, this effect will be lower, and the performance threshold will be less useful). Making the `frame` bigger than 28 days will result in an unnecessary delay in reward allocation.
+El `marco` para el reporte del Oráculo de Rendimiento está configurado en 28 días. Esto hace que el `marco` sea lo suficientemente largo como para tener en cuenta las interrupciones cortas de rendimiento (con un marco más pequeño, este efecto será menor y el umbral de rendimiento será menos útil). Hacer que el `marco` sea más grande que 28 días resultará en un retraso innecesario en la asignación de recompensas.
 
-The performance threshold is relative to the overall network attestation effectiveness to ensure that network issues outside the Node Operator's control do not affect reward allocation.
+El umbral de rendimiento es relativo a la efectividad global de la attestation en la red para asegurar que los problemas de red fuera del control del Operador de Nodo no afecten la asignación de recompensas.
 
-If you want to learn more about the actual Performance Oracle algorithm, check out this [detailed doc](https://hackmd.io/@lido/BJclaWbi6).
+Si deseas obtener más información sobre el algoritmo real del Oráculo de Rendimiento, consulta este [documento detallado](https://hackmd.io/@lido/BJclaWbi6).
 
-## Further reading
+## Lecturas adicionales
 
-- [Penalties](penalties.md)
-- [Validator exits](validator-exits.md)
+- [Penalizaciones](penalties.md)
+- [Salidas de validadores](validator-exits.md)
