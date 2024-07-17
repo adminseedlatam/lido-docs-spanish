@@ -1,52 +1,49 @@
 # ValidatorsExitBusOracle
 
-- [Source code](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/oracle/ValidatorsExitBusOracle.sol)
-- [Deployed contract](https://etherscan.io/address/0x0De4Ea0184c2ad0BacA7183356Aea5B8d5Bf5c6e)
-- Inherits [BaseOracle](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/oracle/BaseOracle.sol)
+- [Código fuente](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/oracle/ValidatorsExitBusOracle.sol)
+- [Contrato desplegado](https://etherscan.io/address/0x0De4Ea0184c2ad0BacA7183356Aea5B8d5Bf5c6e)
+- Hereda de [BaseOracle](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/oracle/BaseOracle.sol)
 
 :::info
-It's advised to read [What is Lido Oracle mechanism](/guías/oracle-operator-manual#introducción) before
+Se recomienda leer [¿Qué es el mecanismo de oráculo de Lido?](/guías/oracle-operator-manual#introducción) antes de continuar.
 :::
 
-## What is ValidatorsExitBusOracle
+## ¿Qué es ValidatorsExitBusOracle?
 
-A contract that implements an on-chain "source of truth" message bus between the protocol's off-chain oracle and off-chain observers,
-with the main goal of delivering validator exit requests to the Lido-participating node operators.
+Es un contrato que implementa un "bus de mensajes" en la cadena como fuente de verdad entre el oráculo fuera de la cadena del protocolo y los observadores fuera de la cadena, con el objetivo principal de entregar solicitudes de salida de validadores a los operadores de nodos que participan en Lido.
 
-A report calculation consists of 4 key steps:
+El cálculo de un informe consta de 4 pasos clave:
 
-1. Calculate withdrawals amount to cover with ether.
-2. Calculate ether rewards prediction per epoch.
-3. Calculate withdrawal epoch for next validator eligible for exit to cover withdrawal requests if needed
-4. Prepare validators exit order queue
-5. Go through the queue until the exited validators’ balances cover all withdrawal requests (considering the predicated final exited balance of each validator).
+1. Calcular la cantidad de retiros a cubrir con ether.
+2. Calcular la predicción de recompensas en ether por época.
+3. Calcular la época de retiro para el siguiente validador elegible para salir y cubrir las solicitudes de retiro si es necesario.
+4. Preparar la cola de órdenes de salida de validadores.
+5. Recorrer la cola hasta que los saldos de los validadores que han salido cubran todas las solicitudes de retiro (considerando el saldo final predicho de cada validador que ha salido).
 
 :::note
-Placed exit requests via `ValidatorsExitBusOracle` should be processed timely according to the ratified [Lido on Ethereum Validator Exits Policy V1.0](https://snapshot.org/#/lido-snapshot.eth/proposal/0xa4eb1220a15d46a1825d5a0f44de1b34644d4aa6bb95f910b86b29bb7654e330).
+Las solicitudes de salida realizadas a través de `ValidatorsExitBusOracle` deben procesarse a tiempo según la política ratificada [Lido en Ethereum Políticas de Salidas de Validadores V1.0](https://snapshot.org/#/lido-snapshot.eth/proposal/0xa4eb1220a15d46a1825d5a0f44de1b34644d4aa6bb95f910b86b29bb7654e330).
 :::
 
-Access to lever methods is restricted using the functionality of the
-[AccessControlEnumerable](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/utils/access/AccessControlEnumerable.sol)
-contract and a bunch of [granular roles](#permissions).
+El acceso a los métodos de palanca está restringido utilizando la funcionalidad del contrato [AccessControlEnumerable](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/utils/access/AccessControlEnumerable.sol) y un conjunto de [roles granulares](#permissions).
 
-## Report cycle
+## Ciclo del informe
 
-The oracle work is delineated by equal time periods called frames. In normal operation, oracles finalize a report in each frame (the frame duration is 75 Ethereum Consensus Layer epochs, each frame starts at ~04:00, ~12:00, ~20:00 UTC). Each frame has a reference slot and processing deadline. Report data is gathered by looking at the world state (both Ethereum Execution and Consensus Layers) at the moment of the frame's reference slot (including any state changes made in that slot), and must be processed before the frame's processing deadline.
+El trabajo del oráculo se divide en períodos de tiempo iguales llamados marcos. En operación normal, los oráculos finalizan un informe en cada marco (la duración del marco es de 75 épocas de la Capa de Consenso de Ethereum, cada marco comienza aproximadamente a las 04:00, 12:00 y 20:00 UTC). Cada marco tiene una ranura de referencia y una fecha límite de procesamiento. Los datos del informe se recopilan observando el estado del mundo (tanto en las Capas de Ejecución y Consenso de Ethereum) en el momento de la ranura de referencia del marco (incluyendo cualquier cambio de estado realizado en esa ranura), y deben procesarse antes de la fecha límite de procesamiento del marco.
 
-Reference slot for each frame is set to the last slot of the epoch preceding the frame's first epoch. The processing deadline is set to the last slot of the last epoch of the frame.
+La ranura de referencia para cada marco se establece en la última ranura de la época que precede a la primera época del marco. La fecha límite de procesamiento se establece en la última ranura de la última época del marco.
 
-It's worth noting that frame length [can be changed](./hash-consensus#setframeconfig). And if oracle report is delayed it does not extend the report period, unless it's missed. In this case, the next report will have the report period increased.
+Vale la pena señalar que la duración del marco [puede cambiar](./hash-consensus#setframeconfig). Y si el informe del oráculo se retrasa, no extiende el período del informe, a menos que se pierda. En este caso, el siguiente informe tendrá el período del informe aumentado.
 
-The frame includes these stages:
+El marco incluye estas etapas:
 
-- **Waiting** - oracle starts as a [daemon](/guías/oracle-operator-manual#el-daemon-del-oráculo) and wakes up every 12 seconds (by default) in order to find the last finalized slot, trying to collate with it with the expected reference slot;
-- **Data collection**: oracles monitor the state of both the execution and consensus layers and collect the data for the successfully arrived finalized reference slot;
-- **Hash consensus**: oracles analyze the report data, compile the report and submit its hash to the [HashConsensus](/contracts/hash-consensus) smart contract;
-- **Core update report**: once the [quorum](./hash-consensus#getquorum) of hashes is reached, meaning more than half of the oracles submitted the same hash (i.e., 5 of 9 oracle committee members at the moment of writing), one of the oracles chosen in turn submits the actual report to the `ValidatorsExitBusOracle` contract, which triggers a chain of the [`ValidatorExitRequest`](#validatorexitrequest) events containing details about the next validators to be ejected (to initiate a voluntary exit from the Ethereum Consensus Layer side).
+- **Esperando**: el oráculo comienza como un [daemon](/guías/oracle-operator-manual#el-daemon-del-oráculo) y se despierta cada 12 segundos (por defecto) para encontrar la última ranura finalizada, tratando de hacerla coincidir con la ranura de referencia esperada;
+- **Recolección de datos**: los oráculos monitorean el estado de las capas de ejecución y consenso y recopilan los datos para la ranura de referencia finalizada que ha llegado con éxito;
+- **Consenso de hash**: los oráculos analizan los datos del informe, compilan el informe y envían su hash al contrato inteligente [HashConsensus](/contracts/hash-consensus);
+- **Informe de actualización principal**: una vez que se alcanza el [quórum](./hash-consensus#getquorum) de hashes, es decir, más de la mitad de los oráculos enviaron el mismo hash (es decir, 5 de 9 miembros del comité de oráculos en el momento de escribir esto), uno de los oráculos elegidos por turno envía el informe real al contrato `ValidatorsExitBusOracle`, lo que desencadena una cadena de eventos [`ValidatorExitRequest`](#validatorexitrequest) que contienen detalles sobre los siguientes validadores a ser expulsados (para iniciar una salida voluntaria del lado de la Capa de Consenso de Ethereum).
 
-## Report data
+## Datos del informe
 
-The function `submitReportData()` accepts the following `ReportData` structure.
+La función `submitReportData()` acepta la siguiente estructura `ReportData`.
 
 ```solidity
 struct ReportData {
@@ -58,26 +55,25 @@ struct ReportData {
 }
 ```
 
-**Oracle consensus info**
+**Información del consenso del oráculo**
 
-- `consensusVersion` — Version of the oracle consensus rules. A current version expected by the oracle can be obtained by calling `getConsensusVersion()`.
-- `refSlot` — Reference slot for which the report was calculated. The state being reported must include all state changes resulting from the all blocks up to this reference slot (inclusive). The epoch containing the slot must be finalized prior to calculating the report.
+- `consensusVersion`: versión de las reglas de consenso del oráculo. Se puede obtener la versión actual esperada por el oráculo llamando a `getConsensusVersion()`.
+- `refSlot`: ranura de referencia para la cual se calculó el informe. El estado informado debe incluir todos los cambios de estado resultantes de todos los bloques hasta esta ranura (inclusive). La época que contiene la ranura debe estar finalizada antes de calcular el informe.
 
-**Requests data**
+**Datos de solicitudes**
 
-- `requestsCount` — Total number of validator exit requests in this report. Must not be greater
-         than the limit enforced by `OracleReportSanityChecker.checkExitBusOracleReport`.
-- `dataFormat` — Format of the validator exit requests data. Currently, only the `DATA_FORMAT_LIST=1` value is supported.
-- `data` — Validator exit requests data. Can differ based on the data format, see the constant defining a specific data format [here](#data_format_list) for more info.
+- `requestsCount`: número total de solicitudes de salida de validadores en este informe. No debe ser mayor que el límite impuesto por `OracleReportSanityChecker.checkExitBusOracleReport`.
+- `dataFormat`: formato de los datos de solicitudes de salida de validadores. Actualmente, solo se admite el valor `DATA_FORMAT_LIST=1`.
+- `data`: datos de solicitudes de salida de validadores. Pueden diferir según el formato de datos, consulte la constante que define un formato de datos específico [aquí](#data_format_list) para obtener más información.
 
-## Constants
+## Constantes
 
 ### DATA_FORMAT_LIST()
 
-The list format of the validator exit requests data.
+El formato de lista de los datos de solicitudes de salida de validadores.
 
 :::note
-Each validator exit request is described by the following 64-byte array:
+Cada solicitud de salida de validador se describe con el siguiente array de 64 bytes:
 
 ```
     MSB <------------------------------------------------------- LSB
@@ -85,12 +81,10 @@ Each validator exit request is described by the following 64-byte array:
     |  moduleId  |  nodeOpId  |  validatorIndex  | validatorPubkey |
 ```
 
- All requests are tightly packed into a byte array where requests follow
- one another without any separator or padding, and passed to the `data`
- field of the report structure.
+ Todas las solicitudes están empaquetadas estrechamente en un array de bytes donde las solicitudes siguen
+ unas a otras sin ningún separador o relleno, y se pasan al campo `data` de la estructura del informe.
 
-Requests must be sorted in the ascending order by the following compound
-key: `(moduleId, nodeOpId, validatorIndex)`.
+Las solicitudes deben estar ordenadas en orden ascendente por la siguiente clave compuesta: `(moduleId, nodeOpId, validatorIndex)`.
 :::
 
 ```solidity
@@ -99,10 +93,10 @@ uint256 public constant DATA_FORMAT_LIST = 1
 
 ### SECONDS_PER_SLOT()
 
-See [https://ethereum.org/en/developers/docs/blocks/#block-time](https://ethereum.org/en/developers/docs/blocks/#block-time)
+Vea [https://ethereum.org/en/developers/docs/blocks/#block-time](https://ethereum.org/en/developers/docs/blocks/#block-time)
 
 :::note
-always returns 12 seconds due to [the Merge](https://ethereum.org/en/roadmap/merge/)
+Siempre devuelve 12 segundos debido a [el Merge](https://ethereum.org/en/roadmap/merge/)
 :::
 
 ```solidity
@@ -111,20 +105,19 @@ uint256 public immutable SECONDS_PER_SLOT
 
 ### GENESIS_TIME()
 
-See [https://blog.ethereum.org/2020/11/27/eth2-quick-update-no-21](https://blog.ethereum.org/2020/11/27/eth2-quick-update-no-21)
+Vea [https://blog.ethereum.org/2020/11/27/eth2-quick-update-no-21](https://blog.ethereum.org/2020/11/27/eth2-quick-update-no-21)
 
 :::note
-always returns 1606824023 (December 1, 2020, 12:00:23pm UTC) on [Mainnet](https://blog.ethereum.org/2020/11/27/eth2-quick-update-no-21)
+Siempre devuelve 1606824023 (1 de diciembre de 2020, 12:00:23pm UTC) en la [Mainnet](https://blog.ethereum.org/2020/11/27/eth2-quick-update-no-21)
 :::
 
 ```solidity
 uint256 public immutable GENESIS_TIME
 ```
-
 ### PAUSE_INFINITELY()
 
-Special value for the infinite pause.
-See [`pauseFor`](#pausefor) and [`pauseUntil`](#pauseuntil).
+Valor especial para la pausa infinita.
+Vea [`pauseFor`](#pausefor) y [`pauseUntil`](#pauseuntil).
 
 ```solidity
 uint256 public constant PAUSE_INFINITELY = type(uint256).max
@@ -144,19 +137,19 @@ struct ProcessingState {
 }
 ```
 
-- `currentFrameRefSlot` — Reference slot for the current reporting frame.
-- `processingDeadlineTime` — The last time at which a report data can be submitted for the current reporting frame.
-- `dataHash` — Hash of the report data. Zero bytes if consensus on the hash hasn't been reached yet for the current reporting frame.
-- `dataSubmitted` — Whether any report data for the for the current reporting frame has been already submitted.
-- `dataFormat` — Format of the report data for the current reporting frame.
-- `requestsCount` — Total number of validator exit requests for the current reporting frame.
-- `requestsSubmitted` — How many validator exit requests are already submitted for the current reporting frame.
+- `currentFrameRefSlot` — Ranura de referencia para el marco de informes actual.
+- `processingDeadlineTime` — El último momento en que se pueden enviar datos del informe para el marco de informes actual.
+- `dataHash` — Hash de los datos del informe. Bytes cero si no se ha alcanzado el consenso sobre el hash para el marco de informes actual.
+- `dataSubmitted` — Si ya se han enviado datos del informe para el marco de informes actual.
+- `dataFormat` — Formato de los datos del informe para el marco de informes actual.
+- `requestsCount` — Número total de solicitudes de salida de validadores para el marco de informes actual.
+- `requestsSubmitted` — Cuántas solicitudes de salida de validadores ya se han enviado para el marco de informes actual.
 
-## View methods
+## Métodos de vista
 
 ### getTotalRequestsProcessed()
 
-Returns the total number of validator exit requests ever processed across all received reports.
+Devuelve el número total de solicitudes de salida de validadores procesadas en todos los informes recibidos.
 
 ```solidity
 function getTotalRequestsProcessed() external view returns (uint256)
@@ -164,30 +157,30 @@ function getTotalRequestsProcessed() external view returns (uint256)
 
 ### getLastRequestedValidatorIndices()
 
-Returns the latest validator indices that were requested to exit for the given
-`nodeOpIds` in the given `moduleId`. For node operators that were never requested to exit
-any validator, index is set to `-1`.
+Devuelve los últimos índices de validadores que se solicitaron para salir para los
+`nodeOpIds` dados en el `moduleId` dado. Para los operadores de nodos que nunca se solicitaron para salir
+ningún validador, el índice se establece en `-1`.
 
 ```solidity
 function getLastRequestedValidatorIndices(uint256 moduleId, uint256[] calldata nodeOpIds)
         external view returns (int256[] memory)
 ```
 
-#### Parameters
+#### Parámetros
 
-| Name        | Type      | Description                                 |
+| Nombre      | Tipo      | Descripción                                 |
 | ----------- | --------- | ------------------------------------------- |
-| `moduleId`  | `uint256` | ID of the staking module.                   |
-| `nodeOpIds` | `uint256` | IDs of the staking module's node operators. |
+| `moduleId`  | `uint256` | ID del módulo de staking.                   |
+| `nodeOpIds` | `uint256` | IDs de los operadores de nodos del módulo de staking. |
 
-#### Reverts
+#### Reversiones
 
-- Reverts with `ArgumentOutOfBounds()` if `moduleId > UINT24_MAX`
-- Reverts with `ArgumentOutOfBounds()` if `nodeOpId > UINT40_MAX`
+- Revierte con `ArgumentOutOfBounds()` si `moduleId > UINT24_MAX`
+- Revierte con `ArgumentOutOfBounds()` si `nodeOpId > UINT40_MAX`
 
 ### getProcessingState()
 
-Returns data processing state for the current reporting frame. See the docs for the [ProcessingState](#processingstate) struct.
+Devuelve el estado de procesamiento de datos para el marco de informes actual. Consulte la documentación de la estructura [ProcessingState](#processingstate).
 
 ```solidity
 function getProcessingState() external view returns (ProcessingState memory result)
@@ -195,7 +188,7 @@ function getProcessingState() external view returns (ProcessingState memory resu
 
 ### getConsensusContract()
 
-Returns the address of the [HashConsensus](/contracts/hash-consensus) contract instance used by `ValidatorsExitBusOracle`.
+Devuelve la dirección de la instancia del contrato [HashConsensus](/contracts/hash-consensus) utilizada por `ValidatorsExitBusOracle`.
 
 ```solidity
 function getConsensusContract() external view returns (address)
@@ -203,7 +196,7 @@ function getConsensusContract() external view returns (address)
 
 ### getConsensusReport()
 
-Returns the last consensus report hash and metadata.
+Devuelve el último hash del informe de consenso y metadatos.
 
 ```solidity
 function getConsensusReport() external view returns (
@@ -216,11 +209,11 @@ function getConsensusReport() external view returns (
 
 ### getConsensusVersion()
 
-Returns the current consensus version expected by the oracle contract.
+Devuelve la versión actual del consenso esperada por el contrato del oráculo.
 
 :::note
-Consensus version must change every time consensus rules change, meaning that
- an oracle looking at the same reference slot would calculate a different hash.
+La versión del consenso debe cambiar cada vez que cambian las reglas del consenso, lo que significa que
+un oráculo que mire la misma ranura de referencia calcularía un hash diferente.
 :::
 
 ```solidity
@@ -229,7 +222,7 @@ function getConsensusVersion() external view returns (uint256)
 
 ### getContractVersion()
 
-Returns the current contract version.
+Devuelve la versión actual del contrato.
 
 ```solidity
 function getContractVersion() public view returns (uint256)
@@ -237,28 +230,28 @@ function getContractVersion() public view returns (uint256)
 
 ### getLastProcessingRefSlot()
 
-Returns the last reference slot for which processing of the report was started.
+Devuelve la última ranura de referencia para la cual se inició el procesamiento del informe.
 
 ```solidity
 function getLastProcessingRefSlot() external view returns (uint256)
 ```
 
-#### Returns
+#### Devuelve
 
-| Name                     | Type      | Description                                                |
-| ------------------------ | --------- | ---------------------------------------------------------- |
-| `hash`                   | `bytes32` | The last reported hash                 |
-| `refSlot`                | `uint256` | The frame's reference slot: if the data the consensus is being reached upon includes or depends on any onchain state, this state should be queried at the reference slot. If the slot contains a block, the state should include all changes from that block.                 |
-| `processingDeadlineTime` | `uint256` | Timestamp of the last slot at which a report can be reported and processed |
-| `processingStarted`      | `bool`    | Has the processing of the report been started or not                       |
+| Nombre                  | Tipo      | Descripción                                                                 |
+| ----------------------- | --------- | --------------------------------------------------------------------------- |
+| `hash`                  | `bytes32` | El último hash informado                                                    |
+| `refSlot`               | `uint256` | La ranura de referencia del marco: si los datos de los que se está alcanzando el consenso incluyen o dependen de algún estado en la cadena, este estado debe consultarse en la ranura de referencia. Si la ranura contiene un bloque, el estado debe incluir todos los cambios de ese bloque. |
+| `processingDeadlineTime`| `uint256` | La marca de tiempo de la última ranura en la que se puede informar y procesar un informe |
+| `processingStarted`     | `bool`    | Si se ha iniciado o no el procesamiento del informe                          |
 
 ### getResumeSinceTimestamp()
 
-Returns one of the `timestamp` values:
+Devuelve uno de los valores `timestamp`:
 
-- `PAUSE_INFINITELY` if paused permanently (i.e., with no expiration timestamp)
-- a first second when get contract get resumed if paused for specific duration (if `timestamp ≥ block.timestamp`)
-- some timestamp in past if not paused (if `timestamp < block.timestamp`)
+- `PAUSE_INFINITELY` si está pausado permanentemente (es decir, sin marca de tiempo de expiración)
+- el primer segundo cuando el contrato se reanuda si está pausado por una duración específica (si `timestamp ≥ block.timestamp`)
+- alguna marca de tiempo en el pasado si no está pausado (si `timestamp < block.timestamp`)
 
 ```solidity
 function getResumeSinceTimestamp() external view returns (uint256 timestamp)
@@ -266,108 +259,108 @@ function getResumeSinceTimestamp() external view returns (uint256 timestamp)
 
 ### isPaused()
 
-Returns whether the contract is paused or not at the moment.
+Devuelve si el contrato está pausado o no en este momento.
 
 ```solidity
 function isPaused() public view returns (bool)
 ```
 
-## Methods
+## Métodos
 
 ### submitReportData()
 
-Submits report data for processing.
+Envía datos del informe para su procesamiento.
 
 ```solidity
 function submitReportData(ReportData calldata data, uint256 contractVersion)
         external whenResumed
 ```
 
-#### Parameters
+#### Parámetros
 
-| Name        | Type      | Description                                                           |
-| ----------- | --------- | --------------------------------------------------------------------- |
-| `data`            | `ReportData` | The report data. See [`ReportData`](#report-data) for details. |
-| `contractVersion` | `uint256`    | Expected version of the oracle contract.                     |
+| Nombre            | Tipo         | Descripción                                      |
+| ----------------- | ------------ | ------------------------------------------------ |
+| `data`            | `ReportData` | Los datos del informe. Consulte [`ReportData`](#report-data) para más detalles. |
+| `contractVersion` | `uint256`    | Versión esperada del contrato del oráculo.       |
 
-#### Reverts
+#### Reversiones
 
-- Reverts with `SenderNotAllowed()` if the caller doesn't have a `SUBMIT_DATA_ROLE` role and is not a member of the oracle committee.
-- Reverts with `UnexpectedContractVersion(expectedVersion, version)` if the provided contract version differs from the current one.
-- Reverts with `UnexpectedConsensusVersion(expectedConsensusVersion, consensusVersion)` if the provided consensus version differs from the expected one.
-- Reverts with `UnexpectedRefSlot(report.refSlot, refSlot)` if the provided reference slot differs from the current consensus frame's one.
-- Reverts with `UnexpectedDataHash(report.hash, hash)` if a `keccak256` hash of the ABI-encoded data differs from the last hash.
-- Reverts with `NoConsensusReportToProcess()` if the report hash data is `0`.
-- Reverts with `RefSlotAlreadyProcessing()` if the report reference slot is equal to the previous processing reference slot.
-- Reverts with `InvalidRequestsData()` if `moduleId` in the provided data is `0`
-- Reverts with `InvalidRequestsDataLength()` if the provided data is packed incorrectly
-- Reverts with `UnexpectedRequestsDataLength()` if the length of the provided packed data is not equal `data.requestsCount`
-- Reverts with `InvalidRequestsDataSortOrder` when the provided data is not sorted
-- Reverts with `NodeOpValidatorIndexMustIncrease(
+- Revierte con `SenderNotAllowed()` si el remitente no tiene el rol `SUBMIT_DATA_ROLE` y no es un miembro del comité de oráculos.
+- Revierte con `UnexpectedContractVersion(expectedVersion, version)` si la versión del contrato proporcionada difiere de la actual.
+- Revierte con `UnexpectedConsensusVersion(expectedConsensusVersion, consensusVersion)` si la versión de consenso proporcionada difiere de la esperada.
+- Revierte con `UnexpectedRefSlot(report.refSlot, refSlot)` si la ranura de referencia proporcionada difiere de la del marco de consenso actual.
+- Revierte con `UnexpectedDataHash(report.hash, hash)` si un hash `keccak256` de los datos codificados en ABI difiere del último hash.
+- Revierte con `NoConsensusReportToProcess()` si el hash de datos del informe es `0`.
+- Revierte con `RefSlotAlreadyProcessing()` si la ranura de referencia del informe es igual a la ranura de referencia de procesamiento anterior.
+- Revierte con `InvalidRequestsData()` si `moduleId` en los datos proporcionados es `0`
+- Revierte con `InvalidRequestsDataLength()` si los datos proporcionados están empaquetados incorrectamente
+- Revierte con `UnexpectedRequestsDataLength()` si la longitud de los datos empaquetados proporcionados no es igual a `data.requestsCount`
+- Revierte con `InvalidRequestsDataSortOrder` cuando los datos proporcionados no están ordenados
+- Revierte con `NodeOpValidatorIndexMustIncrease(
         uint256 moduleId,
         uint256 nodeOpId,
         uint256 prevRequestedValidatorIndex,
         uint256 requestedValidatorIndex
-    )` if `requested validator index <= last requested index` from the same module
+    )` si `requested validator index <= last requested index` del mismo módulo
 
 ### pauseFor()
 
-Pause accepting the reports data and forming new validator exit requests for the provided duration in seconds.
+Pausa la aceptación de los datos de los informes y la formación de nuevas solicitudes de salida de validadores por la duración proporcionada en segundos.
 
 ```solidity
 function pauseFor(uint256 _duration) external
 ```
 
-#### Parameters
+#### Parámetros
 
-| Name        | Type      | Description                                                    |
-| ----------- | --------- | -------------------------------------------------------------- |
-| `_duration` | `uint256` | pause duration, seconds (use `PAUSE_INFINITELY` for unlimited) |
+| Nombre      | Tipo      | Descripción                                                  |
+| ----------- | --------- | ------------------------------------------------------------ |
+| `_duration` | `uint256` | duración de la pausa, en segundos (usar `PAUSE_INFINITELY` para ilimitado) |
 
-#### Reverts
+#### Reversiones
 
-- Reverts with `ResumedExpected()` if contract is already paused
-- Reverts with `AccessControl:...` reason if sender has no `PAUSE_ROLE`
-- Reverts with `ZeroPauseDuration()` if zero duration is passed
+- Revierte con `ResumedExpected()` si el contrato ya está pausado
+- Revierte con `AccessControl:...` razón si el remitente no tiene el rol `PAUSE_ROLE`
+- Revierte con `ZeroPauseDuration()` si se pasa una duración cero
 
 ### pauseUntil()
 
-Pause accepting the reports data and forming new validator exit requests till the given timestamp (inclusive).
+Pausa la aceptación de los datos de los informes y la formación de nuevas solicitudes de salida de validadores hasta la marca de tiempo dada (inclusive).
 
 ```solidity
 function pauseUntil(uint256 _pauseUntilInclusive) external
 ```
 
-#### Parameters
+#### Parámetros
 
-| Name                   | Type      | Description                    |
-| ---------------------- | --------- | ------------------------------ |
-| `_pauseUntilInclusive` | `uint256` | the last second to pause until (inclusive) |
+| Nombre                | Tipo      | Descripción                     |
+| --------------------- | --------- | ------------------------------- |
+| `_pauseUntilInclusive`| `uint256` | el último segundo para pausar (inclusive) |
 
-#### Reverts
+#### Reversiones
 
-- Reverts with `ResumeSinceInPast()` if the provided timestamp is in the past
-- Reverts with `AccessControl:...` reason if the sender has no `PAUSE_ROLE`
-- Reverts with `ResumedExpected()` if the contract is already paused
+- Revierte con `ResumeSinceInPast()` si la marca de tiempo proporcionada está en el pasado
+- Revierte con `AccessControl:...` razón si el remitente no tiene el rol `PAUSE_ROLE`
+- Revierte con `ResumedExpected()` si el contrato ya está pausado
 
 ### resume()
 
-Resume accepting the reports data and forming new validator exit requests.
+Reanuda la aceptación de los datos de los informes y la formación de nuevas solicitudes de salida de validadores.
 
 ```solidity
 function resume() external
 ```
 
-#### Reverts
+#### Reversiones
 
-- Reverts with `PausedExpected()` if contract is already resumed (i.e., not paused)
-- Reverts with `AccessControl:...` reason if the sender has no `RESUME_ROLE`
+- Revierte con `PausedExpected()` si el contrato ya está reanudado (es decir, no pausado)
+- Revierte con `AccessControl:...` razón si el remitente no tiene el rol `RESUME_ROLE`
 
-## Permissions
+## Permisos
 
 ### SUBMIT_DATA_ROLE()
 
-An ACL role granting the permission to submit the data for a committee report.
+Un rol de ACL que otorga el permiso para enviar los datos para un informe del comité.
 
 ```solidity
 bytes32 public constant SUBMIT_DATA_ROLE = keccak256("SUBMIT_DATA_ROLE")
@@ -375,7 +368,7 @@ bytes32 public constant SUBMIT_DATA_ROLE = keccak256("SUBMIT_DATA_ROLE")
 
 ### PAUSE_ROLE()
 
-An ACL role granting the permission to pause accepting the reports data and forming new validator exit requests.
+Un rol de ACL que otorga el permiso para pausar la aceptación de los datos de los informes y la formación de nuevas solicitudes de salida de validadores.
 
 ```solidity
 bytes32 public constant PAUSE_ROLE = keccak256("PAUSE_ROLE")
@@ -383,7 +376,7 @@ bytes32 public constant PAUSE_ROLE = keccak256("PAUSE_ROLE")
 
 ### RESUME_ROLE()
 
-An ACL role granting the permission to resume accepting the reports data and forming new validator exit requests.
+Un rol de ACL que otorga el permiso para reanudar la aceptación de los datos de los informes y la formación de nuevas solicitudes de salida de validadores.
 
 ```solidity
 bytes32 public constant RESUME_ROLE = keccak256("RESUME_ROLE")
@@ -391,7 +384,7 @@ bytes32 public constant RESUME_ROLE = keccak256("RESUME_ROLE")
 
 ### MANAGE_CONSENSUS_CONTRACT_ROLE()
 
-An ACL role granting the permission to set the consensus contract address by calling `setConsensusContract`.
+Un rol de ACL que otorga el permiso para establecer la dirección del contrato de consenso llamando a `setConsensusContract`.
 
 ```solidity
 bytes32 public constant MANAGE_CONSENSUS_CONTRACT_ROLE = keccak256("MANAGE_CONSENSUS_CONTRACT_ROLE");
@@ -399,17 +392,17 @@ bytes32 public constant MANAGE_CONSENSUS_CONTRACT_ROLE = keccak256("MANAGE_CONSE
 
 ### MANAGE_CONSENSUS_VERSION_ROLE()
 
-An ACL role granting the permission to set the consensus version by calling `setConsensusVersion`.
+Un rol de ACL que otorga el permiso para establecer la versión del consenso llamando a `setConsensusVersion`.
 
 ```solidity
 bytes32 public constant MANAGE_CONSENSUS_VERSION_ROLE = keccak256("MANAGE_CONSENSUS_VERSION_ROLE");
 ```
 
-## Events
+## Eventos
 
 ### ValidatorExitRequest()
 
-Emits when the new report data submitted for processing.
+Se emite cuando se envían nuevos datos del informe para su procesamiento.
 
 ```solidity
 event ValidatorExitRequest(
@@ -423,7 +416,7 @@ event ValidatorExitRequest(
 
 ### WarnDataIncompleteProcessing()
 
-Emits on attempt of new data submission having not all of the items processed yet.
+Se emite al intentar enviar nuevos datos cuando no se han procesado todos los elementos.
 
 ```solidity
 event WarnDataIncompleteProcessing(
@@ -435,7 +428,7 @@ event WarnDataIncompleteProcessing(
 
 ### Paused()
 
-Emits when the contract is paused either by the `pauseFor` or `pauseUntil` calls.
+Se emite cuando el contrato se pausa, ya sea mediante las llamadas a `pauseFor` o `pauseUntil`.
 
 ```solidity
 event Paused(uint256 duration)
@@ -443,7 +436,7 @@ event Paused(uint256 duration)
 
 ### Resumed()
 
-Emits when the contract is resumed by the `resume` call.
+Se emite cuando el contrato se reanuda mediante la llamada a `resume`.
 
 ```solidity
 event Resumed()
