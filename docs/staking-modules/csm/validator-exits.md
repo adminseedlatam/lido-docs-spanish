@@ -1,46 +1,45 @@
-# Validator Exits
+# Salidas de Validadores
 ![exits-1](../../../static/img/csm/exits-1.png)
 
-## Voluntary exits
-Given the permissionless nature of CSM, NOs can voluntarily exit their validators at any moment.
+## Salidas voluntarias
+Dada la naturaleza sin permisos de CSM, los Operadores de Nodo (ON) pueden salir voluntariamente de sus validadores en cualquier momento.
 
-## Protocol-initiated exits
-For consistency with the core protocol and other staking modules, CSM uses [VEBO](../../contracts/validators-exit-bus-oracle) to request or trigger exits (to be implemented after the Pectra hardfork bringing [EIP-7002](https://eips.ethereum.org/EIPS/eip-7002) to life) for the validators.
-
-:::info
-Note: The actual implementation of the triggerable exits is not defined yet. There might be additional contracts to actually trigger exits on top of the [VEBO](../../contracts/validators-exit-bus-oracle).
-:::
-
-From the core protocol side, validator exit can be requested to cover withdrawal requests from stETH holders, or according to the decision of the DAO.
-
-From CSM side, validator exits can be requested for unbonded validators. These exits are requested automatically using the `forcedTargetLimit`.
+## Salidas iniciadas por el protocolo
+Para mantener la consistencia con el protocolo central y otros módulos de participación, CSM utiliza [VEBO](../../contracts/validators-exit-bus-oracle) para solicitar o activar salidas (para implementarse después del hardfork Pectra que trae [EIP-7002](https://eips.ethereum.org/EIPS/eip-7002) a la vida) para los validadores.
 
 :::info
-`forcedTargetLimit` is currently under development within the updated version of [Staking Router](https://hackmd.io/@lido/BJXRTxMRp#Forced-Exit-Requests1). In short, it is similar to the existing `targetLimit` but exits for the validators above `forcedTargetLimit` can be requested within the next [VEBO](../../contracts/validators-exit-bus-oracle) report, even without a need to fulfill withdrawal requests from stETH holders.
+Nota: La implementación real de las salidas activables aún no está definida. Podrían existir contratos adicionales para activar las salidas sobre [VEBO](../../contracts/validators-exit-bus-oracle).
 :::
 
-Node Operators should follow [VEBO](../../contracts/validators-exit-bus-oracle) events (for example, by using the [Ejector](https://github.com/lidofinance/validator-ejector)) to ensure they exit validators on time. The following penalties and limiting measures should be applied if the Node Operator refuses to exit validators after the protocol request:
-1. Exclude Node Operator's keys from the CSM deposit queue and do not put them back until `stuckKeysCount = 0`;
-2. Exclude the Node Operator from the staking rewards allocation cycle within the reporting period of the Performance Oracle if the Node Operator's `stuckKeysCount` was > 0 during it;
+Desde el lado del protocolo central, la salida del validador puede ser solicitada para cubrir solicitudes de retiro de poseedores de stETH, o de acuerdo con la decisión de la DAO.
 
-Also, in exceptional cases, Lido DAO can trigger exits for Node Operator's validators (to be implemented after the Pectra hardfork bringing [EIP-7002](https://eips.ethereum.org/EIPS/eip-7002) to life).
-
-## Low performance for a long time
+Desde el lado de CSM, las salidas de validadores pueden solicitarse para validadores no enlazados. Estas salidas se solicitan automáticamente utilizando el `forcedTargetLimit`.
 
 :::info
-This mechanics is to be implemented after the Pectra hardfork bringing [EIP-7002](https://eips.ethereum.org/EIPS/eip-7002) to life.
+El `forcedTargetLimit` está actualmente en desarrollo dentro de la versión actualizada de [Staking Router](https://hackmd.io/@lido/BJXRTxMRp#Forced-Exit-Requests1). En resumen, es similar al `targetLimit` existente, pero las salidas para los validadores por encima de `forcedTargetLimit` pueden solicitarse en el próximo informe de [VEBO](../../contracts/validators-exit-bus-oracle), incluso sin la necesidad de cumplir con las solicitudes de retiro de poseedores de stETH.
 :::
 
-If a validator is performing below the Performance threshold for 3 frames within 6 frames, it is treated as a bad performer violating the rule of good performance within the protocol. Validators with 3 "strikes" (frames of low performance) can be requested for ejection from the protocol using a permissionless method. There is also an option to confiscate missed profits by such validators from the Node Operator's bond. However, this option is still under consideration.
+Los Operadores de Nodo deben seguir los eventos de [VEBO](../../contracts/validators-exit-bus-oracle) (por ejemplo, utilizando el [Ejector](https://github.com/lidofinance/validator-ejector)) para asegurarse de que salgan de los validadores a tiempo. Se deben aplicar las siguientes penalizaciones y medidas limitantes si el Operador de Nodo se niega a salir de los validadores después de la solicitud del protocolo:
+1. Excluir las claves del Operador de Nodo de la cola de depósitos de CSM y no volver a colocarlas hasta que `stuckKeysCount = 0`.
+2. Excluir al Operador de Nodo del ciclo de asignación de recompensas de participación dentro del período de informe del Oráculo de Rendimiento si `stuckKeysCount` del Operador de Nodo fue > 0 durante el mismo.
 
-To learn more about bad-performers ejection please refer to the [separate document](https://hackmd.io/@lido/Sy0nRd36a).
+Además, en casos excepcionales, la DAO de Lido puede activar las salidas de los validadores del Operador de Nodo (para implementarse después del hardfork Pectra que trae [EIP-7002](https://eips.ethereum.org/EIPS/eip-7002) a la vida).
 
-## Withdrawal balance reporting
-The withdrawal balance of the validator is required to release the bond and calculate the exit penalty, if any. This balance is reported permissionlessly using [EIP-4788](https://eips.ethereum.org/EIPS/eip-4788) by the CSM bot or the Node Operator themselves.
+## Bajo rendimiento durante mucho tiempo
 
+:::info
+Esta mecánica se implementará después del hardfork Pectra que trae [EIP-7002](https://eips.ethereum.org/EIPS/eip-7002) a la vida.
+:::
 
-## Useful links
+Si un validador tiene un rendimiento por debajo del umbral de rendimiento durante 3 frames dentro de 6 frames, se considera un mal desempeño que viola la regla de buen rendimiento dentro del protocolo. Los validadores con 3 "strikes" (frames de bajo rendimiento) pueden ser solicitados para su expulsión del protocolo mediante un método sin permisos. También existe la opción de confiscar las ganancias perdidas por tales validadores del bono del Operador de Nodo. Sin embargo, esta opción aún está bajo consideración.
+
+Para obtener más información sobre la expulsión de malos desempeñadores, consulte el [documento separado](https://hackmd.io/@lido/Sy0nRd36a).
+
+## Reporte de saldo de retiro
+Se requiere el saldo de retiro del validador para liberar el bono y calcular la penalización de salida, si la hubiera. Este saldo se informa sin permisos utilizando [EIP-4788](https://eips.ethereum.org/EIPS/eip-4788) por parte del bot de CSM o por el propio Operador de Nodo.
+
+## Enlaces útiles
 
 - [EIP-4788](https://eips.ethereum.org/EIPS/eip-4788)
 - [EIP-7002](https://eips.ethereum.org/EIPS/eip-7002)
-- [Pectra hardfork](https://eips.ethereum.org/EIPS/eip-7600)
+- [Hardfork Pectra](https://eips.ethereum.org/EIPS/eip-7600)
