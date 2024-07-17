@@ -12,7 +12,7 @@ Un operador de nodo curado está obligado por Lido DAO a retirar sus validadores
 
 Lido DAO también puede:
 
-- establecer el límite objetivo como el número de validadores para el Operador de Nodo. Si el número actual de validadores activos es inferior al valor, se solicitará la salida de los excedentes de manera priorizada cuando sea necesario [finalizar las solicitudes de retiro](/docs/contracts/withdrawal-queue-erc721.md#finalization). La asignación de depósitos por encima del valor objetivo está prohibida.
+- establecer el límite objetivo como el número de validadores para el Operador de Nodo. Si el número actual de validadores activos es inferior al valor, se solicitará la salida de los excedentes de manera priorizada cuando sea necesario [finalizar las solicitudes de retiro](/docs/contracts/withdrawal-queue-erc721.md#solicitud). La asignación de depósitos por encima del valor objetivo está prohibida.
 - desactivar operadores mal comportados mediante `deactivateNodeOperator()`. Un operador de nodo desactivado no recibe recompensas ni nuevos depósitos.
 
 ## Glosario

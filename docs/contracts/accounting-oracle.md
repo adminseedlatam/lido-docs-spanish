@@ -10,7 +10,7 @@ Se recomienda leer [¿Qué es el mecanismo de Lido Oracle?](/guías/oracle-opera
 
 ## ¿Qué es AccountingOracle?
 
-AccountingOracle es un contrato que recopila información enviada por los oráculos fuera de la cadena sobre el estado de los validadores que participan en Lido y sus saldos, la cantidad de fondos acumulados en las bóvedas del protocolo (es decir, [retiro](./withdrawal-vault) y [recompensas de la capa de ejecución](./lido-execution-layer-rewards-vault)), el número de validadores [salidos y atascados](./staking-router#validadores-salidos-y-atascados), el número de [solicitudes de retiro](./withdrawal-queue-erc721#request) que el protocolo puede procesar y distribuye las recompensas a los operadores de nodos.
+AccountingOracle es un contrato que recopila información enviada por los oráculos fuera de la cadena sobre el estado de los validadores que participan en Lido y sus saldos, la cantidad de fondos acumulados en las bóvedas del protocolo (es decir, [retiro](./withdrawal-vault) y [recompensas de la capa de ejecución](./lido-execution-layer-rewards-vault)), el número de validadores [salidos y atascados](./staking-router#validadores-salidos-y-atascados), el número de [solicitudes de retiro](./withdrawal-queue-erc721#solicitud) que el protocolo puede procesar y distribuye las recompensas a los operadores de nodos.
 
 ## Ciclo de reporte
 

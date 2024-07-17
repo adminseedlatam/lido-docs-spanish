@@ -1,39 +1,33 @@
 # WithdrawalQueueERC721
 
-- [Source code](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/WithdrawalQueueERC721.sol)
-- [Deployed contract](https://etherscan.io/address/0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1)
+- [Código fuente](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/WithdrawalQueueERC721.sol)
+- [Contrato desplegado](https://etherscan.io/address/0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1)
 
-A FIFO queue for `stETH` withdrawal requests and an `unstETH` NFT implementation representing the position in the queue.
+Una cola FIFO para solicitudes de retiro de `stETH` y una implementación de NFT `unstETH` que representa la posición en la cola.
 
-Access to lever methods is restricted using the functionality of the
-[AccessControlEnumerable](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/utils/access/AccessControlEnumerable.sol)
-contract and a bunch of [granular roles](#roles).
+El acceso a los métodos de palanca está restringido mediante la funcionalidad del contrato [AccessControlEnumerable](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/utils/access/AccessControlEnumerable.sol)
+y una serie de [roles granulares](#roles).
 
-## What is WithdrawalQueueERC721?
+## ¿Qué es WithdrawalQueueERC721?
 
-This contract is a main entry point to exchange `stETH` for underlying ether directly via Lido protocol.
-It is responsible for:
+Este contrato es un punto de entrada principal para intercambiar `stETH` por ether subyacente directamente a través del protocolo Lido.
+Es responsable de:
 
-- managing a queue of withdrawal requests
-- committing withdrawal request finalization as a part of the [AccountingOracle](./accounting-oracle.md) report
-- storing `stETH` before and ether after the finalization
-- transfer reserved ether to the user upon the claim
+- gestionar una cola de solicitudes de retiro
+- comprometer la finalización de la solicitud de retiro como parte del informe del [AccountingOracle](./accounting-oracle.md)
+- almacenar `stETH` antes y ether después de la finalización
+- transferir ether reservado al usuario al reclamar
 
-Also, the contract is [ERC-721](https://eips.ethereum.org/EIPS/eip-721) `unstETH` NFT with
-metadata extension representing the right to claim underlying ether once the request is
-finalized. This NFT is minted upon request and burned on the claim. [ERC-4906](https://eips.ethereum.org/EIPS/eip-4906)
-is used to update the metadata as soon as the finalization status of the request is changed.
+Además, el contrato es un NFT `unstETH` [ERC-721](https://eips.ethereum.org/EIPS/eip-721) con extensión de metadatos que representa el derecho a reclamar el ether subyacente una vez que se finalice la solicitud.
+Este NFT se acuña al solicitarlo y se quema al reclamarlo. Se utiliza [ERC-4906](https://eips.ethereum.org/EIPS/eip-4906) para actualizar los metadatos tan pronto como cambia el estado de finalización de la solicitud.
 
-## Request
+## Solicitud
 
-To request a withdrawal, one needs to approve the amount of `stETH` or `wstETH` to this contract or sign the
-[ERC-2612 Permit](https://eips.ethereum.org/EIPS/eip-2612), and then call the appropriate `requestWithdrawals*` method.
+Para solicitar un retiro, se debe aprobar la cantidad de `stETH` o `wstETH` a este contrato o firmar el [Permiso ERC-2612](https://eips.ethereum.org/EIPS/eip-2612) y luego llamar al método `requestWithdrawals*` apropiado.
 
-The **minimal** amount for a request is `100 wei`, and the **maximum** is `1000 eth`. More significant amounts should
-be split into several requests, which allows us to avoid clogging the queue with an extra large request.
+La **cantidad mínima** para una solicitud es de `100 wei`, y la **máxima** es de `1000 eth`. Cantidades mayores deben dividirse en varias solicitudes, lo que nos permite evitar congestionar la cola con una solicitud demasiado grande.
 
-During this call, the request is placed in the queue, and the related `unstETH` NFT is minted. The following structure
-represents the request:
+Durante esta llamada, la solicitud se coloca en la cola y se acuña el NFT `unstETH` relacionado. La siguiente estructura representa la solicitud:
 
 ```sol
 struct WithdrawalRequestStatus {
@@ -46,50 +40,43 @@ struct WithdrawalRequestStatus {
 }
 ```
 
-where
+donde
 
-- **`amountOfStETH`** — the number of `stETH` tokens transferred to the contract upon request
-- **`amountOfShares`** — the number of underlying shares corresponding to transferred `stETH` tokens.
-See [Lido rebasing chapter](lido.md#rebase) to learn about the shares mechanic
-- **`owner`** — the owner's address for this request. The owner is also a holder of the `unstETH` NFT
-and can transfer the ownership and claim the underlying ether once finalized
-- **`timestamp`** — the creation time of the request
-- **`isFinalized`** — finalization status of the request; finalized requests are available to claim
-- **`isClaimed`** — the claim status of the request. Once claimed, NFT is burned, and
-the request is not available to claim again
-
-:::note
-
-The amount of ether that will be withdrawn is limited to the number of `stETH` tokens transferred to this contract
-at the moment of request. So, the user will not receive the rewards for the period of time while their tokens stay in the queue.
-
-:::
-
-## Finalization
-
-After filing a withdrawal request, one can only claim it once finalization occurs.
-[Accounting Oracle](accounting-oracle.md) report finalizes a batch of withdrawal requests,
-choosing the `_maxShareRate` and the size of the batch taking in account following factors:
-
-- If there is enough ether to fulfill the request. Ether can be obtained from the Lido buffer, which is filled
-from the new users' stake, Beacon chain partial and full withdrawals, protocol tips, and MEV rewards.
-Withdrawals are prioritized over deposits, so ether can't be deposited to the Beacon chain if some withdrawal requests
-can be fulfilled.
-- if enough time has passed since the withdrawal request was placed in the queue (timelock)
-- If there was some massive loss for the protocol on the Beacon Chain side since the withdrawal request was filed.
-It can lead to finalization by the rate lower than 1:1 if the loss will be high enough to be not covered
-with daily rewards (never happened before)
+- **`amountOfStETH`** — la cantidad de tokens `stETH` transferidos al contrato al solicitar
+- **`amountOfShares`** — la cantidad de participaciones subyacentes correspondientes a los tokens `stETH` transferidos.
+Consulta el [capítulo de rebalanceo de Lido](lido.md#rebase) para aprender sobre la mecánica de las participaciones
+- **`owner`** — la dirección del propietario de esta solicitud. El propietario también es titular del NFT `unstETH`
+y puede transferir la propiedad y reclamar el ether subyacente una vez finalizado
+- **`timestamp`** — la hora de creación de la solicitud
+- **`isFinalized`** — estado de finalización de la solicitud; las solicitudes finalizadas están disponibles para reclamar
+- **`isClaimed`** — estado de reclamación de la solicitud. Una vez reclamada, el NFT se quema y la solicitud no está disponible para reclamar nuevamente
 
 :::note
 
-To put it simply, token holders don't receive rewards but still take risks during withdrawal. Rewards, acquired
-since the stETH was locked in the WithdrawalQueue, are burned upon the finalization, effectively distributing them
-among the other token holders.
+La cantidad de ether que se retirará está limitada por el número de tokens `stETH` transferidos a este contrato en el momento de la solicitud. Por lo tanto, el usuario no recibirá las recompensas por el período de tiempo en que sus tokens permanezcan en la cola.
 
 :::
 
-So, the finalization sets the final value of the request, locks ether on the balance of this contract,
-and burns the underlying `stETH` and the queue may look like this in arbitrary moment:
+## Finalización
+
+Después de presentar una solicitud de retiro, solo se puede reclamar una vez que se produzca la finalización.
+El informe del [Accounting Oracle](accounting-oracle.md) finaliza un lote de solicitudes de retiro,
+eligiendo el `_maxShareRate` y el tamaño del lote teniendo en cuenta los siguientes factores:
+
+- Si hay suficiente ether para cumplir con la solicitud. El ether puede obtenerse del buffer de Lido, que se llena con la participación de nuevos usuarios, retiros parciales y totales de la cadena Beacon, propinas del protocolo y recompensas MEV.
+Los retiros tienen prioridad sobre los depósitos, por lo que el ether no puede depositarse en la cadena Beacon si algunas solicitudes de retiro pueden ser cumplidas.
+- Si ha pasado suficiente tiempo desde que se colocó la solicitud de retiro en la cola (bloqueo de tiempo)
+- Si ha habido alguna pérdida masiva para el protocolo en el lado de la cadena Beacon desde que se presentó la solicitud de retiro.
+Esto puede llevar a la finalización a una tasa inferior a 1:1 si la pérdida es lo suficientemente alta como para no ser cubierta con las recompensas diarias (nunca ha sucedido antes)
+
+:::note
+
+En resumen, los titulares de tokens no reciben recompensas pero aún así asumen riesgos durante el retiro. Las recompensas adquiridas
+desde que el `stETH` se bloqueó en el WithdrawalQueue se queman al finalizar, distribuyéndolas efectivamente entre los otros titulares de tokens.
+
+:::
+
+Entonces, la finalización establece el valor final de la solicitud, bloquea el ether en el balance de este contrato, quema el `stETH` subyacente y la cola puede verse así en un momento arbitrario:
 
 ```mermaid
 graph LR
@@ -112,28 +99,27 @@ graph LR
 
 ```
 
-## Claim
+## Reclamo
 
-When the request is finalized, it can be claimed by the current owner, transferring the reserved amount of ether to
-the recipient's address and burning the withdrawal NFT.
+Cuando la solicitud está finalizada, puede ser reclamada por el propietario actual, transfiriendo la cantidad reservada de ether a
+la dirección del destinatario y quemando el NFT de retiro.
 
-To see if the request is claimable, one can get its status using `getWithdrawalStatus()` or subscribe to
-the event `WithdrawalsFinalized(uint256 from, uint256 to, ...)`, which is emitted once the batch of requests
-with ids in the range `(from, to]` is finalized.
+Para ver si la solicitud es reclamable, se puede obtener su estado usando `getWithdrawalStatus()` o suscribirse al evento `WithdrawalsFinalized(uint256 from, uint256 to, ...)`, que se emite una vez que el lote de solicitudes
+con ids en el rango `(from, to]` es finalizado.
 
-## Standards
+## Estándares
 
-Contract implements the following Ethereum standards:
+El contrato implementa los siguientes estándares de Ethereum:
 
-- [ERC-721: Non-Fungible Token Standard](https://eips.ethereum.org/EIPS/eip-721)
-- [ERC-165: Standard Interface Detection](https://eips.ethereum.org/EIPS/eip-165)
-- [ERC-4906: EIP-721 Metadata Update Extension](https://eips.ethereum.org/EIPS/eip-4906)
+- [ERC-721: Estándar de Token No Fungible](https://eips.ethereum.org/EIPS/eip-721)
+- [ERC-165: Detección de Interfaz Estándar](https://eips.ethereum.org/EIPS/eip-165)
+- [ERC-4906: Extensión de Actualización de Metadatos de EIP-721](https://eips.ethereum.org/EIPS/eip-4906)
 
-## `ERC-721`-related Methods
+## Métodos relacionados con `ERC-721`
 
 ### name()
 
-Returns the token collection name.
+Devuelve el nombre de la colección de tokens.
 
 ```sol
 function name() view returns (string memory)
@@ -141,7 +127,7 @@ function name() view returns (string memory)
 
 ### symbol()
 
-Returns the token collection symbol.
+Devuelve el símbolo de la colección de tokens.
 
 ```sol
 function symbol() view returns (string memory)
@@ -149,8 +135,7 @@ function symbol() view returns (string memory)
 
 ### tokenURI()
 
-Returns the Uniform Resource Identifier (URI) for the `_requestId` token. Returns an empty string if no base URI
-and no `NFTDescriptor` address are set.
+Devuelve el Identificador de Recurso Uniforme (URI) para el token `_requestId`. Devuelve una cadena vacía si no se ha establecido un URI base ni una dirección `NFTDescriptor`.
 
 ```sol
 function tokenURI(uint256 _requestId) view returns (string memory)
@@ -158,7 +143,7 @@ function tokenURI(uint256 _requestId) view returns (string memory)
 
 ### balanceOf()
 
-Returns the number of tokens in the `_owner`'s account.
+Devuelve el número de tokens en la cuenta de `_owner`.
 
 ```sol
 function balanceOf(address _owner) view returns (uint256 balance)
@@ -166,13 +151,13 @@ function balanceOf(address _owner) view returns (uint256 balance)
 
 :::note
 
-Reverts if `_owner` is zero address
+Revierte si `_owner` es una dirección cero
 
 :::
 
 ### ownerOf()
 
-Returns the owner of the `_requestId` token.
+Devuelve el propietario del token `_requestId`.
 
 ```sol
 function ownerOf(uint256 _requestId) view returns (address owner)
@@ -180,18 +165,18 @@ function ownerOf(uint256 _requestId) view returns (address owner)
 
 :::note
 
-Requirements:
-    - `_requestId` request must exist.
-    - `_requestId` request must not be claimed.
+Requisitos:
+    - La solicitud `_requestId` debe existir.
+    - La solicitud `_requestId` no debe estar reclamada.
 
 :::
 
+
 ### approve()
 
-Gives permission to `_to` to transfer the `_requestId` token to another account. The approval is cleared when
-the token is transferred.
+Da permiso a `_to` para transferir el token `_requestId` a otra cuenta. La aprobación se elimina cuando el token se transfiere.
 
-Emits an `Approval` event.
+Emite un evento `Approval`.
 
 ```sol
 function approve(address _to, uint256 _requestId)
@@ -199,16 +184,16 @@ function approve(address _to, uint256 _requestId)
 
 :::note
 
-Requirements:
-    - The caller must own the token or be an approved operator.
-    - `_requestId` must exist.
-    - `_to` must not be the owner
+Requisitos:
+    - El llamante debe poseer el token o ser un operador aprobado.
+    - `_requestId` debe existir.
+    - `_to` no debe ser el propietario.
 
 :::
 
 ### getApproved()
 
-Returns the account approved for the `_requestId` token.
+Devuelve la cuenta aprobada para el token `_requestId`.
 
 ```sol
 function getApproved(uint256 _requestId) view returns (address)
@@ -216,16 +201,15 @@ function getApproved(uint256 _requestId) view returns (address)
 
 :::note
 
-Reverts if no `_requestId` exists
+Revierte si no existe `_requestId`.
 
 :::
 
 ### setApprovalForAll()
 
-Approve or remove `_operator` as an operator for the caller. Operators can call `transferFrom` or `safeTransferFrom`
-for any token owned by the caller.
+Aprueba o elimina a `_operator` como operador para el llamante. Los operadores pueden llamar a `transferFrom` o `safeTransferFrom` para cualquier token propiedad del llamante.
 
-Emits an `ApprovalForAll` event.
+Emite un evento `ApprovalForAll`.
 
 ```sol
 function setApprovalForAll(address _operator, bool _approved)
@@ -233,13 +217,13 @@ function setApprovalForAll(address _operator, bool _approved)
 
 :::note
 
-Reverts if `msg.sender` is equal to `_operator`
+Revierte si `msg.sender` es igual a `_operator`.
 
 :::
 
 ### isApprovedForAll()
 
-Returns `true` if the `_operator` is allowed to manage all of the assets of the `_owner`.
+Devuelve `true` si el `_operator` está autorizado para gestionar todos los activos de `_owner`.
 
 ```sol
 function isApprovedForAll(address _owner, address _operator) view returns (bool)
@@ -247,12 +231,11 @@ function isApprovedForAll(address _owner, address _operator) view returns (bool)
 
 ### safeTransferFrom()
 
-Safely transfers the `_requestId` token from `_from` to `_to`, checking first that contract recipients are aware of
-the ERC721 protocol to prevent tokens from being forever locked.
-If a version with `_data` parameter is used, it passed to `IERC721Receiver.onERC721Received()` of the target
-smart contract as an argument.
+Transfiere de forma segura el token `_requestId` de `_from` a `_to`, verificando primero que los destinatarios del contrato sean conscientes del
+protocolo ERC721 para evitar que los tokens queden bloqueados para siempre.
+Si se utiliza una versión con el parámetro `_data`, se pasa a `IERC721Receiver.onERC721Received()` del contrato inteligente de destino como argumento.
 
-Emits a `Transfer` event.
+Emite un evento `Transfer`.
 
 ```sol
 function safeTransferFrom(address _from, address _to, uint256 _requestId)
@@ -261,41 +244,40 @@ function safeTransferFrom(address _from, address _to, uint256 _requestId, bytes 
 
 :::note
 
-Requirements:
+Requisitos:
 
-- `_from` cannot be the zero address.
-- `_to` cannot be the zero address.
-- `_requestId` token must exist and be owned by `_from`.
-- If the caller is not `_from`, it must have been allowed to move this token by either `approve()` or `setApprovalForAll()`.
-- If `_to` refers to a smart contract, it must implement `IERC721Receiver` interface
+- `_from` no puede ser la dirección cero.
+- `_to` no puede ser la dirección cero.
+- El token `_requestId` debe existir y ser propiedad de `_from`.
+- Si el llamante no es `_from`, debe tener permiso para mover este token mediante `approve()` o `setApprovalForAll()`.
+- Si `_to` se refiere a un contrato inteligente, debe implementar la interfaz `IERC721Receiver`.
 
 :::
 
 ### transferFrom()
 
-Transfers the `_requestId` token from `_from` to `_to`.
+Transfiere el token `_requestId` de `_from` a `_to`.
 
-Emits a `Transfer` event.
+Emite un evento `Transfer`.
 
-**WARNING**: Usage of this method is discouraged, use `safeTransferFrom()` whenever possible.
+**ADVERTENCIA**: El uso de este método no es recomendable, use `safeTransferFrom()` siempre que sea posible.
 
 ```sol
 function transferFrom(address _from, address _to, uint256 _requestId)
 ```
 
 :::note
-Requirements:
+Requisitos:
 
-- `_from` cannot be the zero address.
-- `_to` cannot be the zero address.
-- `_requestId` token must be owned by `_from`.
-- If the caller is not `_from`, it must be approved to move this token by either `approve()` or `setApprovalForAll()`.
+- `_from` no puede ser la dirección cero.
+- `_to` no puede ser la dirección cero.
+- El token `_requestId` debe ser propiedad de `_from`.
+- Si el llamante no es `_from`, debe tener aprobación para mover este token mediante `approve()` o `setApprovalForAll()`.
 :::
 
 ### getBaseUri()
 
-Returns the base URI for computing token URI. If set, the resulting URI for each token will be the concatenation
-of the base URI and the `_requestId`.
+Devuelve el URI base para calcular el URI del token. Si está establecido, el URI resultante para cada token será la concatenación del URI base y el `_requestId`.
 
 ```sol
 function getBaseURI() view returns (string memory)
@@ -303,19 +285,18 @@ function getBaseURI() view returns (string memory)
 
 ### getNFTDescriptorAddress()
 
-Returns the address of the `NFTDescriptor` contract responsible for the token URI generation.
+Devuelve la dirección del contrato `NFTDescriptor` responsable de la generación del URI del token.
 
 ```sol
 function getNFTDescriptorAddress() view returns (address)
 ```
 
-## `ERC-165`-related Methods
+## Métodos relacionados con `ERC-165`
 
 ### supportsInterface()
 
-Returns `true` if this contract implements the interface defined by `interfaceId`. See
-the [ERC-165](https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified) to learn more about
-how these ids are created.
+Devuelve `true` si este contrato implementa la interfaz definida por `interfaceId`. Consulte el [ERC-165](https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified) para obtener más información sobre
+cómo se crean estos ids.
 
 ```sol
 function supportsInterface(bytes4 interfaceId) view returns (bool)
@@ -323,64 +304,60 @@ function supportsInterface(bytes4 interfaceId) view returns (bool)
 
 :::note
 
-This contract returns `true` for `IERC721`, `IERC721Metadata`, `IERC4906`, `IAccessControlEnumerable`,
-`IAccessControl` and `IERC165` itself.
+Este contrato devuelve `true` para `IERC721`, `IERC721Metadata`, `IERC4906`, `IAccessControlEnumerable`, `IAccessControl` y `IERC165` en sí mismo.
 
 :::
 
-## Queue-related Methods
+## Métodos relacionados con la cola
 
 ### requestWithdrawals()
 
-Batch request the `_amounts` of `stETH` for withdrawal to the `_owner` address. For each request, the respective
-amount of `stETH` is transferred to this contract address, and an `unstETH` NFT is minted to the `_owner` address.
+Solicita en lote las cantidades `_amounts` de `stETH` para retiro a la dirección `_owner`. Para cada solicitud, la cantidad respectiva de `stETH` se transfiere a esta dirección del contrato, y se acuña un NFT `unstETH` a la dirección `_owner`.
 
 ```sol
 function requestWithdrawals(uint256[] _amounts, address _owner) returns (uint256[] requestIds)
 ```
 
-Returns the array of ids for each created request. Emits `WithdrawalRequested` and `Transfer` events.
+Devuelve la matriz de ids para cada solicitud creada. Emite eventos `WithdrawalRequested` y `Transfer`.
 
 :::note
 
-Requirements:
+Requisitos:
 
-- withdrawals must not be paused
-- `stETH` balance of `msg.sender` must be greater than or equal to the sum of all `_amounts`
-- there must be approval from the `msg.sender` to this contract address for the overall amount of `stETH` token transfer
-- each amount in `_amounts` must be greater than or equal to `MIN_STETH_WITHDRAWAL_AMOUNT` and lower than or equal to `MAX_STETH_WITHDRAWAL_AMOUNT`
+- Los retiros no deben estar pausados.
+- El saldo de `stETH` de `msg.sender` debe ser mayor o igual a la suma de todos los `_amounts`.
+- Debe haber aprobación de `msg.sender` a esta dirección del contrato para la transferencia total de tokens `stETH`.
+- Cada cantidad en `_amounts` debe ser mayor o igual a `MIN_STETH_WITHDRAWAL_AMOUNT` y menor o igual a `MAX_STETH_WITHDRAWAL_AMOUNT`.
 
 :::
 
 ### requestWithdrawalsWstETH()
 
-Batch request the `_amounts` of `wstETH` for withdrawal to the `_owner` address. For each request,
-the respective amount of `wstETH` is transferred to this contract address, unwrapped to `stETH`,
-and an `unstETH` NFT is minted to the `_owner` address.
+Solicita en lote las cantidades `_amounts` de `wstETH` para retiro a la dirección `_owner`. Para cada solicitud, la cantidad respectiva de `wstETH` se transfiere a esta dirección del contrato, se convierte en `stETH`, y se acuña un NFT `unstETH` a la dirección `_owner`.
 
 ```sol
 function requestWithdrawalsWstETH(uint256[] _amounts, address _owner) returns (uint256[] requestIds)
 ```
 
-Returns the array of ids for each created request. Emits `WithdrawalRequested` and `Transfer` events.
+Devuelve la matriz de ids para cada solicitud creada. Emite eventos `WithdrawalRequested` y `Transfer`.
 
 :::note
 
-Requirements:
+Requisitos:
 
-- withdrawals must not be paused
-- `wstETH` balance of `msg.sender` must be greater than or equal to the sum of all `_amounts`
-- there must be approval from the `msg.sender` to this contract address for the overall amount of `wstETH` token transfer
-- each amount in `_amounts` must have `getPooledEthByShares(amount)` being greater than  `MIN_STETH_WITHDRAWAL_AMOUNT`
-and lower than `MAX_STETH_WITHDRAWAL_AMOUNT`
+- Los retiros no deben estar pausados.
+- El saldo de `wstETH` de `msg.sender` debe ser mayor o igual a la suma de todos los `_amounts`.
+- Debe haber aprobación de `msg.sender` a esta dirección del contrato para la transferencia total de tokens `wstETH`.
+- Cada cantidad en `_amounts` debe tener `getPooledEthByShares(amount)` siendo mayor que `MIN_STETH_WITHDRAWAL_AMOUNT`
+y menor que `MAX_STETH_WITHDRAWAL_AMOUNT`.
 
 :::
 
 ### requestWithdrawalsWithPermit()
 
-Batch request the `_amounts` of `stETH` for withdrawal to the `_owner` address. For each request,
-the respective amount of `stETH` is transferred to this contract address,
-and an `unstETH` NFT is minted to the `_owner` address. `ERC-2612` permit is used to approve the token transfer.
+Solicita en lote las cantidades `_amounts` de `stETH` para retiro a la dirección `_owner`. Para cada solicitud,
+la cantidad respectiva de `stETH` se transfiere a esta dirección del contrato,
+y se acuña un NFT `unstETH` a la dirección `_owner`. Se utiliza el permiso de `ERC-2612` para aprobar la transferencia de tokens.
 
 ```sol
 function requestWithdrawalsWithPermit(
@@ -390,7 +367,7 @@ function requestWithdrawalsWithPermit(
 ) returns (uint256[] requestIds)
 ```
 
-where `_permit` is [ERC-2612](https://eips.ethereum.org/EIPS/eip-2612) signed permit structure defined as:
+donde `_permit` es la estructura de permiso firmada [ERC-2612](https://eips.ethereum.org/EIPS/eip-2612) definida como:
 
 ```sol
 struct PermitInput {
@@ -402,24 +379,22 @@ struct PermitInput {
 }
 ```
 
-Returns the array of ids for each created request. Emits `WithdrawalRequested` and `Transfer` events.
+Devuelve la matriz de ids para cada solicitud creada. Emite eventos `WithdrawalRequested` y `Transfer`.
 
 :::note
 
-Requirements:
+Requisitos:
 
-- withdrawals must not be paused
-- `stETH` balance of `msg.sender` must be greater than or equal to the sum of all `_amounts`
-- permit must have a valid signature, `value` greater than the sum of all `_amounts`, and the `deadline` not expired
-- each amount in `_amounts` must be greater than or equal to `MIN_STETH_WITHDRAWAL_AMOUNT` and lower than or equal to `MAX_STETH_WITHDRAWAL_AMOUNT`
+- Los retiros no deben estar pausados.
+- El saldo de `stETH` de `msg.sender` debe ser mayor o igual a la suma de todos los `_amounts`.
+- El permiso debe tener una firma válida, un `value` mayor que la suma de todos los `_amounts` y que no haya expirado el `deadline`.
+- Cada cantidad en `_amounts` debe ser mayor o igual a `MIN_STETH_WITHDRAWAL_AMOUNT` y menor o igual a `MAX_STETH_WITHDRAWAL_AMOUNT`.
 
 :::
 
 ### requestWithdrawalsWstETHWithPermit()
 
-Batch request the `_amounts` of `wstETH` for withdrawal to the `_owner` address. For each request,
-the respective amount of `wstETH` is transferred to this contract address, unwrapped to `stETH`,
-and an `unstETH` NFT is minted to the `_owner` address.`ERC-2612` permit is used to approve the token transfer.
+Solicita en lote las cantidades `_amounts` de `wstETH` para retiro a la dirección `_owner`. Para cada solicitud, la cantidad respectiva de `wstETH` se transfiere a esta dirección del contrato, se convierte en `stETH`, y se acuña un NFT `unstETH` a la dirección `_owner`. Se utiliza el permiso de `ERC-2612` para aprobar la transferencia de tokens.
 
 ```sol
 function requestWithdrawalsWstETHWithPermit(
@@ -429,7 +404,7 @@ function requestWithdrawalsWstETHWithPermit(
 ) returns (uint256[] requestIds)
 ```
 
-where `_permit` is [ERC-2612](https://eips.ethereum.org/EIPS/eip-2612) signed permit structure defined as:
+donde `_permit` es la estructura de permiso firmada [ERC-2612](https://eips.ethereum.org/EIPS/eip-2612) definida como:
 
 ```sol
 struct PermitInput {
@@ -441,23 +416,23 @@ struct PermitInput {
 }
 ```
 
-Returns the array of ids for each created request. Emits `WithdrawalRequested` and `Transfer` events.
+Devuelve la matriz de ids para cada solicitud creada. Emite eventos `WithdrawalRequested` y `Transfer`.
 
 :::note
 
-Requirements:
+Requisitos:
 
-- withdrawals must not be paused
-- `wstETH` balance of `msg.sender` must be greater than or equal to the sum of all `_amounts`
-- permit must have a valid signature, `value` greater than the sum of all `_amounts`, and the `deadline` not expired
-- each amount in `_amounts` must have `getPooledEthByShares(amount)` being greater than  `MIN_STETH_WITHDRAWAL_AMOUNT`
-and lower than `MAX_STETH_WITHDRAWAL_AMOUNT`
+- Los retiros no deben estar pausados.
+- El saldo de `wstETH` de `msg.sender` debe ser mayor o igual a la suma de todos los `_amounts`.
+- El permiso debe tener una firma válida, un `value` mayor que la suma de todos los `_amounts` y que no haya expirado el `deadline`.
+- Cada cantidad en `_amounts` debe tener `getPooledEthByShares(amount)` siendo mayor que `MIN_STETH_WITHDRAWAL_AMOUNT`
+y menor que `MAX_STETH_WITHDRAWAL_AMOUNT`.
 
 :::
 
 ### getWithdrawalRequests()
 
-Returns all withdrawal requests that belong to the `_owner` address.
+Devuelve todas las solicitudes de retiro que pertenecen a la dirección `_owner`.
 
 ```sol
 function getWithdrawalRequests(address _owner) view returns (uint256[] requestsIds)
@@ -465,16 +440,13 @@ function getWithdrawalRequests(address _owner) view returns (uint256[] requestsI
 
 :::warning
 
-This operation will copy the entire storage to memory, which can be quite expensive. This method is designed to mostly
-be used by view accessors that are queried without gas fees. Developers should keep in mind that this function has an
-unbounded cost, and using it as part of a state-changing function may render the function uncallable if the set grows
-to a point where copying to memory consumes too much gas to fit in a block.
+Esta operación copiará todo el almacenamiento en la memoria, lo que puede ser bastante costoso. Este método está diseñado para ser usado principalmente por los accesores de vista que se consultan sin tarifas de gas. Los desarrolladores deben tener en cuenta que esta función tiene un costo ilimitado, y usarla como parte de una función que cambia el estado puede hacer que la función no se pueda llamar si el conjunto crece hasta el punto en que copiarlo a la memoria consume demasiado gas para caber en un bloque.
 
 :::
 
 ### getWithdrawalStatus()
 
-Returns `statuses` for requests with ids in `_requestIds`.
+Devuelve `statuses` para las solicitudes con ids en `_requestIds`.
 
 ```sol
 function getWithdrawalStatus(uint256[] _requestIds)
@@ -482,7 +454,7 @@ function getWithdrawalStatus(uint256[] _requestIds)
     returns (WithdrawalRequestStatus[] statuses)
 ```
 
-Returns an array of `WithdrawalRequestStatus` structures, defined as:
+Devuelve una matriz de estructuras `WithdrawalRequestStatus`, definidas como:
 
 ```sol
 struct WithdrawalRequestStatus {
@@ -495,21 +467,18 @@ struct WithdrawalRequestStatus {
 }
 ```
 
-where
+donde
 
-- **`amountOfStETH`** — the number of `stETH` tokens transferred to the contract upon request
-- **`amountOfShares`** — the number of underlying shares corresponding to transferred `stETH` tokens.
-See [Lido rebasing chapter](lido.md#rebase) to learn about the shares mechanic
-- **`owner`** — the owner's address for this request. The owner is also a holder of the `unstETH` NFT
-and can transfer the ownership and claim the underlying ether once finalized
-- **`timestamp`** — the creation time of the request
-- **`isFinalized`** — finalization status of the request; finalized requests are available to claim
-- **`isClaimed`** — the claim status of the request. Once claimed, NFT is burned, and the request
-is not available to claim again
+- **`amountOfStETH`** — el número de tokens `stETH` transferidos al contrato al momento de la solicitud.
+- **`amountOfShares`** — el número de acciones subyacentes correspondientes a los tokens `stETH` transferidos. Consulte el [capítulo de rebalanceo de Lido](lido.md#rebase) para obtener información sobre la mecánica de las acciones.
+- **`owner`** — la dirección del propietario de esta solicitud. El propietario también es titular del NFT `unstETH` y puede transferir la propiedad y reclamar el ether subyacente una vez finalizado.
+- **`timestamp`** — la hora de creación de la solicitud.
+- **`isFinalized`** — estado de finalización de la solicitud; las solicitudes finalizadas están disponibles para ser reclamadas.
+- **`isClaimed`** — estado de reclamación de la solicitud. Una vez reclamado, el NFT se quema y la solicitud no está disponible para ser reclamada nuevamente.
 
 ### getClaimableEther()
 
-Returns amounts of ether available for claiming for each provided request id.
+Devuelve las cantidades de ether disponibles para reclamar para cada id de solicitud proporcionado.
 
 ```sol
 function getClaimableEther(uint256[] _requestIds, uint256[] _hints)
@@ -517,88 +486,87 @@ function getClaimableEther(uint256[] _requestIds, uint256[] _hints)
     returns (uint256[] claimableEthValues)
 ```
 
-where
+donde
 
-- **`_requestIds`** — the array of request id to check the claimable ether for
-- **`_hints`** — checkpoint hint for each request id. Can be obtained by calling [`findCheckpointHints()`](#findcheckpointhints)
+- **`_requestIds`** — la matriz de ids de solicitud para verificar el ether reclamable.
+- **`_hints`** — pista de punto de control para cada id de solicitud. Se puede obtener llamando a [`findCheckpointHints()`](#findcheckpointhints).
 
-Returns the array of ether amounts available for claiming for each request id. The amount is equal to 0 if the request is not finalized or already claimed.
+Devuelve la matriz de cantidades de ether disponibles para reclamar para cada id de solicitud. La cantidad es igual a 0 si la solicitud no está finalizada o ya ha sido reclamada.
 
 ### claimWithdrawalsTo()
 
-Claim a batch of withdrawal requests if they are finalized, sending ether to `_recipient` address.
+Reclama un lote de solicitudes de retiro si están finalizadas, enviando ether a la dirección `_recipient`.
 
 ```sol
 function claimWithdrawalsTo(uint256[] _requestIds, uint256[] _hints, address _recipient)
 ```
 
-where
+donde
 
-- **`_requestIds`** — the array of request id to check the claimable ether for
-- **`_hints`** — checkpoint hint for each request id. Can be obtained by calling [`findCheckpointHints()`](#findcheckpointhints)
-- **`_recipient`** — the address of the recipient for claimed ether
+- **`_requestIds`** — la matriz de ids de solicitud para verificar el ether reclamable.
+- **`_hints`** — pista de punto de control para cada id de solicitud. Se puede obtener llamando a [`findCheckpointHints()`](#findcheckpointhints).
+- **`_recipient`** — la dirección del destinatario para el ether reclamado.
 
-Emits a batch of `Transfer` to zero address and `WithdrawalClaimed` events.
+Emite un lote de eventos `Transfer` a la dirección cero y eventos `WithdrawalClaimed`.
 
 :::note
 
-Requirements:
+Requisitos:
 
-- all `_requestIds` must exist, be finalized and not claimed
-- all `_hints` must be valid for respective requests
-- `msg.sender` must be the owner of all the requests
-- `_recipient` must not be zero
+- Todos los `_requestIds` deben existir, estar finalizados y no reclamados.
+- Todas las `_hints` deben ser válidas para las solicitudes respectivas.
+- `msg.sender` debe ser el propietario de todas las solicitudes.
+- `_recipient` no debe ser cero.
 
 :::
 
 ### claimWithdrawals()
 
-Claim a batch of withdrawal requests if they are finalized, sending ether to `msg.sender` address.
+Reclama un lote de solicitudes de retiro si están finalizadas, enviando ether a la dirección `msg.sender`.
 
 ```sol
 function claimWithdrawals(uint256[] _requestIds, uint256[] _hints)
 ```
 
-where
+donde
 
-- **`_requestIds`** — the array of request id to check the claimable ether for
-- **`_hints`** — checkpoint hint for each request id. Can be obtained by calling [`findCheckpointHints()`](#findcheckpointhints)
+- **`_requestIds`** — la matriz de ids de solicitud para verificar el ether reclamable.
+- **`_hints`** — pista de punto de control para cada id de solicitud. Se puede obtener llamando a [`findCheckpointHints()`](#findcheckpointhints).
 
-Emits a batch of `Transfer` to zero address and `WithdrawalClaimed` events.
+Emite un lote de eventos `Transfer` a la dirección cero y eventos `WithdrawalClaimed`.
 
 :::note
 
-Requirements:
+Requisitos:
 
-- all `_requestIds` must exist, be finalized and not claimed
-- all `_hints` must be valid for respective requests
-- `msg.sender` must be the owner of all the requests
+- Todos los `_requestIds` deben existir, estar finalizados y no reclamados.
+- Todas las `_hints` deben ser válidas para las solicitudes respectivas.
+- `msg.sender` debe ser el propietario de todas las solicitudes.
 
 :::
 
 ### claimWithdrawal()
 
-Claims the `_requestId` withdrawal request, sending ether to `msg.sender` address.
+Reclama la solicitud de retiro `_requestId`, enviando ether a la dirección `msg.sender`.
 
 ```sol
 function claimWithdrawal(uint256 _requestId)
 ```
 
-Emits a `Transfer` to zero address and `WithdrawalClaimed` event.
+Emite un evento `Transfer` a la dirección cero y un evento `WithdrawalClaimed`.
 
 :::note
 
-Requirements:
+Requisitos:
 
-- `msg.sender` must be the owner of the `_requestId` request
-- `_requestId` request must exist, be finalized and not claimed
+- `msg.sender` debe ser el propietario de la solicitud `_requestId`.
+- La solicitud `_requestId` debe existir, estar finalizada y no reclamada.
 
 :::
 
 ### findCheckpointHints()
 
-Returns an array of hints for the given `_requestIds` searching among the checkpoints with indices
-in the range  `[_firstIndex, _lastIndex]`.
+Devuelve una matriz de pistas para los `_requestIds` dados, buscando entre los puntos de control con índices en el rango `[_firstIndex, _lastIndex]`.
 
 ```sol
 function findCheckpointHints(uint256[] _requestIds, uint256 _firstIndex, uint256 _lastIndex)
@@ -608,16 +576,17 @@ function findCheckpointHints(uint256[] _requestIds, uint256 _firstIndex, uint256
 
 :::note
 
-Requirements:
+Requisitos:
 
-- Array of request ids must be sorted
-- `_firstIndex` must be greater than 0, because checkpoint list is 1-based array
-- `_lastIndex` must be less than or equal to [`getLastCheckpointIndex()`](#getlastcheckpointindex)
+- La matriz de ids de solicitud debe estar ordenada.
+- `_firstIndex` debe ser mayor que 0, porque la lista de puntos de control es una matriz basada en 1.
+- `_lastIndex` debe ser menor o igual a [`getLastCheckpointIndex()`](#getlastcheckpointindex).
+
 :::
 
 ### isBunkerModeActive()
 
-Returns `true` if bunker mode is active.
+Devuelve `true` si el modo bunker está activo.
 
 ```sol
 function isBunkerModeActive() view returns (bool)
@@ -625,8 +594,7 @@ function isBunkerModeActive() view returns (bool)
 
 ### bunkerModeSinceTimestamp()
 
-Returns the timestamp of the last bunker mode activation, if it's active now and
-`BUNKER_MODE_DISABLED_TIMESTAMP` if bunker mode is disabled (i.e., protocol in turbo mode).
+Devuelve la marca de tiempo de la última activación del modo bunker, si está activo ahora y `BUNKER_MODE_DISABLED_TIMESTAMP` si el modo bunker está desactivado (es decir, el protocolo está en modo turbo).
 
 ```sol
 function bunkerModeSinceTimestamp() view returns (uint256)
@@ -634,7 +602,7 @@ function bunkerModeSinceTimestamp() view returns (uint256)
 
 ### getLastRequestId()
 
-Returns the id of the last request in the queue.
+Devuelve el id de la última solicitud en la cola.
 
 ```sol
 function getLastRequestId() view returns (uint256)
@@ -642,13 +610,13 @@ function getLastRequestId() view returns (uint256)
 
 :::note
 
-Requests are indexed from `1`, so it returns `0` if there are no requests in the queue.
+Las solicitudes se indexan desde `1`, por lo que devuelve `0` si no hay solicitudes en la cola.
 
 :::
 
 ### getLastFinalizedRequestId()
 
-Returns the id of the last finalized request in the queue.
+Devuelve el id de la última solicitud finalizada en la cola.
 
 ```sol
 function getLastFinalizedRequestId() view returns (uint256)
@@ -656,13 +624,13 @@ function getLastFinalizedRequestId() view returns (uint256)
 
 :::note
 
-Requests are indexed from `1`, so it returns `0` if there are no finalized requests in the queue.
+Las solicitudes se indexan desde `1`, por lo que devuelve `0` si no hay solicitudes finalizadas en la cola.
 
 :::
 
 ### getLockedEtherAmount()
 
-Returns the amount of ether on the balance locked for withdrawal and available to claim.
+Devuelve la cantidad de ether en el balance bloqueada para retiro y disponible para reclamar.
 
 ```sol
 function getLockedEtherAmount() view returns (uint256)
@@ -670,7 +638,7 @@ function getLockedEtherAmount() view returns (uint256)
 
 ### getLastCheckpointIndex()
 
-Returns the length of the checkpoint array. Last possible value for the hint.
+Devuelve la longitud de la matriz de puntos de control. Último valor posible para la pista.
 
 ```sol
 function getLastCheckpointIndex() view returns (uint256)
@@ -678,13 +646,13 @@ function getLastCheckpointIndex() view returns (uint256)
 
 :::note
 
-Checkpoints are indexed from `1`, so it returns `0` if there are no checkpoints yet.
+Los puntos de control se indexan desde `1`, por lo que devuelve `0` si aún no hay puntos de control.
 
 :::
 
 ### unfinalizedRequestNumber()
 
-Returns the number of unfinalized requests in the queue.
+Devuelve el número de solicitudes no finalizadas en la cola.
 
 ```sol
 function unfinalizedRequestNumber() view returns (uint256)
@@ -692,7 +660,7 @@ function unfinalizedRequestNumber() view returns (uint256)
 
 ### unfinalizedStETH()
 
-Returns the amount of `stETH` in the queue yet to be finalized.
+Devuelve la cantidad de `stETH` en la cola que aún no se ha finalizado.
 
 ```sol
 function unfinalizedStETH() view returns (uint256)
@@ -700,10 +668,7 @@ function unfinalizedStETH() view returns (uint256)
 
 ### calculateFinalizationBatches()
 
-View for offchain use by the oracle daemon that calculates how many requests can be finalized within the given budget,
-time period, and share rate limits. Returned requests are split into batches. All requests belonging to one batch must
-have their share rate above or below (or equal) to the `_maxShareRate`. Below you can see an example of how 14 requests
-with different share rates will be split into five batches by this method:
+Vista para uso fuera de la cadena por el demonio del oráculo que calcula cuántas solicitudes se pueden finalizar dentro del presupuesto dado, período de tiempo y límites de tasa de acciones. Las solicitudes devueltas se dividen en lotes. Todas las solicitudes que pertenecen a un lote deben tener su tasa de participación por encima o por debajo (o igual) al `_maxShareRate`. A continuación, puede ver un ejemplo de cómo 14 solicitudes con diferentes tasas de participación se dividirán en cinco lotes por este método:
 
 ```txt
  ^ share rate
@@ -726,12 +691,12 @@ function calculateFinalizationBatches(
 ) external view returns (BatchesCalculationState)
 ```
 
-where
+donde
 
-- **`_maxShareRate`** — the max share rate (ETH per share) that will be used for the finalization (1e27 precision)
-- **`_maxTimestamp`** — the max timestamp of the request that can be finalized
-- **`_maxRequestsPerCall`** — the max request number that can be processed per iteration
-- **`_state`** — the current state of the calculation, represented with a `BatchesCalculationState` structure:
+- **`_maxShareRate`** — la tasa de participación máxima (ETH por participación) que se utilizará para la finalización (precisión de 1e27)
+- **`_maxTimestamp`** — la marca de tiempo máxima de la solicitud que se puede finalizar
+- **`_maxRequestsPerCall`** — el número máximo de solicitudes que se puede procesar por iteración
+- **`_state`** — el estado actual del cálculo, representado con una estructura `BatchesCalculationState`:
 
   ```sol
   struct BatchesCalculationState {
@@ -742,25 +707,23 @@ where
   }
   ```
 
-  - **`remainingEthBudget`** — the currently remaining amount of ether. It must be set into the whole budget of
-  the finalization at the first call
-  - **`finished`** — the flag that is set to `true` if all requests are iterated on
-  - **`batches`** — the resulting array of batches, each represented by the id of the last request in the batch
-  - **`batchesLength`** — the length of the filled part of the `batches` array
+  - **`remainingEthBudget`** — la cantidad actual restante de ether. Debe establecerse en todo el presupuesto de
+  la finalización en la primera llamada.
+  - **`finished`** — la bandera que se establece en `true` si se iteran todas las solicitudes.
+  - **`batches`** — la matriz resultante de lotes, cada uno representado por el id de la última solicitud en el lote.
+  - **`batchesLength`** — la longitud de la parte llena de la matriz `batches`.
 
-Returns the current state of the finalization batch calculation.
+Devuelve el estado actual del cálculo de lotes de finalización.
 
 :::note
-This method is designed for iterative usage under gas limits. So, in the case of the number of withdrawals are
-too large to iterate over in one call, one can use this method repeatedly, passing the return value as an argument
-for the next call as long as it returns `finished` equal to `false`
+Este método está diseñado para uso iterativo bajo límites de gas. Por lo tanto, en el caso de que el número de retiros sea demasiado grande para iterar en una sola llamada, se puede usar este método repetidamente, pasando el valor de retorno como argumento para la próxima llamada mientras devuelva `finished` igual a `false`.
 :::
 
 ### prefinalize()
 
-Checks finalization batches and calculates the required amount of ether to lock and the number of shares to burn.
+Verifica los lotes de finalización y calcula la cantidad de ether necesaria para bloquear y la cantidad de participaciones a quemar.
 
-Designed to use during the oracle report to find the amount of ether to send along the `finalize()` call.
+Diseñado para usar durante el informe del oráculo para encontrar la cantidad de ether que se debe enviar junto con la llamada `finalize()`.
 
 ```sol
 function prefinalize(uint256[] _batches, uint256 _maxShareRate)
@@ -768,103 +731,101 @@ function prefinalize(uint256[] _batches, uint256 _maxShareRate)
     returns (uint256 ethToLock, uint256 sharesToBurn)
 ```
 
-where
+donde
 
-- **`_batches`** — finalization batches calculated off-chain using `calculateFinalizationBatches()`
-- **`_maxShareRate`** — max share rate (ETH per share) for request finalization (1e27 precision)
+- **`_batches`** — lotes de finalización calculados fuera de la cadena utilizando `calculateFinalizationBatches()`.
+- **`_maxShareRate`** — tasa de participación máxima (ETH por participación) para la finalización de solicitudes (precisión de 1e27).
 
-Returns
+Devuelve
 
-- **`ethToLock`** — the amount of ether to be sent with `finalize()` method
-- **`sharesToBurn`** — the number of shares to be burnt to match this finalization call
+- **`ethToLock`** — la cantidad de ether a enviar con el método `finalize()`.
+- **`sharesToBurn`** — el número de participaciones a quemar para coincidir con esta llamada de finalización.
 
-## Protected methods
+## Métodos protegidos
 
 ### Roles
 
-- **FINALIZE_ROLE** — role to finalize withdrawal requests in the queue
-- **PAUSE_ROLE** — role to pause the withdrawal on the protocol
-- **RESUME_ROLE** — role to resume the withdrawal after being paused
-- **ORACLE_ROLE** — role to provide required oracle-related data as the last report timestamp
-and if the protocol is in the bunker mode
-- **MANAGE_TOKEN_URI_ROLE** — role to set the parameters for constructing the token URI: the base URI
-or `NFTDescriptor` address
+- **FINALIZE_ROLE** — rol para finalizar solicitudes de retiro en la cola.
+- **PAUSE_ROLE** — rol para pausar el retiro en el protocolo.
+- **RESUME_ROLE** — rol para reanudar el retiro después de haber sido pausado.
+- **ORACLE_ROLE** — rol para proporcionar los datos relacionados con el oráculo necesarios, como la última marca de tiempo del informe y si el protocolo está en modo bunker.
+- **MANAGE_TOKEN_URI_ROLE** — rol para establecer los parámetros para construir el URI del token: el URI base
+o la dirección de `NFTDescriptor`.
 
 ### finalize()
 
-Finalize requests from the last finalized one up to `_lastRequestIdToBeFinalized` using `_maxShareRate`
-as a base share rate for `stETH` and passing along some ether as `msg.value`.
-The amount of ether to send should be precalculated by the `prefinalize()` method.
+Finaliza solicitudes desde la última finalizada hasta `_lastRequestIdToBeFinalized` utilizando `_maxShareRate`
+como tasa de participación base para `stETH` y pasando junto con algo de ether como `msg.value`.
+La cantidad de ether a enviar debe precalcularse con el método `prefinalize()`.
 
-Emits a `BatchMetadataUpdate` and a `WithdrawalsFinalized` events.
+Emite un evento `BatchMetadataUpdate` y un evento `WithdrawalsFinalized`.
 
 ```sol
 function finalize(uint256 _lastRequestIdToBeFinalized, uint256 _maxShareRate) payable
 ```
 
-where
+donde
 
-- **`_lastRequestIdToBeFinalized`** — the last request id to finalize
-- **`_maxShareRate`** — the max share rate (ETH per share) for the request finalization (1e27 precision)
+- **`_lastRequestIdToBeFinalized`** — el último id de solicitud a finalizar.
+- **`_maxShareRate`** — la tasa de participación máxima (ETH por participación) para la finalización de solicitudes (precisión de 1e27).
 
 :::note
 
-Requirements:
+Requisitos:
 
-- withdrawals must not be paused
-- `msg.sender` must have the `FINALIZE_ROLE` assigned
-- `_lastRequestIdToBeFinalized` must be an existing unfinalized request id
-- `msg.value` must be less or equal to the sum of unfinalized `stETH` up to `_lastRequestIdToBeFinalized`
+- los retiros no deben estar pausados.
+- `msg.sender` debe tener asignado el rol `FINALIZE_ROLE`.
+- `_lastRequestIdToBeFinalized` debe ser un id de solicitud no finalizada existente.
+- `msg.value` debe ser menor o igual a la suma de `stETH` no finalizada hasta `_lastRequestIdToBeFinalized`.
 
 :::
 
 ### pauseFor()
 
-Pause withdrawal requests placement and finalization for particular `_duration`. Claiming finalized requests
-will still be available.
+Pausa la colocación de solicitudes de retiro y la finalización durante una `_duration` particular. Reclamar solicitudes finalizadas seguirá estando disponible.
 
-Emits a `Paused` event.
+Emite un evento `Paused`.
 
 ```sol
 function pauseFor(uint256 _duration) onlyRole(PAUSE_ROLE)
 ```
 
-where
+donde
 
-- **`_duration`** — pause duration in seconds (use `PAUSE_INFINITELY` for unlimited)
+- **`_duration`** — duración de la pausa en segundos (usar `PAUSE_INFINITELY` para ilimitado).
 
 :::note
 
-Requirements:
+Requisitos:
 
-- `msg.sender` must have a `PAUSE_ROLE` assigned
-- `_duration` must not be zero
-- the contract must not be already paused
+- `msg.sender` debe tener asignado el rol `PAUSE_ROLE`.
+- `_duration` no debe ser cero.
+- el contrato no debe estar ya pausado.
 
 :::
 
 ### pauseUntil()
 
-Pause withdrawal requests placement and finalization until `_pauseUntilInclusive` timestamp.
-Claiming finalized requests will still be available.
+Pausa la colocación de solicitudes de retiro y la finalización hasta la marca de tiempo `_pauseUntilInclusive`.
+Reclamar solicitudes finalizadas seguirá estando disponible.
 
-Emits a `Paused` event.
+Emite un evento `Paused`.
 
 ```sol
 function pauseUntil(uint256 _pauseUntilInclusive) onlyRole(PAUSE_ROLE)
 ```
 
-where
+donde
 
-- **`_pauseUntilInclusive`** — the `block.timestamp` to pause until (inclusive)
+- **`_pauseUntilInclusive`** — la marca de tiempo `block.timestamp` hasta la cual pausar (inclusive).
 
 :::note
 
-Requirements:
+Requisitos:
 
-- `msg.sender` must have a `PAUSE_ROLE` assigned
-- `_pauseUntilInclusive` must not be in the past
-- the contract must not be already paused
+- `msg.sender` debe tener asignado el rol `PAUSE_ROLE`.
+- `_pauseUntilInclusive` no debe estar en el pasado.
+- el contrato no debe estar ya pausado.
 
 :::
 
