@@ -1,27 +1,27 @@
 # TRP VestingEscrow
 
-- [Source Code](https://github.com/lidofinance/lido-vesting-escrow/tree/main/contracts)
-- Deployed Contracts (mainnet)
+- [Código Fuente](https://github.com/lidofinance/lido-vesting-escrow/tree/main/contracts)
+- Contratos Desplegados (mainnet)
   - [VestingEscrowFactory](https://etherscan.io/address/0xDA1DF6442aFD2EC36aBEa91029794B9b2156ADD0)
   - [VestingEscrowProto](https://etherscan.io/address/0x484FD04c598A095360DF89bF85AB34c37127AA39)
   - [VotingAdapter](https://etherscan.io/address/0xCFda8aB0AE5F4Fa33506F9C51650B890E4871Cc1)
-- [Detailed contracts spec](https://hackmd.io/@lido/rkKpFX8So)
+- [Especificaciones detalladas de los contratos](https://hackmd.io/@lido/rkKpFX8So)
 
-[Token Reward Program (TRP)](https://research.lido.fi/t/lidodao-token-rewards-plan-trp/3364) escrow contracts allow transparent on-chain distribution and vesting of the token rewards for the Lido DAO contributors.
+Los contratos de escrow de Token Reward Program (TRP) permiten la distribución y el vesting transparente en la cadena de recompensas de tokens para los contribuyentes de Lido DAO.
 
 ## VestingEscrowFactory
 
-### Public variables
+### Variables Públicas
 
-- `voting_adapter: address` - address of the VotingAdapter used in the vestings
-- `owner: address` - factory and vestings owner
-- `manager: address` - vestings manager
+- `voting_adapter: address` - dirección del VotingAdapter utilizado en los vestings
+- `owner: address` - propietario de la fábrica y los vestings
+- `manager: address` - gestor de los vestings
 
-### View methods
+### Métodos de Vista
 
 #### target()
 
-Returns immutable `TARGET`
+Devuelve el valor inmutable `TARGET`
 
 ```vyper
 @external
@@ -31,7 +31,7 @@ def target() -> uint256
 
 #### token()
 
-Returns immutable `TOKEN`
+Devuelve el valor inmutable `TOKEN`
 
 ```vyper
 @external
@@ -39,16 +39,16 @@ Returns immutable `TOKEN`
 def token() -> uint256
 ```
 
-### Methods
+### Métodos
 
 #### deploy_vesting_contract()
 
 :::note
-Before calling `deploy_vesting_contract()` caller need to have enough tokens on the balance and call `approve(vestingFactoryAddress, fundAmount)` on the token contract
+Antes de llamar a `deploy_vesting_contract()`, el llamador debe tener suficientes tokens en el balance y llamar a `approve(vestingFactoryAddress, fundAmount)` en el contrato del token.
 :::
 
-Deploy and fund a new instance of the `VestingEscrow` for the given `recipient`. Set all params for the deployed escrow.
-Returns address of the deployed escrow
+Despliega y financia una nueva instancia de `VestingEscrow` para el `recipient` dado. Configura todos los parámetros para el escrow desplegado.
+Devuelve la dirección del escrow desplegado.
 
 ```vyper
 @external
@@ -62,29 +62,29 @@ def deploy_vesting_contract(
 ) -> address
 ```
 
-##### Parameters
+##### Parámetros
 
-| Name                 | Type                        | Description                                                |
-|----------------------|-----------------------------|------------------------------------------------------------|
-| `amount`             | `uint256`                   | Amount of the tokens to be controlled by vesting           |
-| `recipient`          | `address`                   | Recipient of the vested funds                              |
-| `vesting_duration`   | `uint256`                   | Vesting duration in seconds                                |
-| `vesting_start`      | `uint256`                   | Vesting start time in seconds (unix time in sec)           |
-| `cliff_length`       | `uint256`                   | Cliff duration in seconds                                  |
-| `is_fully_revokable` | `bool`                      | Flag that enables `revoke_all` method                      |
+| Nombre                 | Tipo                        | Descripción                                                |
+|------------------------|-----------------------------|------------------------------------------------------------|
+| `amount`               | `uint256`                   | Cantidad de tokens a controlar por el vesting               |
+| `recipient`            | `address`                   | Destinatario de los fondos vestidos                         |
+| `vesting_duration`     | `uint256`                   | Duración del vesting en segundos                           |
+| `vesting_start`        | `uint256`                   | Tiempo de inicio del vesting en segundos (tiempo Unix en segundos) |
+| `cliff_length`         | `uint256`                   | Duración del cliff en segundos                             |
+| `is_fully_revokable`   | `bool`                      | Bandera que habilita el método `revoke_all`                |
 
 :::note
-Reverts if any of the following is true:
+Revoca si alguna de las siguientes condiciones es verdadera:
 
 - `vesting_duration <= 0`.
 - `cliff_length >= vesting_duration`
-- token transfer from caller to factory fails
-- approve of the tokens to the actual vesting fails
+- falla la transferencia de tokens del llamador a la fábrica
+- falla la aprobación de los tokens al vesting actual
 :::
 
 #### recover_erc20()
 
-Collect ERC20 tokens from the contract to the `owner`.
+Recupera tokens ERC20 desde el contrato hacia el `owner`.
 
 ```vyper
 @external
@@ -94,22 +94,22 @@ def recover_erc20(
 )
 ```
 
-##### Parameters
+##### Parámetros
 
-| Name           | Type                        | Description                                                |
-|----------------|-----------------------------|------------------------------------------------------------|
-| `token`        | `address`                   | Address of ERC20 token to recover                          |
-| `amount`       | `uint256`                   | Amount of the tokens to recover                            |
+| Nombre           | Tipo                        | Descripción                                                |
+|------------------|-----------------------------|------------------------------------------------------------|
+| `token`          | `address`                   | Dirección del token ERC20 a recuperar                       |
+| `amount`         | `uint256`                   | Cantidad de tokens a recuperar                             |
 
 :::note
-Reverts if:
+Revoca si:
 
-- tokens transfer to `owner` fails
+- falla la transferencia de tokens al `owner`
 :::
 
 #### recover_ether()
 
-Collect all ether from the contract to the `owner`.
+Recupera todo el ether desde el contrato hacia el `owner`.
 
 ```vyper
 @external
@@ -117,14 +117,14 @@ def recover_ether()
 ```
 
 :::note
-Reverts if:
+Revoca si:
 
-- Ether transfer to `owner` fails
+- falla la transferencia de ether al `owner`
 :::
 
 #### update_voting_adapter()
 
-Set `self.voting_adapter` to `voting_adapter`.
+Establece `self.voting_adapter` a `voting_adapter`.
 
 ```vyper
 @external
@@ -133,87 +133,28 @@ def update_voting_adapter(
 )
 ```
 
-##### Parameters
-
-| Name             | Type                        | Description                                                |
-|------------------|-----------------------------|------------------------------------------------------------|
-| `voting_adapter` | `address`                   | New voting adapter                                         |
-
-:::note
-Reverts if:
-
-- called by anyone except `VestingEscrowFactory` owner
-:::
-
-#### change_owner()
-
-Set `self.owner` to `owner`.
-
-```vyper
-@external
-def change_owner(
-    owner: address
-)
-```
-
-##### Parameters
-
-| Name             | Type                        | Description                                                |
-|------------------|-----------------------------|------------------------------------------------------------|
-| `owner`          | `address`                   | New `owner` address                                          |
-
-:::note
-Reverts if:
-
-- called by anyone except `VestingEscrowFactory` owner
-- arg `owner` is empty address
-:::
-
-#### change_manager()
-
-Set `self.manager` to `manager`.
-
-```vyper
-@external
-def change_manager(
-    manager: address
-)
-```
-
-##### Parameters
-
-| Name             | Type                        | Description                                                |
-|------------------|-----------------------------|------------------------------------------------------------|
-| `manager`        | `address`                   | New `manager` address                                        |
-
-:::note
-Reverts if:
-
-- called by anyone except `VestingEscrowFactory` owner
-:::
-
 ## VestingEscrow
 
-### Public variables
+### Variables Públicas
 
-- `recipient: address` - address that can claim tokens from escrow
-- `token: ERC20` - address of the vested token
-- `start_time: uint256` - vesting start time (UTC time in UNIX seconds)
-- `end_time: uint256` - vesting end time (UTC time in UNIX seconds)
-- `cliff_length: uint256` - cliff length in seconds
-- `factory: IVestingEscrowFactory` - address of the parent factory
-- `total_locked: uint256` - total amount of the tokens to be vested (does not change after claims)
-- `is_fully_revokable: bool` - flag showing if the escrow is fully revocable or not
-- `total_claimed: uint256` - total amount of the claimed tokens
-- `disabled_at: uint256` - effective vesting end time (UTC time in UNIX seconds). Can differ from end_time in case of the revoke_xxx methods call
-- `initialized: bool` - flag indicating that escrow was initialized
-- `is_fully_revoked: bool` - flag indicating that escrow was fully revoked and there are no more tokens
+- `recipient: address` - dirección que puede reclamar tokens del escrow
+- `token: ERC20` - dirección del token con vested
+- `start_time: uint256` - tiempo de inicio del vesting (hora UTC en segundos UNIX)
+- `end_time: uint256` - tiempo de finalización del vesting (hora UTC en segundos UNIX)
+- `cliff_length: uint256` - duración del cliff en segundos
+- `factory: IVestingEscrowFactory` - dirección de la fábrica principal
+- `total_locked: uint256` - cantidad total de tokens a ser vested (no cambia después de los reclamos)
+- `is_fully_revokable: bool` - indica si el escrow puede ser completamente revocado
+- `total_claimed: uint256` - cantidad total de tokens reclamados
+- `disabled_at: uint256` - tiempo efectivo de finalización del vesting (hora UTC en segundos UNIX). Puede diferir de `end_time` en caso de llamadas a los métodos `revoke_xxx`
+- `initialized: bool` - indica si el escrow fue inicializado
+- `is_fully_revoked: bool` - indica si el escrow fue completamente revocado y no hay más tokens
 
-### View methods
+### Métodos de Vista
 
 #### unclaimed()
 
-Returns the current amount of the tokens available for the claim.
+Devuelve la cantidad actual de tokens disponibles para el reclamo.
 
 ```vyper
 @external
@@ -223,7 +164,7 @@ def unclaimed() -> uint256
 
 #### locked()
 
-Returns the current amount of the tokens locked.
+Devuelve la cantidad actual de tokens bloqueados.
 
 ```vyper
 @external
@@ -231,13 +172,13 @@ Returns the current amount of the tokens locked.
 def locked() -> uint256
 ```
 
-### Methods
+### Métodos
 
 #### claim()
 
-Claim tokens to the `beneficiary` address. If the requested amount is larger than `unclaimed`, then the `unclaimed` amount will be claimed.
+Reclama tokens a la dirección del `beneficiary`. Si la cantidad solicitada es mayor que `unclaimed`, entonces se reclamará la cantidad `unclaimed`.
 
-Returns actual amount of the tokens claimed.
+Devuelve la cantidad real de tokens reclamados.
 
 ```vyper
 @external
@@ -247,23 +188,23 @@ def claim(
 )
 ```
 
-##### Parameters
+##### Parámetros
 
-| Name           | Type                        | Description                                                |
-|----------------|-----------------------------|------------------------------------------------------------|
-| `beneficiary`  | `address`                   | Address to claim tokens to                                 |
-| `amount`       | `uint256`                   | Amount of the tokens to claim                              |
+| Nombre         | Tipo        | Descripción                              |
+|----------------|-------------|------------------------------------------|
+| `beneficiary`  | `address`   | Dirección para reclamar los tokens       |
+| `amount`       | `uint256`   | Cantidad de tokens a reclamar            |
 
 :::note
-Reverts if:
+Revoca si:
 
-- called by anyone except vesting `recipient`
-- tokens transfer to `beneficiary` fails
+- llamado por cualquier persona excepto el `recipient` del vesting
+- falla la transferencia de tokens al `beneficiary`
 :::
 
 #### revoke_unvested()
 
-Disable further flow of tokens and revoke the unvested part to the owner.
+Deshabilita el flujo futuro de tokens y revoca la parte no vested al propietario.
 
 ```vyper
 @external
@@ -271,15 +212,15 @@ def revoke_unvested()
 ```
 
 :::note
-Reverts if:
+Revoca si:
 
-- called by anyone except `VestingEscrowFactory` owner or manager
-- tokens transfer to `VestingEscrowFactory.owner()` fails
+- llamado por cualquier persona excepto el propietario o manager de `VestingEscrowFactory`
+- falla la transferencia de tokens al propietario de `VestingEscrowFactory`
 :::
 
 #### revoke_all()
 
-Disable further flow of tokens and revoke all tokens to the owner.
+Deshabilita el flujo futuro de tokens y revoca todos los tokens al propietario.
 
 ```vyper
 @external
@@ -287,16 +228,16 @@ def revoke_all()
 ```
 
 :::note
-Reverts if:
+Revoca si:
 
-- `is_fully_revocable` param of the `VestingEscrow` is not True
-- called by anyone except `VestingEscrowFactory` owner
-- tokens transfer to `VestingEscrowFactory.owner` fails
+- el parámetro `is_fully_revocable` de `VestingEscrow` no es Verdadero
+- llamado por cualquier persona excepto el propietario de `VestingEscrowFactory`
+- falla la transferencia de tokens al propietario de `VestingEscrowFactory`
 :::
 
 #### recover_erc20()
 
-Collect ERC20 tokens from the contract to the `recipient`.
+Recupera tokens ERC20 desde el contrato hacia el `recipient`.
 
 ```vyper
 @external
@@ -306,17 +247,17 @@ def recover_erc20(
 )
 ```
 
-##### Parameters
+##### Parámetros
 
-| Name           | Type                        | Description                                                |
-|----------------|-----------------------------|------------------------------------------------------------|
-| `token`        | `address`                   | Address of ERC20 token to recover                          |
-| `amount`       | `uint256`                   | Amount of the tokens to recover                            |
+| Nombre         | Tipo        | Descripción                              |
+|----------------|-------------|------------------------------------------|
+| `token`        | `address`   | Dirección del token ERC20 a recuperar    |
+| `amount`       | `uint256`   | Cantidad de tokens a recuperar           |
 
 :::note
-Reverts if:
+Revoca si:
 
-- tokens transfer to `recipient` fails
+- falla la transferencia de tokens al `recipient`
 :::
 
 #### recover_ether()
@@ -336,7 +277,7 @@ Reverts if:
 
 #### aragon_vote()
 
-Participate in the Aragon vote using all available tokens on the contract's balance. Uses `delegateCall` to `VotingAdapter`. `VotingAdapter` address is fetched from `self.factory`.
+Participa en la votación de Aragon utilizando todos los tokens disponibles en el balance del contrato. Utiliza `delegateCall` hacia `VotingAdapter`. La dirección de `VotingAdapter` se obtiene desde `self.factory`.
 
 ```vyper
 @external
@@ -345,21 +286,21 @@ def aragon_vote(
 )
 ```
 
-##### Parameters
+##### Parámetros
 
-| Name                 | Type                        | Description                                                                                                      |
-|----------------------|-----------------------------|------------------------------------------------------------------------------------------------------------------|
-| `abi_encoded_params` | `Bytes[1000]`               | ABI encoded params for the `vote` method call. can be compiled using `VotingAdapter.encode_aragon_vote_calldata` |
+| Nombre                 | Tipo                        | Descripción                                                                                                      |
+|------------------------|-----------------------------|------------------------------------------------------------------------------------------------------------------|
+| `abi_encoded_params`   | `Bytes[1000]`               | Parámetros codificados en ABI para la llamada al método `vote`. Pueden ser compilados usando `VotingAdapter.encode_aragon_vote_calldata` |
 
 :::note
-Reverts if:
+Revoca si:
 
-- called by anyone except vesting `recipient`
+- llamado por cualquier persona excepto el `recipient` del vesting
 :::
 
 #### snapshot_set_delegate()
 
-Delegate Snapshot voting power of all available tokens on the contract's balance to `delegate`. Uses `delegateCall` to `VotingAdapter`. `VotingAdapter` address is fetched from `self.factory`.
+Delega el poder de voto del Snapshot de todos los tokens disponibles en el balance del contrato a `delegate`. Utiliza `delegateCall` hacia `VotingAdapter`. La dirección de `VotingAdapter` se obtiene desde `self.factory`.
 
 ```vyper
 @external
@@ -368,25 +309,25 @@ def snapshot_set_delegate(
 )
 ```
 
-##### Parameters
+##### Parámetros
 
-| Name                 | Type                        | Description                                                                                                                |
-|----------------------|-----------------------------|----------------------------------------------------------------------------------------------------------------------------|
-| `abi_encoded_params` | `Bytes[1000]`               | ABI encoded params for the `delegate` method call. can be compiled using `VotingAdapter.encode_snapshot_set_delegate_calldata` |
+| Nombre                 | Tipo                        | Descripción                                                                                                                |
+|------------------------|-----------------------------|----------------------------------------------------------------------------------------------------------------------------|
+| `abi_encoded_params`   | `Bytes[1000]`               | Parámetros codificados en ABI para la llamada al método `delegate`. Pueden ser compilados usando `VotingAdapter.encode_snapshot_set_delegate_calldata` |
 
 :::note
-Reverts if:
+Revoca si:
 
-- called by anyone except vesting `recipient`
+- llamado por cualquier persona excepto el `recipient` del vesting
 :::
 
 #### delegate()
 
 :::note
-Stub at the moment of writing
+No implementado en el momento de la escritura
 :::
 
-Delegate voting power of all available tokens on the contract's balance to `delegate`. Uses `delegateCall` to VotingAdapter. `VotingAdapter` address is fetched from `self.factory`.
+Delega el poder de voto de todos los tokens disponibles en el balance del contrato a `delegate`. Utiliza `delegateCall` hacia `VotingAdapter`. La dirección de `VotingAdapter` se obtiene desde `self.factory`.
 
 ```vyper
 @external
@@ -395,29 +336,29 @@ def delegate(
 )
 ```
 
-##### Parameters
+##### Parámetros
 
-| Name                 | Type                        | Description                                                                                                   |
-|----------------------|-----------------------------|---------------------------------------------------------------------------------------------------------------|
-| `abi_encoded_params` | `Bytes[1000]`               | ABI encoded params for the `vote` method call. can be compiled using `VotingAdapter.encode_delegate_calldata` |
+| Nombre                 | Tipo                        | Descripción                                                                                                   |
+|------------------------|-----------------------------|---------------------------------------------------------------------------------------------------------------|
+| `abi_encoded_params`   | `Bytes[1000]`               | Parámetros codificados en ABI para la llamada al método `vote`. Pueden ser compilados usando `VotingAdapter.encode_delegate_calldata` |
 
 :::note
-Reverts if:
+Revoca si:
 
-- called by anyone except vesting `recipient`
+- llamado por cualquier persona excepto el `recipient` del vesting
 :::
 
 ## VotingAdapter
 
-### Public variables
+### Variables públicas
 
-- `owner: address` - votingAdapter owner
+- `owner: address` - dueño del VotingAdapter
 
-### View methods
+### Métodos de vista
 
 #### encode_aragon_vote_calldata()
 
-Returns abi encoded params for the `aragon_vote` call.
+Devuelve los parámetros codificados ABI para la llamada `aragon_vote`.
 
 ```vyper
 @external
@@ -428,16 +369,16 @@ def encode_aragon_vote_calldata(
 ) -> Bytes[1000]
 ```
 
-##### Parameters
+##### Parámetros
 
-| Name           | Type                        | Description                                                |
-|----------------|-----------------------------|------------------------------------------------------------|
-| `voteId`       | `uint256`                   | Aragon vote id                                             |
-| `amount`       | `bool`                      | Supports flag. `True` - for, `False` - against             |
+| Nombre           | Tipo                        | Descripción                                                |
+|------------------|-----------------------------|------------------------------------------------------------|
+| `voteId`         | `uint256`                   | ID de la votación en Aragon                                 |
+| `supports`       | `bool`                      | Bandera de soporte. `True` - a favor, `False` - en contra   |
 
 #### encode_snapshot_set_delegate_calldata()
 
-Returns abi encoded params for the `snapshot_set_delegate` call.
+Devuelve los parámetros codificados ABI para la llamada `snapshot_set_delegate`.
 
 ```vyper
 @external
@@ -447,15 +388,15 @@ def encode_snapshot_set_delegate_calldata(
 ) -> Bytes[1000]
 ```
 
-##### Parameters
+##### Parámetros
 
-| Name           | Type                        | Description                                                |
-|----------------|-----------------------------|------------------------------------------------------------|
-| `delegate`     | `address`                   | Address to delegate snapshot voting power to               |
+| Nombre           | Tipo                        | Descripción                                                |
+|------------------|-----------------------------|------------------------------------------------------------|
+| `delegate`       | `address`                   | Dirección a la cual delegar el poder de voto snapshot      |
 
 #### encode_delegate_calldata()
 
-Returns abi encoded params for the `delegate` call.
+Devuelve los parámetros codificados en ABI para la llamada al método `delegate`.
 
 ```vyper
 @external
@@ -465,17 +406,17 @@ def encode_delegate_calldata(
 ) -> Bytes[1000]
 ```
 
-##### Parameters
+##### Parámetros
 
-| Name           | Type                        | Description                                                |
-|----------------|-----------------------------|------------------------------------------------------------|
-| `delegate`     | `address`                   | Address to delegate voting power to                        |
+| Nombre           | Tipo                        | Descripción                                                |
+|------------------|-----------------------------|------------------------------------------------------------|
+| `delegate`       | `address`                   | Dirección a la cual delegar el poder de voto               |
 
-### Methods
+### Métodos
 
 #### aragon_vote()
 
-Participate in the Aragon vote using all available tokens on the contract's balance. It makes sense only for delegateCalls, so the caller's balance will be used. Uses `VOTING_CONTRACT_ADDR` as the voting contract address.
+Participa en la votación de Aragon utilizando todos los tokens disponibles en el balance del contrato. Solo tiene sentido para `delegateCalls`, por lo que se utilizará el balance del llamante. Utiliza `VOTING_CONTRACT_ADDR` como la dirección del contrato de votación.
 
 ```vyper
 @external
@@ -484,21 +425,21 @@ def aragon_vote(
 )
 ```
 
-##### Parameters
+##### Parámetros
 
-| Name                 | Type                        | Description                                                                                                      |
-|----------------------|-----------------------------|------------------------------------------------------------------------------------------------------------------|
-| `abi_encoded_params` | `Bytes[1000]`               | ABI encoded params for the `vote` method call. can be compiled using `VotingAdapter.encode_aragon_vote_calldata` |
+| Nombre                 | Tipo                        | Descripción                                                                                                      |
+|------------------------|-----------------------------|------------------------------------------------------------------------------------------------------------------|
+| `abi_encoded_params`   | `Bytes[1000]`               | Parámetros codificados en ABI para la llamada al método `vote`. Pueden ser compilados usando `VotingAdapter.encode_aragon_vote_calldata` |
 
 :::note
-Reverts if:
+Revoca si:
 
-- called by anyone except vesting `recipient`
+- llamado por cualquier persona excepto el `recipient` del vesting
 :::
 
 #### snapshot_set_delegate()
 
-Delegate Snapshot voting power of all available tokens. Makes sense only for delegateCalls so that the balance of the caller will be used. Uses `SNAPSHOT_DELEGATE_CONTRACT_ADDR` as the voting contract address.
+Delega el poder de voto del Snapshot de todos los tokens disponibles. Solo tiene sentido para `delegateCalls`, por lo que se utilizará el balance del llamante. Utiliza `SNAPSHOT_DELEGATE_CONTRACT_ADDR` como la dirección del contrato de votación.
 
 ```vyper
 @external
@@ -507,25 +448,25 @@ def snapshot_set_delegate(
 )
 ```
 
-##### Parameters
+##### Parámetros
 
-| Name                 | Type                        | Description                                                                                                                |
-|----------------------|-----------------------------|----------------------------------------------------------------------------------------------------------------------------|
-| `abi_encoded_params` | `Bytes[1000]`               | ABI encoded params for the `delegate` method call. can be compiled using `VotingAdapter.encode_snapshot_set_delegate_calldata` |
+| Nombre                 | Tipo                        | Descripción                                                                                                                |
+|------------------------|-----------------------------|----------------------------------------------------------------------------------------------------------------------------|
+| `abi_encoded_params`   | `Bytes[1000]`               | Parámetros codificados en ABI para la llamada al método `delegate`. Pueden ser compilados usando `VotingAdapter.encode_snapshot_set_delegate_calldata` |
 
 :::note
-Reverts if:
+Revoca si:
 
-- called by anyone except vesting `recipient`
+- llamado por cualquier persona excepto el `recipient` del vesting
 :::
 
 #### delegate()
 
 :::note
-Stub at the moment of writing
+Implementación futura
 :::
 
-Stub for the future implementation of the Voting with Delegation.
+Stub para la futura implementación del voto con delegación.
 
 ```vyper
 @external
@@ -534,19 +475,19 @@ def delegate(
 )
 ```
 
-##### Parameters
+##### Parámetros
 
-| Name                 | Type                        | Description                                                                                                   |
-|----------------------|-----------------------------|---------------------------------------------------------------------------------------------------------------|
-| `abi_encoded_params` | `Bytes[1000]`               | ABI encoded params for the `vote` method call. can be compiled using `VotingAdapter.encode_delegate_calldata` |
+| Nombre                 | Tipo                        | Descripción                                                                                                   |
+|------------------------|-----------------------------|---------------------------------------------------------------------------------------------------------------|
+| `abi_encoded_params`   | `Bytes[1000]`               | Parámetros codificados en ABI para la llamada al método `vote`. Pueden ser compilados usando `VotingAdapter.encode_delegate_calldata` |
 
 :::note
-Always reverts
+Siempre revoca
 :::
 
 #### recover_erc20()
 
-Collect ERC20 tokens from the contract to the `owner`.
+Recupera tokens ERC20 desde el contrato hacia el `owner`.
 
 ```vyper
 @external
@@ -556,22 +497,22 @@ def recover_erc20(
 )
 ```
 
-##### Parameters
+##### Parámetros
 
-| Name           | Type                        | Description                                                |
-|----------------|-----------------------------|------------------------------------------------------------|
-| `token`        | `address`                   | Address of ERC20 token to recover                          |
-| `amount`       | `uint256`                   | Amount of the tokens to recover                            |
+| Nombre           | Tipo                        | Descripción                                                |
+|------------------|-----------------------------|------------------------------------------------------------|
+| `token`          | `address`                   | Dirección del token ERC20 a recuperar                       |
+| `amount`         | `uint256`                   | Monto de tokens a recuperar                                |
 
 :::note
-Reverts if:
+Revoca si:
 
-- tokens transfer to `owner` fails
+- falla la transferencia de tokens al `owner`
 :::
 
 #### recover_ether()
 
-Collect all ether from the contract to the `owner`.
+Recupera todo el ether del contrato hacia el `owner`.
 
 ```vyper
 @external
@@ -579,14 +520,14 @@ def recover_ether()
 ```
 
 :::note
-Reverts if:
+Revoca si:
 
-- Ether transfer to `owner` fails
+- falla la transferencia de ether al `owner`
 :::
 
 #### change_owner()
 
-Set `self.owner` to `owner`
+Establece `self.owner` a `owner`.
 
 ```vyper
 @external
@@ -595,15 +536,15 @@ def change_owner(
 )
 ```
 
-##### Parameters
+##### Parámetros
 
-| Name           | Type                        | Description                                                |
-|----------------|-----------------------------|------------------------------------------------------------|
-| `owner`        | `address`                   | New `owner` address                                        |
+| Nombre           | Tipo                        | Descripción                                                |
+|------------------|-----------------------------|------------------------------------------------------------|
+| `owner`          | `address`                   | Nueva dirección del `owner`                                |
 
 :::note
-Reverts if:
+Revoca si:
 
-- called by anyone except `VotingAdapter` owner
-- arg `owner` is empty address
+- llamado por cualquier persona excepto el `owner` de `VotingAdapter`
+- el argumento `owner` es una dirección vacía
 :::
