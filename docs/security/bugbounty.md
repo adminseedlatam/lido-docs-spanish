@@ -1,11 +1,11 @@
-# Bug Bounties with Immunefi
+# Bug Bounties con Immunefi
 
-## Program overview
+## Visión general del programa
 
-Lido Bug Bounty programs allow you to report a vulnerability and get up to $2,000,000.
+Los programas de Bug Bounty de Lido te permiten informar sobre vulnerabilidades y recibir hasta $2,000,000.
 
-We’re using the [Immunefi platform](https://immunefi.com) — the leading bug bounty platform for DeFi with the world's largest bounties.
+Estamos utilizando la plataforma [Immunefi](https://immunefi.com), la principal plataforma de Bug Bounty para DeFi con las recompensas más grandes del mundo.
 
-[Lido Bug Bounty programs](https://lido.fi/bug-bounty) focused on the prevention of loss of user funds, denial of service, governance hijacks, data breaches, and data leaks. We care about it and have already paid $250,000 for 7 Bug Bounties.
+Los [programas de Bug Bounty de Lido](https://lido.fi/bug-bounty) se centran en la prevención de pérdidas de fondos de usuarios, denegación de servicio, toma de control de gobernanza, violaciones de datos y filtraciones de datos. Nos preocupamos por estos aspectos y ya hemos pagado $250,000 por 7 Bug Bounties.
 
-We have separate active programs for [Ethereum](https://immunefi.com/bounty/lido/) and [Polygon](https://immunefi.com/bounty/lidoonpolygon/).
+Tenemos programas activos separados para [Ethereum](https://immunefi.com/bounty/lido/) y [Polygon](https://immunefi.com/bounty/lidoonpolygon/).
