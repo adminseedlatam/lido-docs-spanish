@@ -1,71 +1,30 @@
-# HashConsensus
+## ¿Qué es HashConsensus?
 
-- [Source code](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/oracle/HashConsensus.sol)
-- [Deployed instance for AccountingOracle](https://etherscan.io/address/0xD624B08C83bAECF0807Dd2c6880C3154a5F0B288)
-- [Deployed instance for ValidatorsExitBusOracle](https://etherscan.io/address/0x7FaDB6358950c5fAA66Cb5EB8eE5147De3df355a)
+HashConsensus es un contrato responsable de gestionar el comité de miembros del oráculo y permitir que los miembros alcancen un consenso sobre un hash de datos para cada marco de informes.
 
-:::info
-It's advised to read [What is Lido Oracle mechanism](/guías/oracle-operator-manual#introducción) before
-:::
+El tiempo se divide en marcos de igual longitud, cada uno con una ranura de referencia y una fecha límite de procesamiento. Los datos del informe deben recopilarse observando el estado del mundo (tanto en las capas de consenso como de ejecución de Ethereum) en el momento de la ranura de referencia del marco (incluidos los cambios de estado realizados en esa ranura) y deben procesarse antes de la fecha límite de procesamiento del marco.
 
-## What is HashConsensus
+## Procesador de informes (`IReportAsyncProcessor`)
 
-HashConsensus is a contract responsible for managing oracle members committee and allowing the members to reach consensus on a data hash for each reporting frame.
+`IReportAsyncProcessor` define la interfaz para un contrato que recibe informes de consenso (es decir, hashes) y los procesa de manera asincrónica. `HashConsensus` no espera un comportamiento específico de un procesador de informes y garantiza lo siguiente:
 
-Time is divided in frames of equal length, each having reference slot and processing deadline. Report data must be gathered by looking at the world state (both Ethereum Consensus and Execution Layers) at the moment of the frame’s reference slot (including any state changes made in that slot), and must be processed before the frame’s processing deadline.
+1. `HashConsensus` no enviará informes a través de `IReportAsyncProcessor.submitConsensusReport` ni pedirá descartar informes a través de `IReportAsyncProcessor.discardConsensusReport` para cualquier ranura hasta (e incluyendo) la ranura devuelta por `IReportAsyncProcessor.getLastProcessingRefSlot`.
 
-Frame length is defined in Ethereum Consensus Layer epochs. Reference slot for each frame is set to the last slot of the epoch preceding the frame’s first epoch. The processing deadline is set to the last slot of the last epoch of the frame.
+2. `HashConsensus` no aceptará informes de miembros (y, por lo tanto, no los incluirá en el cálculo del consenso) que tengan el argumento `consensusVersion` de la llamada `HashConsensus.submitReport` con un valor diferente al devuelto por `IReportAsyncProcessor.getConsensusVersion` en el momento de la llamada `HashConsensus.submitReport`.
 
-Note that all state changes a report processing could entail are guaranteed to be observed while gathering data for the next frame’s report. This is an essential property given that oracle reports sometimes have to contain diffs instead of the entire state, which might be impractical or even impossible to transmit and process.
+### Fast-lane members
 
-Consensus members rotate within one time into two subsets:
+Los miembros de Fast-lane son un subconjunto de todos los miembros que cambia en cada marco de informes. Estos miembros pueden, y se espera que, envíen un informe durante la primera parte del marco llamada "intervalo de fast lane" y definida a través de `setFrameConfig` o `setFastLaneLengthSlots`. El cálculo del subconjunto de miembros de Fast-lane depende de `frameIndex`, `totalMembers` y `quorum`. En circunstancias normales, todos los demás miembros solo pueden enviar un informe después de que pase el intervalo de fast lane. Esto se hace para alentar a cada oráculo del conjunto completo a participar en los informes de manera regular e identificar a los miembros que no funcionan correctamente.
 
-- Non-fast-lane members
-- [Fast-lane members](/contracts/hash-consensus#fast-lane-members)
+El subconjunto de fast lane consiste en miembros del quórum; la selección se implementa como una ventana deslizante del ancho del quórum sobre los índices de miembros (`mod` total de miembros). La ventana avanza un índice en cada marco de informes.
 
-Once the consensus is gathered, a [Report processor](#report-processor-ireportasyncprocessor) would allow submitting and processing the actual report data.
-The latter is a part of the [phased Oracle report flow](/docs/guías/oracle-operator-manual.md#fases-del-oráculo).
+Con el mecanismo de fast lane activo, es suficiente para la supervisión verificar que se alcanza consistentemente el consenso durante la parte de fast lane de cada marco para concluir que todos los miembros están activos y comparten las mismas reglas de consenso.
 
-## Report processor (`IReportAsyncProcessor`)
+### Métodos de visualización
 
-`IReportAsyncProcessor` defines the interface for a contract that gets consensus reports (i.e. hashes) pushed to and processes them asynchronously.
-`HashConsensus` doesn't expect any specific behavior from a report processor, and guarantees the following:
+#### getChainConfig()
 
-1. `HashConsensus` won't submit reports via `IReportAsyncProcessor.submitConsensusReport` or ask to discard
-reports via `IReportAsyncProcessor.discardConsensusReport` for any slot up to (and including)
-the slot returned from `IReportAsyncProcessor.getLastProcessingRefSlot`.
-
-2. `HashConsensus` won't accept member reports (and thus won't include such reports in calculating the consensus)
-that have `consensusVersion` argument of the `HashConsensus.submitReport` call holding a diff.
-value than the one returned from `IReportAsyncProcessor.getConsensusVersion`
-at the moment of the `HashConsensus.submitReport` call.
-
-There are two core protocol contracts that implements this interface:
-
-- [AccountingOracle](./accounting-oracle)
-- [ValidatorsExitBusOracle](./validators-exit-bus-oracle.md)
-
-## Fast-lane members
-
-Fast lane members is a subset of all members that changes each reporting frame. These members can, and are expected to, submit a report during the first part of the frame called the "fast lane interval" and defined via [setFrameConfig](#setframeconfig) or [setFastLaneLengthSlots](#setfastlanelengthslots). The calculation of the Fast-lane members subset depends on `frameIndex`, `totalMembers` and `quorum`. Under regular circumstances, all other members are only allowed to submit a report after the fast lane interval passes. This is done to encourage each oracle from the full set to participate in reporting on a regular basis, and identify any malfunctioning members.
-
-The fast lane subset consists of quorum members; selection is implemented as a sliding window of the quorum width over member indices (`mod` total members). The window advances by one index each reporting frame.
-
-With the fast lane mechanism active, it's sufficient for the monitoring to check that consensus is consistently reached during the fast lane part of each frame to conclude that all members are active and share the same consensus rules.
-
-:::note
-There is no guarantee that, at any given time, it holds true that only the current fast lane members can or were able to report during the currently-configured fast lane interval of the current frame.
-
-In particular, this assumption can be violated in any frame during which the members set, initial epoch, or the quorum number was changed, or the fast lane interval length was increased.
-
-Therefore, the fast lane mechanism should not be used for any purpose other than monitoring of the members liveness, and monitoring tools should take into consideration the potential irregularities within frames with any configuration changes.
-:::
-
-## View methods
-
-### getChainConfig()
-
-Returns the immutable chain parameters required to calculate epoch and slot given a timestamp.
+Devuelve los parámetros de cadena inmutables necesarios para calcular la época y la ranura dada una marca de tiempo.
 
 ```solidity
 function getChainConfig() external view returns (
@@ -75,17 +34,17 @@ function getChainConfig() external view returns (
 )
 ```
 
-#### Returns
+##### Retornos
 
-| Name             | Type      | Description                                                |
-| ---------------- | --------- | ---------------------------------------------------------- |
-| `slotsPerEpoch`  | `uint256` | Number of slots per epoch, `32` by default                 |
-| `secondsPerSlot` | `uint256` | The time allocated for each slot, `12` by default          |
-| `genesisTime`    | `uint256` | Consensus Layer genesis time, `1606824023` on [Mainnet](https://blog.ethereum.org/2020/11/27/eth2-quick-update-no-21)          |
+| Nombre             | Tipo      | Descripción                                                |
+| ------------------ | --------- | ---------------------------------------------------------- |
+| `slotsPerEpoch`    | `uint256` | Número de ranuras por época, `32` por defecto              |
+| `secondsPerSlot`   | `uint256` | El tiempo asignado para cada ranura, `12` por defecto      |
+| `genesisTime`      | `uint256` | Hora de génesis de la capa de consenso, `1606824023` en [Mainnet](https://blog.ethereum.org/2020/11/27/eth2-quick-update-no-21) |
 
-### getFrameConfig()
+#### getFrameConfig()
 
-Returns the time-related configuration.
+Devuelve la configuración relacionada con el tiempo.
 
 ```solidity
 function getFrameConfig() external view returns (
@@ -95,17 +54,17 @@ function getFrameConfig() external view returns (
 )
 ```
 
-#### Returns
+##### Retornos
 
-| Name                  | Type      | Description                                                           |
-| --------------------- | --------- | --------------------------------------------------------------------- |
-| `initialEpoch`        | `uint256` | Epoch of the frame with zero index                                    |
-| `epochsPerFrame`      | `uint256` | Length of a frame in epochs                                           |
-| `fastLaneLengthSlots` | `uint256` | Length of the fast lane interval in slots; see `getIsFastLaneMember`  |
+| Nombre                  | Tipo      | Descripción                                                           |
+| ----------------------- | --------- | --------------------------------------------------------------------- |
+| `initialEpoch`          | `uint256` | Época del marco con índice cero                                       |
+| `epochsPerFrame`        | `uint256` | Longitud de un marco en épocas                                        |
+| `fastLaneLengthSlots`   | `uint256` | Longitud del intervalo de fast lane en ranuras; ver `getIsFastLaneMember`  |
 
-### getCurrentFrame()
+#### getCurrentFrame()
 
-Returns the current reporting frame.
+Devuelve el marco de informes actual.
 
 ```solidity
 function getCurrentFrame() external view returns (

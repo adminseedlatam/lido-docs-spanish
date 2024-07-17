@@ -24,7 +24,7 @@ El cálculo de un informe consta de 4 pasos clave:
 Las solicitudes de salida realizadas a través de `ValidatorsExitBusOracle` deben procesarse a tiempo según la política ratificada [Lido en Ethereum Políticas de Salidas de Validadores V1.0](https://snapshot.org/#/lido-snapshot.eth/proposal/0xa4eb1220a15d46a1825d5a0f44de1b34644d4aa6bb95f910b86b29bb7654e330).
 :::
 
-El acceso a los métodos de palanca está restringido utilizando la funcionalidad del contrato [AccessControlEnumerable](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/utils/access/AccessControlEnumerable.sol) y un conjunto de [roles granulares](#permissions).
+El acceso a los métodos de palanca está restringido utilizando la funcionalidad del contrato [AccessControlEnumerable](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/utils/access/AccessControlEnumerable.sol) y un conjunto de [roles granulares](#permisos).
 
 ## Ciclo del informe
 
@@ -280,7 +280,7 @@ function submitReportData(ReportData calldata data, uint256 contractVersion)
 
 | Nombre            | Tipo         | Descripción                                      |
 | ----------------- | ------------ | ------------------------------------------------ |
-| `data`            | `ReportData` | Los datos del informe. Consulte [`ReportData`](#report-data) para más detalles. |
+| `data`            | `ReportData` | Los datos del informe. Consulte [`ReportData`](#datos-del-informe) para más detalles. |
 | `contractVersion` | `uint256`    | Versión esperada del contrato del oráculo.       |
 
 #### Reversiones
