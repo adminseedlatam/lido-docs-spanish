@@ -17,7 +17,7 @@ rather than the subdomain (e.g., `{HASH}.{GATEWAY}`), then other websites access
 can potentially view or edit your settings, because localStorage stays the same for the same domain.
 
 To avoid this possibility, it is suggested to use IPFS gateway URL, attached to the IPFS release description,
-see [instructions](about.md#where-to-get-cid-and-gateway-address). The offered gateway uses subdomain format.
+see [instructions](about.md#dónde-obtener-cid-y-la-dirección-de-la-puerta-de-enlace). The offered gateway uses subdomain format.
 
 ### Routing
 

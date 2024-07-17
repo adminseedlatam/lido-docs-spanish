@@ -1,76 +1,69 @@
-# About IPFS
+# Acerca de IPFS
 
-IPFS (InterPlanetary File System) is a suite of protocols for publishing data (files, directories, websites, etc.) in a decentralized fashion.
-For more info, see [What is IPFS](https://docs.ipfs.tech/concepts/what-is-ipfs/).
+IPFS (InterPlanetary File System) es un conjunto de protocolos para publicar datos (archivos, directorios, sitios web, etc.) de manera descentralizada.
+Para más información, consulta [¿Qué es IPFS?](https://docs.ipfs.tech/concepts/what-is-ipfs/).
 
-There is an option to use some Lido interfaces via IPFS, for example [Lido Ethereum Staking Widget](https://github.com/lidofinance/ethereum-staking-widget).
+Existe la opción de usar algunas interfaces de Lido a través de IPFS, por ejemplo, [Lido Ethereum Staking Widget](https://github.com/lidofinance/ethereum-staking-widget).
 
-#### IPFS is used for Lido apps because:
+#### IPFS se usa para las aplicaciones de Lido porque:
 
-- IPFS has no single point of failure. The failure of a single or even multiple nodes in the network does not affect the functioning of the entire network.
-- IPFS is decentralized, which makes IPFS more resilient than traditional systems.
-- IPFS uses cryptographic hashes to verify the authenticity and integrity of files, making it difficult for malicious actors to affect files.
+- IPFS no tiene un único punto de fallo. La falla de uno o incluso varios nodos en la red no afecta el funcionamiento de toda la red.
+- IPFS es descentralizado, lo que lo hace más resistente que los sistemas tradicionales.
+- IPFS utiliza hashes criptográficos para verificar la autenticidad e integridad de los archivos, dificultando que actores maliciosos afecten los archivos.
 
-## Address
+## Dirección
 
-### What is a CID
+### ¿Qué es un CID?
 
-A content identifier, or CID, is a label used to point to material in IPFS. CIDs are based on the content’s cryptographic hash.
-Any difference in the content will produce a different CID.
-Note that CIDs won't match file hashes (checksums), because CID contains additional information that the hash does not (i.e., the codec of the data).
+Un identificador de contenido, o CID, es una etiqueta utilizada para señalar material en IPFS. Los CID se basan en el hash criptográfico del contenido. Cualquier diferencia en el contenido producirá un CID diferente. Ten en cuenta que los CID no coinciden con los hashes de archivos (sumas de verificación), porque el CID contiene información adicional que el hash no tiene (es decir, el códec de los datos).
 
-### IPFS HTTP Gateways
+### Puertas de enlace HTTP de IPFS
 
-An IPFS gateway is a web-based service that gets content from an IPFS network, and makes it available via HTTP protocol
-that all web browsers understand. A gateway address can look like this: `https://{CID}.ipfs.cf-ipfs.com`.
-You can use available gateway of [your choice](security.md#possible-localstorage-leak). Check gateway availability [here](https://ipfs.github.io/public-gateway-checker/)
+Una puerta de enlace IPFS es un servicio basado en la web que obtiene contenido de una red IPFS y lo hace disponible a través del protocolo HTTP que todos los navegadores web entienden. Una dirección de puerta de enlace puede verse así: `https://{CID}.ipfs.cf-ipfs.com`. Puedes usar la puerta de enlace disponible de [tu elección](security.md#possible-localstorage-leak). Verifica la disponibilidad de la puerta de enlace [aquí](https://ipfs.github.io/public-gateway-checker/).
 
-### Where to get CID and gateway address
+### Dónde obtener CID y la dirección de la puerta de enlace
 
 :::info
-Each new set of changes to a Lido app will produce a new CID, therefore each release will be available at its specific address.
-This means that for a Lido app, **there won't be a gateway address that always points to the most recent release**.
-The gateway you are currently using may point to the most updated version, but it will remain so until a new release to IPFS occurs.
-After opening a Lido app, it will automatically check if the app's version is the latest one. If not, the user will be notified and asked to use the latest version.
+Cada nuevo conjunto de cambios en una aplicación de Lido producirá un nuevo CID, por lo tanto, cada versión estará disponible en su dirección específica.
+Esto significa que para una aplicación de Lido, **no habrá una dirección de puerta de enlace que siempre apunte a la versión más reciente**.
+La puerta de enlace que estés usando actualmente puede apuntar a la versión más actualizada, pero permanecerá así hasta que ocurra una nueva versión en IPFS.
+Después de abrir una aplicación de Lido, esta verificará automáticamente si la versión de la aplicación es la más reciente. Si no lo es, el usuario será notificado y se le pedirá que use la última versión.
 :::
 
-#### Releases page on GitHub
+#### Página de lanzamientos en GitHub
 
-The latest release information is available on GitHub under the Releases page of the app repository.
-For Ethereum Staking Widget it is [here](https://github.com/lidofinance/ethereum-staking-widget/releases).  
-Using the page, one can find the information about the latest release, including the IPFS pinning artifacts.
+La información sobre el último lanzamiento está disponible en GitHub en la página de lanzamientos del repositorio de la aplicación. Para Ethereum Staking Widget, está [aquí](https://github.com/lidofinance/ethereum-staking-widget/releases).
+Usando esta página, se puede encontrar la información sobre el último lanzamiento, incluidos los artefactos de fijación en IPFS.
+
 :::info
-Note, that not every release is pinned to IPFS, see [Release frequency](#release-frequency)
+Ten en cuenta que no todos los lanzamientos están fijados en IPFS, consulta [Frecuencia de lanzamiento](#frecuencia-de-lanzamiento).
 :::
 
-#### Action page on GitHub
+#### Página de acciones en GitHub
 
-You can take this information from the latest GitHub action in which IPFS pinning happened:
+Puedes obtener esta información desde la última acción de GitHub en la que ocurrió la fijación en IPFS:
 
-1. Open the app's repo, follow the "Actions" tab.
-2. On the left side, in the navigation bar, find the workflow for IPFS releases; for the Ethereum Staking Widget it is called "[IPFS Release](https://github.com/lidofinance/ethereum-staking-widget/actions/workflows/ci-ipfs.yml)".
-3. Open the latest successful workflow and look for the "ipfs-pinning" title. There you will find a root CID and a link to an IPFS HTTP gateway.
+1. Abre el repositorio de la aplicación, sigue la pestaña "Actions".
+2. En el lado izquierdo, en la barra de navegación, encuentra el flujo de trabajo para los lanzamientos de IPFS; para el Ethereum Staking Widget se llama "[IPFS Release](https://github.com/lidofinance/ethereum-staking-widget/actions/workflows/ci-ipfs.yml)".
+3. Abre el último flujo de trabajo exitoso y busca el título "ipfs-pinning". Allí encontrarás un CID raíz y un enlace a una puerta de enlace HTTP de IPFS.
 
 #### IPFS.json
 
-There is a convention to store the latest CID for an app in the `IPFS.json` file in the project's root.
+Existe una convención para almacenar el último CID de una aplicación en el archivo `IPFS.json` en la raíz del proyecto.
 
 :::info
-This solution might be not the final one, serves for development purposes, and is a subject to change in the future.
-The future plans are to replace the latest CID registry with the one living on-chain and be updated via the Lido DAO governance.  
+Esta solución podría no ser la definitiva, sirve para fines de desarrollo y está sujeta a cambios en el futuro. Los planes futuros son reemplazar el registro del último CID por uno que viva en la cadena y se actualice a través de la gobernanza de Lido DAO.
 :::
 
-### Release frequency
+### Frecuencia de lanzamiento
 
-Not every new release of Lido applications will be deployed to IPFS; only major releases or critical fixes will be deployed.
-So the deployment cadence shouldn't be too frequent.  
-This approach is preferred due to the numerous actions required to make an IPFS release,
-and also the fact that each new release of a Lido app will produce a new CID and will be available at the new address,
-which is inconvenient for users willing to always use the latest version of an application.
+No todos los nuevos lanzamientos de aplicaciones de Lido se desplegarán en IPFS; solo se desplegarán los lanzamientos principales o las correcciones críticas.
+Por lo tanto, la cadencia de despliegue no debería ser demasiado frecuente.
+Este enfoque se prefiere debido a las numerosas acciones requeridas para realizar un lanzamiento en IPFS, y también al hecho de que cada nuevo lanzamiento de una aplicación de Lido producirá un nuevo CID y estará disponible en una nueva dirección, lo cual es inconveniente para los usuarios que desean usar siempre la última versión de una aplicación.
 
-## Further reading
+## Lecturas adicionales
 
-- [Release Flow](release-flow.md)
-- [Security](security.md)
-- [Hash Verification](hash-verification.md)
-- [IPFS applications list](apps-list.md)
+- [Flujo de lanzamiento](release-flow.md)
+- [Seguridad](security.md)
+- [Verificación de hashes](hash-verification.md)
+- [Lista de aplicaciones IPFS](apps-list.md)
