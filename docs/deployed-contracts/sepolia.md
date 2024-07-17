@@ -1,20 +1,18 @@
 # Sepolia
 
 :::warning
-Sepolia testnet has only a limited set of working parts of the protocol.
+Sepolia testnet tiene solo un conjunto limitado de partes funcionales del protocolo.
 
-For instance, the in-protocol [withdrawals](/docs/contracts/withdrawal-queue-erc721.md) aren't available
-(paused indefinitely), please use the [Holešky testnet](./holesky.md) deployment if possible.
+Por ejemplo, los [retiros](/docs/contracts/withdrawal-queue-erc721.md) en el protocolo  no están disponibles (en pausa indefinidamente), utilice la implementación [Holešky testnet](./holesky.md) si es posible.
 
-The goals for this testnet deployment are:
+Los objetivos para esta implementación de testnet son:
 
-- Have end-to-end testnet for Lido on L2
-- The running-in of new zk-based oracles (based on [EIP-4788](https://eips.ethereum.org/EIPS/eip-4788) availability)
+- Tener testnet de extremo a extremo para Lido en L2
+- El rodaje de nuevos oráculos basados ​​en zk (basado en la disponibilidad de [EIP-4788](https://eips.ethereum.org/EIPS/eip-4788))
 
-There will be no comprehensive Lido testnet environment available for Sepolia due to the network's restricted
-and permission-based [validator set](https://github.com/eth-clients/sepolia/issues/12) configuration.
+No habrá un entorno completo de prueba Lido disponible para Sepolia debido a las restricciones de la red.
+y configuración basada en permisos [conjunto de validadores](https://github.com/eth-clients/sepolia/issues/12).
 :::
-
 
 ## Core protocol
 
