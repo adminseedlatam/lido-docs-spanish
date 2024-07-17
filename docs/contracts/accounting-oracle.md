@@ -10,7 +10,7 @@ Se recomienda leer [¿Qué es el mecanismo de Lido Oracle?](/guías/oracle-opera
 
 ## ¿Qué es AccountingOracle?
 
-AccountingOracle es un contrato que recopila información enviada por los oráculos fuera de la cadena sobre el estado de los validadores que participan en Lido y sus saldos, la cantidad de fondos acumulados en las bóvedas del protocolo (es decir, [retiro](./withdrawal-vault) y [recompensas de la capa de ejecución](./lido-execution-layer-rewards-vault)), el número de validadores [salidos y atascados](./staking-router#exited-and-stuck-validators), el número de [solicitudes de retiro](./withdrawal-queue-erc721#request) que el protocolo puede procesar y distribuye las recompensas a los operadores de nodos.
+AccountingOracle es un contrato que recopila información enviada por los oráculos fuera de la cadena sobre el estado de los validadores que participan en Lido y sus saldos, la cantidad de fondos acumulados en las bóvedas del protocolo (es decir, [retiro](./withdrawal-vault) y [recompensas de la capa de ejecución](./lido-execution-layer-rewards-vault)), el número de validadores [salidos y atascados](./staking-router#validadores-salidos-y-atascados), el número de [solicitudes de retiro](./withdrawal-queue-erc721#request) que el protocolo puede procesar y distribuye las recompensas a los operadores de nodos.
 
 ## Ciclo de reporte
 
@@ -233,7 +233,7 @@ uint256 public immutable GENESIS_TIME
 
 ### EXTRA_DATA_TYPE_STUCK_VALIDATORS()
 
-Este tipo lleva los detalles de los validador(es) [atascados](/contracts/staking-router#exited-and-stuck-validators).
+Este tipo lleva los detalles de los validador(es) [atascados](/contracts/staking-router#validadores-salidos-y-atascados).
 
 ```solidity
 uint256 public constant EXTRA_DATA_TYPE_STUCK_VALIDATORS = 1
@@ -241,7 +241,7 @@ uint256 public constant EXTRA_DATA_TYPE_STUCK_VALIDATORS = 1
 
 ### EXTRA_DATA_TYPE_EXITED_VALIDATORS()
 
-Este tipo contiene los detalles de los validador(es) [salidos](/contracts/staking-router#exited-and-stuck-validators).
+Este tipo contiene los detalles de los validador(es) [salidos](/contracts/staking-router#validadores-salidos-y-atascados).
 
 ```solidity
 uint256 public constant EXTRA_DATA_TYPE_EXITED_VALIDATORS = 2
@@ -253,7 +253,7 @@ El formato de datos adicionales utilizado para significar que el informe del or�
 
 Enviado como parte de la [Fase 3](/guías/oracle-operator-manual#fase-3-envío-de-datos-adicionales-del-informe) del oráculo.
 
-Este formato se usa cuando no hay nuevos validadores [atascados](/contracts/staking-router#exited-and-stuck-validators) o [salidos](/contracts/staking-router#exited-and-stuck-validators) en el período del informe.
+Este formato se usa cuando no hay nuevos validadores [atascados](/contracts/staking-router#validadores-salidos-y-atascados) o [salidos](/contracts/staking-router#validadores-salidos-y-atascados) en el período del informe.
 
 ```solidity
 uint256 public constant EXTRA_DATA_FORMAT_EMPTY = 0

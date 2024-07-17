@@ -24,7 +24,7 @@ El Módulo de Staking Comunitario (CSM) es un módulo de staking sin permisos di
 - `DepositContract` is the official Ethereum deposit contract for validator deposits;
 - `DepositSecurityModule` or [**DSM**](../../guías/deposit-security-manual.md) is a set of smart contract and off-chain parts mitigating the [deposit front-run vulnerability](../../guías/deposit-security-manual.md#la-vulnerabilidad);
 - A validator is considered to be [**“unbonded”**](join-csm.md#unbonded-validators) when the current Node Operator bond is not sufficient to cover this validator;
-- A validator is considered to be ["**stuck**"](../../contracts/staking-router.md#exited-and-stuck-validators) if it has not been exited timely following an exit signal from the protocol;
+- A validator is considered to be ["**stuck**"](../../contracts/staking-router.md#validadores-salidos-y-atascados) if it has not been exited timely following an exit signal from the protocol;
 - The **Curated module** is the first Lido staking module previously referred to as [Node Operators Registry](../../contracts/node-operators-registry);
 - **Easy Track** is a suite of smart contracts and an alternative veto-based voting model that streamlines routine DAO operations;
 - [**Accounting Oracle**](../../contracts/accounting-oracle.md) is a contract which collects information submitted by the off-chain oracles about state of the Lido-participating validators and their balances, the amount of funds accumulated on the protocol vaults (i.e., withdrawal and execution layer rewards vaults), the number of exited and stuck validators, the number of withdrawal requests the protocol can process and distributes node-operator rewards and performs `stETH` token rebase;

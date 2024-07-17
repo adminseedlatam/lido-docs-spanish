@@ -1,133 +1,134 @@
-# StakingRouter
+### StakingRouter
 
-- [Source code](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/StakingRouter.sol)
-- [Deployed contract](https://etherscan.io/address/0xFdDf38947aFB03C621C71b06C9C70bce73f12999)
+- [Código fuente](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/StakingRouter.sol)
+- [Contrato desplegado](https://etherscan.io/address/0xFdDf38947aFB03C621C71b06C9C70bce73f12999)
 
-StakingRouter is a registry of staking modules, each encapsulating a certain validator subset, e.g. the Lido DAO-curated staking module. The contract allocates stake to modules, distributes protocol fees, and tracks relevant information.
+StakingRouter es un registro de módulos de staking, cada uno encapsulando un subconjunto específico de validadores, por ejemplo, el módulo de staking curado por Lido DAO. El contrato asigna stake a los módulos, distribuye tarifas del protocolo y realiza el seguimiento de información relevante.
 
-## What is StakingRouter?
+## ¿Qué es StakingRouter?
 
-StakingRouter is a top-level controller contract for staking modules. Each staking module is a contract that, in turn, manages its own subset of validators, e.g. the [Curated](https://etherscan.io/address/0x55032650b14df07b85bF18A3a3eC8E0Af2e028d5) staking module is a set of Lido DAO-vetted node operators. Such modular design opens the opportunity for anyone to build a staking module and join the Lido staking platform, including permissionless community stakers, DVT-enabled validators or any other validator subset, technology or mechanics.
+StakingRouter es un contrato controlador de alto nivel para módulos de staking. Cada módulo de staking es un contrato que gestiona su propio subconjunto de validadores, por ejemplo, el [módulo Curated](https://etherscan.io/address/0x55032650b14df07b85bF18A3a3eC8E0Af2e028d5) es un conjunto de operadores de nodos verificados por Lido DAO. Este diseño modular abre la oportunidad para que cualquier persona construya un módulo de staking y se una a la plataforma de staking de Lido, incluyendo stakers comunitarios sin permisos, validadores habilitados por DVT o cualquier otro subconjunto de validadores, tecnología o mecánica.
 
-StakingRouter performs a number of functions, including:
-- maintaining a registry of staking modules,
-- allocating stake to modules, and
-- distributing protocol fees.
+StakingRouter realiza varias funciones, incluyendo:
+- Mantener un registro de módulos de staking,
+- Asignar stake a los módulos, y
+- Distribuir tarifas del protocolo.
 
-## Module Management
+## Gestión de módulos
 
-### Registering a module
+### Registro de un módulo
 
-Modules are registered with StakingRouter through the Lido DAO voting process. To be considered by the governance, the applying module contract should implement the appropriate module interface, meet security requirements, and have a fee structure aligned with the Lido protocol sustainability. Once voted in, the module starts receiving stake and protocol fees.
+Los módulos se registran en StakingRouter a través del proceso de votación de Lido DAO. Para ser considerado por la gobernanza, el contrato de módulo solicitante debe implementar la interfaz de módulo adecuada, cumplir con requisitos de seguridad y tener una estructura de tarifas alineada con la sostenibilidad del protocolo Lido. Una vez aprobado en la votación, el módulo comienza a recibir stake y tarifas del protocolo.
 
-Staking modules are registered using the `addStakingModule` function, providing details such as:
-- the module's name: a human-readable name;
-- address of the deployed staking module contract;
-- target share, a relative hard cap on deposits within Lido;
-- module fee, a percentage of staking rewards to be awarded to the module,
-- and treasury fee, a percentage of staking rewards to be directed to the protocol treasury.
+Los módulos de staking se registran utilizando la función `addStakingModule`, proporcionando detalles como:
+- El nombre del módulo: un nombre legible por humanos;
+- La dirección del contrato de módulo de staking desplegado;
+- El share objetivo, un límite relativo duro en los depósitos dentro de Lido;
+- La tarifa del módulo, un porcentaje de las recompensas de staking que se otorgará al módulo,
+- Y la tarifa de tesorería, un porcentaje de las recompensas de staking que se dirigirá a la tesorería del protocolo.
 
-### Pausing modules
+### Pausa de módulos
 
-Each staking module has a status: a state that determines whether the module can perform deposits and receive rewards:
-- `Active`, can make deposits and receives rewards,
-- `DepositsPaused`, deposits are not allowed but receives rewards,
-- `Stopped`, cannot make deposits and does not receive rewards.
+Cada módulo de staking tiene un estado: un estado que determina si el módulo puede realizar depósitos y recibir recompensas:
+- `Active`, puede realizar depósitos y recibir recompensas,
+- `DepositsPaused`, no se permiten depósitos pero sí se reciben recompensas,
+- `Stopped`, no puede realizar depósitos y no recibe recompensas.
 
 ```solidity
 enum StakingModuleStatus {
-	Active, // deposits and rewards allowed
-	DepositsPaused, // deposits NOT allowed, rewards allowed
-	Stopped // deposits and rewards NOT allowed
+	Active, // depósitos y recompensas permitidos
+	DepositsPaused, // depósitos NO permitidos, recompensas permitidas
+	Stopped // depósitos y recompensas NO permitidos
 }
 ```
 
-### Exited and stuck validators
+### Validadores salidos y atascados
 
-When the withdrawal requests demand exceed buffered ether sitting in Lido together with projected rewards, the protocol signals to node operators to start exiting validators to cover the withdrawals. In this connection, StakingRouter distinguishes two types of validator states:
-- [exited](https://hackmd.io/zHYFZr4eRGm3Ju9_vkcSgQ?view) validators,
-- and stuck validators, meaning those validators that failed to comply with the exit signal.
+Cuando las solicitudes de retiro exceden el éter almacenado en Lido junto con las recompensas proyectadas, el protocolo indica a los operadores de nodos que comiencen a sacar validadores para cubrir los retiros. En este contexto, StakingRouter distingue dos tipos de estados de validadores:
+- Validadores [salidos](https://hackmd.io/zHYFZr4eRGm3Ju9_vkcSgQ?view),
+- Y validadores atascados, es decir, aquellos validadores que no cumplieron con la señal de salida.
 
-StakingRouter keeps track of both of these types of validators in order to correctly allocate stake and penalize stuck validators. These stats are kept up to date via the oracles submitting the data to the contract.
+StakingRouter lleva un seguimiento de ambos tipos de validadores para asignar correctamente el stake y penalizar a los validadores atascados. Estas estadísticas se mantienen actualizadas mediante los oráculos que envían los datos al contrato.
 
-## Stake allocation
+## Asignación de stake
 
-StakingRouter carries out a vital task of distributing depositable ether to staking modules in a manner that aligns with their growth targets set by the DAO. This design ensures a regulated and controlled growth for the modules that have been newly integrated into the system. The principles governing this methodology are comprehensively discussed in [ADR: Staking Router](https://hackmd.io/f1wvHzpjTIq41-GCrdaMjw?view#Target-shares).
+StakingRouter lleva a cabo la tarea vital de distribuir éter depositable a módulos de staking de manera que se alinee con los objetivos de crecimiento establecidos por DAO. Este diseño asegura un crecimiento regulado y controlado para los módulos que han sido recientemente integrados en el sistema. Los principios que rigen esta metodología se discuten de manera exhaustiva en [ADR: Staking Router](https://hackmd.io/f1wvHzpjTIq41-GCrdaMjw?view#Target-shares).
 
-### Deposit
+### Depósito
 
-The deposit workflow involves submitting batches of 32 ether deposits, along with associated validator keys, to [`DepositContract`](https://ethereum.org/en/staking/deposit-contract/) in one transaction. Given that each staking module handles its own deposits, every batch deposit is restricted to keys originating from a single module.
+El flujo de depósito implica enviar lotes de depósitos de 32 éter, junto con claves de validador asociadas, al [`Contrato de Depósito`](https://ethereum.org/en/staking/deposit-contract/) en una transacción. Dado que cada módulo de staking maneja sus propios depósitos, cada depósito por lote está restringido a claves originadas desde un solo módulo.
 
-The deposit operation is, at its core, a sequence of contract calls sparked by an off-chain software, the [depositor bot](https://github.com/lidofinance/depositor-bot). This bot gathers guardian messages to confirm that there are no pre-existing keys in the registry that could take advantage of the [frontrunning vulnerability](https://github.com/lidofinance/lido-improvement-proposals/blob/develop/LIPS/lip-5.md). Once the necessary quorum of guardians is reached, the bot forwards these messages along with the module identifier to the DepositSecurityModule (not to be confused with a staking module). This contract first verifies the messages, then initiates the deposit function on Lido, passing along the maximum number of deposits that the current block size can accommodate. Subsequently, Lido calculates the maximum number of deposits that can be included in the batch based on the existing deposit buffer, and triggers StakingRouter's deposit function. The StakingRouter then determines the distribution of buffered ether to the module that will use its keys in the deposit, and finally executes the batch deposit.
+La operación de depósito es, en su núcleo, una secuencia de llamadas de contrato desencadenadas por un software fuera de la cadena, el [bot depositador](https://github.com/lidofinance/depositor-bot). Este bot recopila mensajes de guardianes para confirmar que no existen claves preexistentes en el registro que puedan aprovechar la [vulnerabilidad de frontrunning](https://github.com/lidofinance/lido-improvement-proposals/blob/develop/LIPS/lip-5.md). Una vez alcanzado el quórum necesario de guardianes, el bot reenvía estos mensajes junto con el identificador del módulo al `DepositSecurityModule` (no confundir con un módulo de staking). Este contrato primero verifica los mensajes, luego inicia la función de depósito en Lido, transmitiendo el número máximo de depósitos que el tamaño actual del bloque puede acomodar. Posteriormente, Lido calcula el número máximo de depósitos que se pueden incluir en el lote según el búfer de depósitos existente, y activa la función de depósito de StakingRouter. Luego, StakingRouter determina la distribución del éter en búfer al módulo que utilizará sus claves en el depósito, y finalmente ejecuta el depósito por lotes.
 
-The `deposit` function begins by verifying the sender's identity and checking the withdrawal credentials and the status of the staking module. After these checks, it updates the contract's local state by recording the current timestamp and block number as the last deposit time and block for the staking module. It then emits an event to log the deposit transaction, and checks if the deposit value matches with the required total deposit size. If there are deposits to be made, it gets deposit data (public keys and signatures) from the staking module contract. It then makes deposits to `DepositContract` using the obtained data. Finally, it confirms that all deposited ETH has been correctly transferred to the contract by comparing the contract's ether balance before and after the deposit transaction.
+La función `deposit` comienza verificando la identidad del remitente y comprobando las credenciales de retiro y el estado del módulo de staking. Después de estas verificaciones, actualiza el estado local del contrato registrando la marca de tiempo y el número de bloque actual como el último tiempo y bloque de depósito para el módulo de staking. Luego emite un evento para registrar la transacción de depósito, y verifica si el valor del depósito coincide con el tamaño total de depósito requerido. Si hay depósitos por realizar, obtiene los datos de depósito (claves públicas y firmas) del contrato de módulo de staking. Luego realiza los depósitos al `DepositContract` utilizando los datos obtenidos. Finalmente, confirma que todo el ETH depositado se ha transferido correctamente al contrato comparando el saldo de éter del contrato antes y después de la transacción de depósito.
 
-### Allocation algorithm
+### Algoritmo de asignación
 
-The algorithm used for the allocation process is designed to consider various factors, including the limit of deposits per transaction, the quantity of ether ready for deposit, the active and available keys within each module, and each module's target share. It then estimates the maximum deposit based on these parameters. The algorithm also identifies the key limits for all modules, and initiates the allocation of keys, starting with the module that has the least active keys. This continues until there is no more ether to allocate or when all the modules have reached their capacity. At the end of the process, any remaining ether is returned.
+El algoritmo utilizado para el proceso de asignación está diseñado para considerar varios factores, incluyendo el límite de depósitos por transacción, la cantidad de éter listo para el depósito, las claves activas disponibles dentro de cada módulo y el share objetivo de cada módulo. Luego estima el máximo depósito basado en estos parámetros. El algoritmo también identifica los límites de claves para todos los módulos e inicia la asignación de claves, comenzando por el módulo que tiene menos claves activas. Esto continúa hasta que no haya más éter para asignar o hasta que todos los módulos alcancen su capacidad. Al final del proceso, cualquier éter restante se devuelve.
 
-The allocation function uses the [`MinFirstAllocationStrategy`](https://github.com/lidofinance/lido-dao/blob/master/contracts/common/lib/MinFirstAllocationStrategy.sol) algorithm to allocate new deposits among different staking modules.
+La función de asignación utiliza el algoritmo [`MinFirstAllocationStrategy`](https://github.com/lidofinance/lido-dao/blob/master/contracts/common/lib/MinFirstAllocationStrategy.sol) para asignar nuevos depósitos entre diferentes módulos de staking.
 
-Here is a breakdown of the process:
+Aquí se detalla el proceso:
 
-1. The function takes as input `_depositsToAllocate`, which represents the amount of new deposits that need to be allocated among the staking modules.
+1. La función toma como entrada `_depositsToAllocate`, que representa la cantidad de nuevos depósitos que deben asignarse entre los módulos de st
 
-2. It starts by calculating the total active validators in the system (`totalActiveValidators`) and loading the current state of staking modules into a cache (`stakingModulesCache`).
+aking.
 
-3. It then creates an `allocations` array of the same size as the number of staking modules, with each index in this array representing a staking module's current allocation (i.e., the current number of active validators in that module).
+2. Comienza calculando el total de validadores activos en el sistema (`totalActiveValidators`) y carga el estado actual de los módulos de staking en una caché (`stakingModulesCache`).
 
-4. If there are staking modules available (`stakingModulesCount > 0`), the function goes into the allocation process:
+3. Luego crea una matriz de `asignaciones` del mismo tamaño que el número de módulos de staking, donde cada índice en esta matriz representa la asignación actual de un módulo de staking (es decir, el número actual de validadores activos en ese módulo).
 
-    a. It calculates a new estimated total of active validators, adding the new deposits to the total active validators (`totalActiveValidators += _depositsToAllocate`).
+4. Si hay módulos de staking disponibles (`stakingModulesCount > 0`), la función procede con el proceso de asignación:
 
-    b. It creates a `capacities` array of the same size as the number of staking modules. Each entry in this array represents the maximum capacity of a particular staking module, i.e., the maximum number of validators that module can have. This is calculated as the minimum of either:
+    a. Calcula un nuevo total estimado de validadores activos, sumando los nuevos depósitos al total de validadores activos (`totalActiveValidators += _depositsToAllocate`).
 
-    - The target number of validators for a module, which is based on a desired target share (`stakingModulesCache[i].targetShare * totalActiveValidators / TOTAL_BASIS_POINTS`), or
-    - The sum of the current active validators and the available validators in the module (`stakingModulesCache[i].activeValidatorsCount + stakingModulesCache[i].availableValidatorsCount`).
+    b. Crea una matriz `capacities` del mismo tamaño que el número de módulos de staking. Cada entrada en esta matriz representa la capacidad máxima de un módulo de staking particular, es decir, el número máximo de validadores que puede tener ese módulo. Esto se calcula como el mínimo de:
 
-    c. Finally, it calls the `allocate` function from `MinFirstAllocationStrategy`, passing in the `allocations`, `capacities`, and `_depositsToAllocate`. The amount successfully allocated is stored in `allocated`.
+    - El número objetivo de validadores para un módulo, que se basa en un share objetivo deseado (`stakingModulesCache[i].targetShare * totalActiveValidators / TOTAL_BASIS_POINTS`), o
+    - La suma de los validadores activos actuales y los validadores disponibles en el módulo (`stakingModulesCache[i].activeValidatorsCount + stakingModulesCache[i].availableValidatorsCount`).
 
+    c. Finalmente, llama a la función `allocate` de `MinFirstAllocationStrategy`, pasando las `asignaciones`, `capacidades` y `_depositsToAllocate`. La cantidad asignada correctamente se almacena en `allocated`.
 
-To sum up, this function is using the `MinFirstAllocationStrategy` algorithm to distribute new deposits (validators) across different staking modules in a way that prioritizes filling the least populated modules, while taking into account each module's target share and capacity. The resulting allocations and total allocated amount are then returned for further use.
+En resumen, esta función utiliza el algoritmo `MinFirstAllocationStrategy` para distribuir nuevos depósitos (validadores) entre diferentes módulos de staking de manera que prioriza llenar los módulos menos poblados, teniendo en cuenta el share objetivo y la capacidad de cada módulo. Las asignaciones resultantes y la cantidad total asignada se devuelven luego para su uso adicional.
 
-## Fee distribution
+## Distribución de tarifas
 
-The fee structure is set independently in each module. There are two components to the fee structure: the module fee and the treasury fee, both specified as percentages (basis points). For example, a 5% (500 basis points) module fee split between node operators in the module and a 5% (500 basis points) treasury fee sent to the treasury. Additionally, `StakingRouter` utilizes a precision factor of 100 * 10^18 for fees that prevents arithmetic operations from truncating the fees of small modules.
+La estructura de tarifas se establece de manera independiente en cada módulo. Hay dos componentes en la estructura de tarifas: la tarifa del módulo y la tarifa de tesorería, ambas especificadas como porcentajes (puntos base). Por ejemplo, una tarifa del 5% (500 puntos base) para el módulo dividida entre los operadores de nodo en el módulo y una tarifa de tesorería del 5% (500 puntos base) enviada a la tesorería. Además, `StakingRouter` utiliza un factor de precisión de 100 * 10^18 para las tarifas que evita que las operaciones aritméticas truncen las tarifas de módulos pequeños.
 
-Because the protocol does not currently account for per-validator performance, the protocol fee is distributed between modules proportionally to active validators and the specified module fee. For example, a module with 75% of all validators in the protocol and a 5% module fee will receive 3.75% of the total rewards across the protocol. This means that if the modules' fee and treasury fee do not exceed 10%, the total protocol fee will not either, no matter how many modules there are. There is also an edge case where the module is stopped for emergency while its validators are still active. In this case the module fee will be transferred to the treasury and once the module is back online, the rewards will be returned back to the module from the treasury.
+Dado que el protocolo actualmente no tiene en cuenta el rendimiento por validador, la tarifa del protocolo se distribuye entre los módulos proporcionalmente a los validadores activos y la tarifa específica del módulo. Por ejemplo, un módulo con el 75% de todos los validadores en el protocolo y una tarifa del 5% recibirá el 3.75% de las recompensas totales en todo el protocolo. Esto significa que si las tarifas del módulo y de la tesorería no superan el 10%, la tarifa total del protocolo tampoco lo hará, sin importar cuántos módulos haya. También existe un caso especial en el que el módulo se detiene por emergencia mientras sus validadores siguen activos. En este caso, la tarifa del módulo se transferirá a la tesorería y una vez que el módulo vuelva en línea, las recompensas se devolverán al módulo desde la tesorería.
 
-The distribution function itself works as follows:
+La función de distribución funciona de la siguiente manera:
 
-1. The function first loads the current state of the staking modules into a cache (`_loadStakingModulesCache`) and calculates the number of these modules (`stakingModulesCount`).
+1. La función primero carga el estado actual de los módulos de staking en una caché (`_loadStakingModulesCache`) y calcula el número de estos módulos (`stakingModulesCount`).
 
-2. If there are no staking modules or no active validators in the system, it returns an empty response.
+2. Si no hay módulos de staking o no hay validadores activos en el sistema, devuelve una respuesta vacía.
 
-3. Otherwise, it initializes arrays to store the module IDs (`stakingModuleIds`), the addresses of reward recipients (`recipients`), and the fees of each recipient (`stakingModuleFees`). It also sets the `precisionPoints` to a constant `FEE_PRECISION_POINTS`, which represents the base precision number that constitutes 100% fee.
+3. De lo contrario, inicializa matrices para almacenar los IDs de módulos (`stakingModuleIds`), las direcciones de los destinatarios de recompensas (`recipients`) y las tarifas de cada destinatario (`stakingModuleFees`). También establece `precisionPoints` en una constante `FEE_PRECISION_POINTS`, que representa el número de precisión base que constituye el 100% de la tarifa.
 
-4. Then it loops through each staking module. For each module that has at least one active validator, it:
+4. Luego recorre cada módulo de staking. Para cada módulo que tenga al menos un validador activo, hace lo siguiente:
 
-    - Stores the module ID and recipient address in the respective arrays.
-    - Calculates the `stakingModuleValidatorsShare`, which is the proportion of total active validators that are part of this staking module.
-    - Calculates the `stakingModuleFee` as the product of `stakingModuleValidatorsShare` and the fee of the staking module divided by `TOTAL_BASIS_POINTS` (i.e., the proportion of the staking module's fee to the total possible fees). If the module is not stopped, this fee is stored in the `stakingModuleFees` array.
-    - Adds to `totalFee` the sum of the staking module's fee and a fee going to the treasury (calculated similarly to `stakingModuleFee`), where the treasury is a central pool of funds.
-5. After looping through all modules, it makes an assertion that `totalFee` doesn't exceed 100% (represented by `precisionPoints`).
+    - Almacena el ID del módulo y la dirección del destinatario en las matrices respectivas.
+    - Calcula `stakingModuleValidatorsShare`, que es la proporción de validadores activos totales que forman parte de este módulo de staking.
+    - Calcula `stakingModuleFee` como el producto de `stakingModuleValidatorsShare` y la tarifa del módulo de staking dividido por `TOTAL_BASIS_POINTS` (es decir, la proporción de la tarifa del módulo de staking en relación con las tarifas posibles totales). Si el módulo no está detenido, esta tarifa se almacena en la matriz `stakingModuleFees`.
+    - Añade a `totalFee` la suma de la tarifa del módulo de staking y una tarifa destinada a la tesorería (calculada de manera similar a `stakingModuleFee`), donde la tesorería es un fondo central de fondos.
 
-6. If there are staking modules with no active validators, it shrinks the `stakingModuleIds`, `recipients`, and `stakingModuleFees` arrays to exclude those modules.
+5. Después de recorrer todos los módulos, hace una afirmación de que `totalFee` no excede el 100% (representado por `precisionPoints`).
 
-Finally, the function returns five arrays/values: `recipients`, `stakingModuleIds`, `stakingModuleFees`, `totalFee`, and `precisionPoints`. These give the caller an overview of how rewards are distributed amongst the staking modules.
+6. Si hay módulos de staking sin validadores activos, reduce las matrices `stakingModuleIds`, `recipients` y `stakingModuleFees` para excluir esos módulos.
 
-## Helpful links
+Finalmente, la función devuelve cinco matrices/valores: `recipients`, `stakingModuleIds`, `stakingModuleFees`, `totalFee` y `precisionPoints`. Estos proporcionan al llamante una visión general de cómo se distribuyen las recompensas entre los módulos de staking.
 
-- [Staking Router ADR](https://hackmd.io/f1wvHzpjTIq41-GCrdaMjw?view)
-- [Staking Router LIP](https://github.com/lidofinance/lido-improvement-proposals/blob/develop/LIPS/lip-20.md)
-- [Lido on Ethereum Validator Exits Policy](https://hackmd.io/zHYFZr4eRGm3Ju9_vkcSgQ?)
+## Enlaces útiles
 
+- [ADR: Staking Router](https://hackmd.io/f1wvHzpjTIq41-GCrdaMjw?view)
+- [LIP: Staking Router](https://github.com/lidofinance/lido-improvement-proposals/blob/develop/LIPS/lip-20.md)
+- [Política de Salidas de Validadores de Lido en Ethereum](https://hackmd.io/zHYFZr4eRGm3Ju9_vkcSgQ?)
 
-## View methods
+## Métodos de visualización
 
 ### `getLido`
 
-Returns the address of the core `Lido` contract.
+Devuelve la dirección del contrato central `Lido`.
 
 ```solidity
 function getLido() public view returns (address)
@@ -135,7 +136,7 @@ function getLido() public view returns (address)
 
 ### `getStakingModules`
 
-Returns the list of structs of all registered staking modules. Each staking module has an associated data structure,
+Devuelve la lista de estructuras de todos los módulos de staking registrados. Cada módulo de staking tiene una estructura de datos asociada.
 
 ```solidity
 struct StakingModule {
@@ -156,49 +157,49 @@ struct StakingModule {
 function getStakingModules() external view returns (StakingModule[] memory res)
 ```
 
-**Returns:**
+**Devuelve:**
 
-| Name  | Type              | Description                                       |
+| Nombre | Tipo | Descripción |
 |-------|-------------------|---------------------------------------------------|
-| `res` | `StakingModule[]` | list of structs of all registered staking modules |
+| `res` | `StakingModule[]` | lista de estructuras de todos los módulos de staking registrados |
 
 ### `getStakingModuleIds`
 
-Returns the list of ids of all registered staking modules.
+Devuelve la lista de IDs de todos los módulos de staking registrados.
 
 ```solidity
 function getStakingModuleIds() public view returns (uint256[] memory stakingModuleIds)
 ```
 
-**Returns:**
+**Devuelve:**
 
-| Name  | Type              | Description                                       |
+| Nombre | Tipo | Descripción |
 |-------|-------------------|---------------------------------------------------|
-| `stakingModuleIds` | `uint256[]` | list of id of all staking modules |
+| `stakingModuleIds` | `uint256[]` | lista de IDs de todos los módulos de staking |
 
 ### `getStakingModule`
 
-Returns the struct of the specified staking module by its id.
+Devuelve la estructura del módulo de staking especificado por su ID.
 
 ```solidity
 function getStakingModule(uint256 _stakingModuleId) public view returns(StakingModule memory)
 ```
 
-**Parameters:**
+**Parámetros:**
 
-| Name  | Type              | Description                                       |
+| Nombre | Tipo | Descripción |
 |-------|-------------------|---------------------------------------------------|
-| `_stakingModuleId`| `uint256` | staking module id |
+| `_stakingModuleId` | `uint256` | ID del módulo de staking |
 
-**Returns:**
+**Devuelve:**
 
-| Name  | Type              | Description                                       |
+| Nombre | Tipo | Descripción |
 |-------|-------------------|---------------------------------------------------|
-|  | `StakingModule` | staking module information |
+| | `StakingModule` | información del módulo de staking |
 
 ### `getStakingModulesCount`
 
-Returns the number of registered staking modules.
+Devuelve el número de módulos de staking registrados.
 
 ```solidity
 function getStakingModulesCount() public view returns (uint256)
@@ -206,498 +207,466 @@ function getStakingModulesCount() public view returns (uint256)
 
 ### `hasStakingModule`
 
-Return a boolean value indicating whether a staking module with the specified id is registered.
+Devuelve un valor booleano que indica si está registrado un módulo de staking con el ID especificado.
 
 ```solidity
 function hasStakingModule(uint256 _stakingModuleId) external view returns (bool)
 ```
 
-**Parameters:**
+**Parámetros:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-| `_stakingModuleId`| `uint256` | staking module id |
+| Nombre             | Tipo      | Descripción            |
+|--------------------|-----------|------------------------|
+| `_stakingModuleId` | `uint256` | ID del módulo de staking |
 
 ### `getStakingModuleStatus`
 
-Return the status of the staking module.
+Devuelve el estado del módulo de staking.
 
 ```solidity
 function getStakingModuleStatus(uint256 _stakingModuleId) public view returns (StakingModuleStatus)
 ```
 
-**Parameters:**
+**Parámetros:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-| `_stakingModuleId`| `uint256` | staking module id |
+| Nombre             | Tipo      | Descripción            |
+|--------------------|-----------|------------------------|
+| `_stakingModuleId` | `uint256` | ID del módulo de staking |
 
-**Returns:**
+**Devuelve:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-|  | `StakingModuleStatus` | status of the staking module |
-
+| Nombre              | Tipo                   | Descripción                        |
+|---------------------|------------------------|------------------------------------|
+|                     | `StakingModuleStatus`  | Estado del módulo de staking       |
 
 ### `getStakingModuleSummary`
 
-Returns the struct containing a short summary of validators in the specified staking module, as shown below,
+Devuelve la estructura que contiene un resumen breve de los validadores en el módulo de staking especificado.
 
 ```solidity
 struct StakingModuleSummary {
-	uint256 totalExitedValidators;
-	uint256 totalDepositedValidators;
-	uint256 depositableValidatorsCount;
+    uint256 totalExitedValidators;
+    uint256 totalDepositedValidators;
+    uint256 depositableValidatorsCount;
 }
-```
 
-```
 function getStakingModuleSummary(uint256 _stakingModuleId) public view returns (StakingModuleSummary)
 ```
 
-**Parameters:**
+**Parámetros:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-| `_stakingModuleId`| `uint256` | staking module id |
+| Nombre             | Tipo      | Descripción            |
+|--------------------|-----------|------------------------|
+| `_stakingModuleId` | `uint256` | ID del módulo de staking |
 
-**Returns:**
+**Devuelve:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-|  | `StakingModuleSummary` | summary of the staking module's validators |
+| Nombre              | Tipo                      | Descripción                           |
+|---------------------|---------------------------|---------------------------------------|
+|                     | `StakingModuleSummary`    | Resumen de los validadores del módulo |
 
 ### `getNodeOperatorSummary`
 
-Returns the summary of a node operator from the staking module, as shown below,
-
-```
-struct NodeOperatorSummary {
-	bool isTargetLimitActive;
-	uint256 targetValidatorsCount;
-	uint256 stuckValidatorsCount;
-	uint256 refundedValidatorsCount;
-	uint256 stuckPenaltyEndTimestamp;
-	uint256 totalExitedValidators;
-	uint256 totalDepositedValidators;
-	uint256 depositableValidatorsCount;
-}
-```
+Devuelve el resumen de un operador de nodo desde el módulo de staking.
 
 ```solidity
-function getNodeOperatorSummary(
-	uint256 _stakingModuleId,
-	uint256 _nodeOperatorId
-) public view returns (NodeOperatorSummary)
+struct NodeOperatorSummary {
+    bool isTargetLimitActive;
+    uint256 targetValidatorsCount;
+    uint256 stuckValidatorsCount;
+    uint256 refundedValidatorsCount;
+    uint256 stuckPenaltyEndTimestamp;
+    uint256 totalExitedValidators;
+    uint256 totalDepositedValidators;
+    uint256 depositableValidatorsCount;
+}
+
+function getNodeOperatorSummary(uint256 _stakingModuleId, uint256 _nodeOperatorId) public view returns (NodeOperatorSummary)
 ```
 
-**Parameters:**
+**Parámetros:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-| `_stakingModuleId`| `uint256` | staking module id |
-| `_nodeOperatorId`| `uint256` | node operator id |
+| Nombre             | Tipo      | Descripción            |
+|--------------------|-----------|------------------------|
+| `_stakingModuleId` | `uint256` | ID del módulo de staking |
+| `_nodeOperatorId`  | `uint256` | ID del operador de nodo |
 
-**Returns:**
+**Devuelve:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-|  | `NodeOperatorSummary` | summary of the node operator |
+| Nombre              | Tipo                    | Descripción                           |
+|---------------------|-------------------------|---------------------------------------|
+|                     | `NodeOperatorSummary`   | Resumen del operador de nodo          |
 
 ### `getAllStakingModuleDigests`
 
-Returns the digests of all staking modules, as show below,
+Devuelve los resúmenes de todos los módulos de staking.
 
 ```solidity
 struct StakingModuleDigest {
-	uint256 nodeOperatorsCount;
-	uint256 activeNodeOperatorsCount;
-	StakingModule state;
-	StakingModuleSummary summary;
+    uint256 nodeOperatorsCount;
+    uint256 activeNodeOperatorsCount;
+    StakingModule state;
+    StakingModuleSummary summary;
 }
-```
 
-```
 function getAllStakingModuleDigests() external view returns (StakingModuleDigest[])
 ```
 
-**Returns:**
+**Devuelve:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-|  | `StakingModuleDigest[]` | array of staking module digests |
-
+| Nombre              | Tipo                      | Descripción                           |
+|---------------------|---------------------------|---------------------------------------|
+|                     | `StakingModuleDigest[]`   | Array de resúmenes de módulos de staking |
 
 ### `getStakingModuleDigests`
 
-Returns the digest of the specified staking modules.
+Devuelve los resúmenes de los módulos de staking especificados.
 
-```
+```solidity
 function getStakingModuleDigests(uint256[] memory _stakingModuleIds) public view returns (StakingModuleDigest[])
 ```
 
-**Parameters:**
+**Parámetros:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-| `_stakingModuleIds`| `uint256[]` | array of staking module ids |
+| Nombre             | Tipo         | Descripción            |
+|--------------------|--------------|------------------------|
+| `_stakingModuleIds`| `uint256[]`  | Array de IDs de módulos de staking |
 
-**Returns:**
+**Devuelve:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-|  | `StakingModuleDigest[]` | array of staking module digests |
+| Nombre              | Tipo                      | Descripción                           |
+|---------------------|---------------------------|---------------------------------------|
+|                     | `StakingModuleDigest[]`   | Array de resúmenes de módulos de staking |
 
 ### `getAllNodeOperatorDigests`
 
-Returns the digests of all node operators in the specified staking module,
+Devuelve los resúmenes de todos los operadores de nodo en el módulo de staking especificado.
 
 ```solidity
 struct NodeOperatorDigest {
-	uint256 id;
-	bool isActive;
-	NodeOperatorSummary summary;
+    uint256 id;
+    bool isActive;
+    NodeOperatorSummary summary;
 }
-```
 
-```
 function getAllNodeOperatorDigests(uint256 _stakingModuleId) external view returns (NodeOperatorDigest[])
 ```
 
-**Parameters:**
+**Parámetros:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-| `_stakingModuleId`| `uint256` | staking module id |
+| Nombre             | Tipo      | Descripción            |
+|--------------------|-----------|------------------------|
+| `_stakingModuleId` | `uint256` | ID del módulo de staking |
 
-**Returns:**
+**Devuelve:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-|  | `NodeOperatorDigest[]` | array of node operator digests |
+| Nombre              | Tipo                      | Descripción                           |
+|---------------------|---------------------------|---------------------------------------|
+|                     | `NodeOperatorDigest[]`    | Array de resúmenes de operadores de nodo |
 
 ### `getNodeOperatorDigests`
 
-Returns the digests for the specified node operators in the staking module.
+Devuelve los resúmenes de los operadores de nodo especificados en el módulo de staking.
 
 ```solidity
 function getNodeOperatorDigests(uint256 _stakingModuleId, uint256[] memory _nodeOperatorIds) public view returns (NodeOperatorDigest[])
 ```
 
-**Parameters:**
+**Parámetros:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-| `_stakingModuleId`| `uint256` | staking module id |
-| `_nodeOperatorIds`| `uint256[]` | array of node operator ids |
+| Nombre             | Tipo         | Descripción            |
+|--------------------|--------------|------------------------|
+| `_stakingModuleId` | `uint256`    | ID del módulo de staking |
+| `_nodeOperatorIds` | `uint256[]`  | Array de IDs de operadores de nodo |
 
-**Returns:**
+**Devuelve:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-|  | `NodeOperatorDigest[]` | array of node operator digests |
-
+| Nombre              | Tipo                      | Descripción                           |
+|---------------------|---------------------------|---------------------------------------|
+|                     | `NodeOperatorDigest[]`    | Array de resúmenes de operadores de nodo |
 
 ### `getStakingModuleIsStopped`
 
-Return a boolean value whether the staking module is stopped.
+Devuelve un valor booleano que indica si el módulo de staking está detenido.
 
 ```solidity
 function getStakingModuleIsStopped(uint256 _stakingModuleId) external view returns (bool)
 ```
 
-**Parameters:**
+**Parámetros:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-| `_stakingModuleId`| `uint256` | staking module id |
+| Nombre             | Tipo      | Descripción            |
+|--------------------|-----------|------------------------|
+| `_stakingModuleId` | `uint256` | ID del módulo de staking |
 
-**Returns:**
+**Devuelve:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-|  | `bool` | true if the staking module is stopped, false otherwise |
+| Nombre              | Tipo                   | Descripción                        |
+|---------------------|------------------------|------------------------------------|
+|                     | `bool`                 | true si el módulo de staking está detenido, false en caso contrario |
 
 ### `getStakingModuleIsDepositsPaused`
 
-Return a boolean value whether deposits are paused for the staking module.
+Devuelve un valor booleano que indica si los depósitos están pausados para el módulo de staking.
 
-```
+```solidity
 function getStakingModuleIsDepositsPaused(uint256 _stakingModuleId) external view returns (bool)
 ```
 
-**Parameters:**
+**Parámetros:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-| `_stakingModuleId`| `uint256` | staking module id |
+| Nombre             | Tipo      | Descripción            |
+|--------------------|-----------|------------------------|
+| `_stakingModuleId` | `uint256` | ID del módulo de staking |
 
-**Returns:**
+**Devuelve:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-|  | `bool` | true if deposits are paused for the staking module, false otherwise |
+| Nombre              | Tipo                   | Descripción                        |
+|---------------------|------------------------|------------------------------------|
+|                     | `bool`                 | true si los depósitos están pausados para el módulo de staking, false en caso contrario |
 
 ### `getStakingModuleIsActive`
 
-Return a boolean value whether the staking module is active.
+Devuelve un valor booleano que indica si el módulo de staking está activo.
 
-```
+```solidity
 function getStakingModuleIsActive(uint256 _stakingModuleId) external view returns (bool)
 ```
 
-**Parameters:**
+**Parámetros:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-| `_stakingModuleId`| `uint256` | staking module id |
+| Nombre             | Tipo      | Descripción            |
+|--------------------|-----------|------------------------|
+| `_stakingModuleId` | `uint256` | ID del módulo de staking |
 
-**Returns:**
+**Devuelve:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-|  | `bool` | true if the staking module is active, false otherwise |
+| Nombre              | Tipo                   | Descripción                        |
+|---------------------|------------------------|------------------------------------|
+|                     | `bool`                 | true si el módulo de staking está activo, false en caso contrario |
 
 ### `getStakingModuleNonce`
 
-Get the nonce of a staking module.
+Obtiene el nonce de un módulo de staking.
 
-```
+```solidity
 function getStakingModuleNonce(uint256 _stakingModuleId) external view returns (uint256)
 ```
 
-**Parameters:**
+**Parámetros:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-| `_stakingModuleId`| `uint256` | staking module id |
+| Nombre             | Tipo      | Descripción            |
+|--------------------|-----------|------------------------|
+| `_stakingModuleId` | `uint256` | ID del módulo de staking |
 
-**Returns:**
+**Devuelve:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-|  | `uint256` | nonce of the staking module |
+| Nombre              | Tipo                   | Descripción                        |
+|---------------------|------------------------|------------------------------------|
+|                     | `uint256`              | nonce del módulo de staking         |
 
 ### `getStakingModuleLastDepositBlock`
 
-Get the block number of the last deposit to the staking module.
+Obtiene el número de bloque del último depósito al módulo de staking.
 
-```
+```solidity
 function getStakingModuleLastDepositBlock(uint256 _stakingModuleId) external view returns (uint256)
 ```
 
-**Parameters:**
+**Parámetros:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-| `_stakingModuleId`| `uint256` | staking module id |
+| Nombre             | Tipo      | Descripción            |
+|--------------------|-----------|------------------------|
+| `_stakingModuleId` | `uint256` | ID del módulo de staking |
 
-**Returns:**
+**Devuelve:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-|  | `uint256` | block number of the last deposit |
+| Nombre              | Tipo                   | Descripción                        |
+|---------------------|------------------------|------------------------------------|
+|                     | `uint256`              | número de bloque del último depósito |
 
 ### `getStakingModuleActiveValidatorsCount`
 
-Returns the number of active validators in the staking module.
+Devuelve el número de validadores activos en el módulo de staking.
 
-```
+```solidity
 function getStakingModuleActiveValidatorsCount(uint256 _stakingModuleId) external view returns (uint256 activeValidatorsCount)
 ```
 
-**Parameters:**
+**Parámetros:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-| `_stakingModuleId`| `uint256` | staking module id |
+| Nombre             | Tipo      | Descripción            |
+|--------------------|-----------|------------------------|
+| `_stakingModuleId` | `uint256` | ID del módulo de staking |
 
-**Returns:**
+**Devuelve:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-|  | `uint256` | number of active validators |
+| Nombre              | Tipo                   | Descripción                        |
+|---------------------|------------------------|------------------------------------|
+| `activeValidatorsCount` | `uint256`       | número de validadores activos      |
 
 ### `getStakingModuleMaxDepositsCount`
 
-Calculates the maximum number of deposits a staking module can handle based on the available deposit value.
+Calcula el número máximo de depósitos que puede manejar un módulo de staking basado en el valor de depósito disponible.
 
-```
-function getStakingModuleMaxDepositsCount(
-	uint256 _stakingModuleId,
-	uint256 _maxDepositsValue
-) public view returns (uint256)
+```solidity
+function getStakingModuleMaxDepositsCount(uint256 _stakingModuleId, uint256 _maxDepositsValue) public view returns (uint256)
 ```
 
-**Parameters:**
+**Parámetros:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-| `_stakingModuleId`| `uint256` | staking module id |
-| `_maxDepositsValue`| `uint256` | maximum amount of deposits based on the available ether |
+| Nombre             | Tipo      | Descripción            |
+|--------------------|-----------|------------------------|
+| `_stakingModuleId` | `uint256` | ID del módulo de staking |
+| `_maxDepositsValue`| `uint256` | cantidad máxima de depósitos basada en el ether disponible |
 
-**Returns:**
+**Devuelve:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-|  | `uint256` | maximum number of deposits that can be made using the given staking module |
+| Nombre              | Tipo                   | Descripción                        |
+|---------------------|------------------------|------------------------------------|
+|                     | `uint256`              | número máximo de depósitos que se pueden realizar usando el módulo de staking dado |
 
 ### `getStakingFeeAggregateDistribution`
 
-Returns the total fee distribution proportion.
+Devuelve la distribución total de tarifas.
 
-```
-function getStakingFeeAggregateDistribution() public view returns (
-	uint96 modulesFee,
-	uint96 treasuryFee,
-	uint256 basePrecision
-)
+```solidity
+function getStakingFeeAggregateDistribution() public view returns (uint96 modulesFee, uint96 treasuryFee, uint256 basePrecision)
 ```
 
-**Returns:**
+**Devuelve:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-| `modulesFee` | `uint96` | total fees for all staking modules |
-| `treasuryFee` | `uint96` | total fee for the treasury |
-| `basePrecision` | `uint256` | base precision number, a value corresponding to the full fee |
+| Nombre              | Tipo                   | Descripción                        |
+|---------------------|------------------------|------------------------------------|
+| `modulesFee`        | `uint96`               | tarifas totales para todos los módulos de staking |
+| `treasuryFee`       | `uint96`               | tarifa total para el tesoro        |
+| `basePrecision`     | `uint256`              | número de precisión base, un valor que corresponde a la tarifa completa |
 
 ### `getStakingRewardsDistribution`
 
-Get the shares table.
+Obtiene la tabla de distribución de las participaciones.
 
 ```solidity
 function getStakingRewardsDistribution() public view returns (
-	address[] memory recipients,
-	uint256[] memory stakingModuleIds,
-	uint96[] memory stakingModuleFees,
-	uint96 totalFee,
-	uint256 precisionPoints
+    address[] memory recipients,
+    uint256[] memory stakingModuleIds,
+    uint96[] memory stakingModuleFees,
+    uint96 totalFee,
+    uint256 precisionPoints
 )
 ```
 
-**Returns:**
+**Devuelve:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-| `recipients` | `address[]` | total staking module addresses |
-| `stakingModuleIds` | `uint256[]` | staking module ids |
-| `stakingModuleFees` | `uint96[]` | staking module fees |
-| `totalFee` | `uint96[]` | total fee |
-| `precisionPoints` | `uint256` | base precision number, a value corresponding to the full fee |
+| Nombre              | Tipo                   | Descripción                        |
+|---------------------|------------------------|------------------------------------|
+| `recipients`        | `address[]`            | direcciones totales de módulos de estaca |
+| `stakingModuleIds`  | `uint256[]`            | ids de módulos de estaca |
+| `stakingModuleFees` | `uint96[]`             | tarifas del módulo de estaca |
+| `totalFee`          | `uint96`               | tarifa total |
+| `precisionPoints`   | `uint256`              | número de precisión base, un valor que corresponde a la tarifa completa |
 
 ### `getDepositsAllocation`
 
-Calculates the deposit allocation after the distribution of the specified number of deposits using the Min-First algorithm.
+Calcula la asignación de depósitos después de la distribución del número especificado de depósitos utilizando el algoritmo Min-First.
 
 ```solidity
-function getDepositsAllocation(uint256 _depositsCount) external view returns (
-	uint256 allocated, uint256[] memory allocations
-)
+function getDepositsAllocation(uint256 _depositsCount) external view returns (uint256 allocated, uint256[] memory allocations)
 ```
 
-**Parameters:**
+**Parámetros:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-| `_depositsCount` | `uint256` | deposits to allocate between staking modules |
+| Nombre             | Tipo      | Descripción            |
+|--------------------|-----------|------------------------|
+| `_depositsCount`   | `uint256` | depósitos para asignar entre módulos de estaca |
 
-**Returns:**
+**Devuelve:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-| `allocated` | `uint256` | total staking module addresses |
-| `allocations` | `uint256[]` | array of new total deposits between staking modules |
+| Nombre              | Tipo                      | Descripción                           |
+|---------------------|---------------------------|---------------------------------------|
+| `allocated`         | `uint256`                 | direcciones totales de módulos de estaca |
+| `allocations`       | `uint256[]`               | array de nuevo total de depósitos entre módulos de estaca |
 
 ### `getWithdrawalCredentials`
 
-Get the withdrawal credentials.
+Obtiene las credenciales de retiro.
 
 ```solidity
 function getWithdrawalCredentials() public view returns (bytes32)
 ```
 
-**Returns:**
+**Devuelve:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-|  | `bytes32` | withdrawal credentials |
+| Nombre              | Tipo                      | Descripción                           |
+|---------------------|---------------------------|---------------------------------------|
+|                     | `bytes32`                 | credenciales de retiro                 |
 
-
-
-## Write methods
+## Métodos de escritura
 
 ### `addStakingModule`
 
-Register a staking module.
+Registra un módulo de staking.
 
 ```solidity
 function addStakingModule(
-	string calldata _name,
-	address _stakingModuleAddress,
-	uint256 _targetShare,
-	uint256 _stakingModuleFee,
-	uint256 _treasuryFee
+    string calldata _name,
+    address _stakingModuleAddress,
+    uint256 _targetShare,
+    uint256 _stakingModuleFee,
+    uint256 _treasuryFee
 ) external;
 ```
 
-**Parameters:**
+**Parámetros:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-| `_name` | `string` | human-readable name of the module |
-| `_stakingModuleAddress` | `address` | address of the module contract |
-| `_targetShare` | `uin256` | module target share |
-| `_stakingModuleFee` | `uin256` | module fee |
-| `_treasuryFee` | `uint256` | module treasury fee |
+| Nombre             | Tipo         | Descripción            |
+|--------------------|--------------|------------------------|
+| `_name`            | `string`     | nombre legible del módulo |
+| `_stakingModuleAddress` | `address` | dirección del contrato del módulo |
+| `_targetShare`     | `uin256`     | participación objetivo del módulo |
+| `_stakingModuleFee`| `uin256`     | tarifa del módulo |
+| `_treasuryFee`     | `uint256`    | tarifa del tesoro del módulo |
 
 ### `updateStakingModule`
 
-Register a staking module.
+Actualiza un módulo de staking.
 
 ```solidity
 function updateStakingModule(
-	uint256 _stakingModuleId,
-	uint256 _targetShare,
-	uint256 _stakingModuleFee,
-	uint256 _treasuryFee
+
+
+    uint256 _stakingModuleId,
+    uint256 _targetShare,
+    uint256 _stakingModuleFee,
+    uint256 _treasuryFee
 ) external;
 ```
 
-**Parameters:**
+**Parámetros:**
 
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-| `_stakingModuleId` | `address` | id of the module |
-| `_targetShare` | `uin256` | updated module target share |
-| `_stakingModuleFee` | `uin256` | updated module fee |
-| `_treasuryFee` | `uint256` | updated module treasury fee |
+| Nombre             | Tipo         | Descripción            |
+|--------------------|--------------|------------------------|
+| `_stakingModuleId` | `address`    | id del módulo |
+| `_targetShare`     | `uin256`     | actualización de la participación objetivo del módulo |
+| `_stakingModuleFee`| `uin256`     | actualización de la tarifa del módulo |
+| `_treasuryFee`     | `uint256`    | actualización de la tarifa del tesoro del módulo |
 
 ### `updateTargetValidatorsLimits`
 
-Updates the limit of the validators that can be used for deposit.
+Actualiza el límite de los validadores que pueden ser utilizados para el depósito.
 
 ```solidity
 function updateTargetValidatorsLimits(
-	uint256 _stakingModuleId,
-	uint256 _nodeOperatorId,
-	bool _isTargetLimitActive,
-	uint256 _targetLimit
+    uint256 _stakingModuleId,
+    uint256 _nodeOperatorId,
+    bool _isTargetLimitActive,
+    uint256 _targetLimit
 ) external;
 ```
 
-**Parameters:**
-
-| Name  | Type              | Description                                       |
-|-------|-------------------|---------------------------------------------------|
-| `_stakingModuleId` | `uin256` | id of the module |
-| `_nodeOperatorId` | `uin256` | id of the node operator |
-| `_isTargetLimitActive` | `bool` | active flag |
-| `_targetLimit` | `uint256` | target limit of the node operator |
-
 ### `updateRefundedValidatorsCount`
 
-Updates the number of the refunded validators in the staking module with the given node operator id.
+Actualiza el número de validadores reembolsados en el módulo de staking con el identificador del operador de nodo dado.
 
 ```solidity
 function updateRefundedValidatorsCount(
@@ -707,17 +676,17 @@ function updateRefundedValidatorsCount(
 ) external;
 ```
 
-**Parameters:**
+**Parámetros:**
 
-| Name  | Type              | Description                                       |
+| Nombre  | Tipo              | Descripción                                       |
 |-------|-------------------|---------------------------------------------------|
-| `_stakingModuleId` | `uin256` | id of the module |
-| `_nodeOperatorId` | `uin256` | id of the node operator |
-| `_refundedValidatorsCount` | `uint256` | new number of refunded validators of the node operator |
+| `_stakingModuleId` | `uin256` | id del módulo |
+| `_nodeOperatorId` | `uin256` | id del operador de nodo |
+| `_refundedValidatorsCount` | `uint256` | nuevo número de validadores reembolsados del operador de nodo |
 
 ### `reportRewardsMinted`
 
-Updates the number of the refunded validators in the staking module with the given node operator id.
+Actualiza el número de validadores reembolsados en el módulo de staking con el identificador del operador de nodo dado.
 
 ```solidity
 function reportRewardsMinted(
@@ -726,16 +695,16 @@ function reportRewardsMinted(
 ) external;
 ```
 
-**Parameters:**
+**Parámetros:**
 
-| Name  | Type              | Description                                       |
+| Nombre  | Tipo              | Descripción                                       |
 |-------|-------------------|---------------------------------------------------|
-| `_stakingModuleIds` | `uin256[]` | list of the reported staking module ids |
-| `_totalShares` | `uin256[]` | total shares minted to the given staking modules |
+| `_stakingModuleIds` | `uin256[]` | lista de los ids reportados de los módulos de staking |
+| `_totalShares` | `uin256[]` | total de participaciones emitidas para los módulos de staking dados |
 
 ### `updateExitedValidatorsCountByStakingModule`
 
-Update total numbers of exited validators for staking modules with the specified module ids.
+Actualiza el número total de validadores salidos para los módulos de staking con los ids de módulo especificados.
 
 ```solidity
 function reportRewardsMinted(
@@ -744,16 +713,16 @@ function reportRewardsMinted(
 ) external;
 ```
 
-**Parameters:**
+**Parámetros:**
 
-| Name  | Type              | Description                                       |
+| Nombre  | Tipo              | Descripción                                       |
 |-------|-------------------|---------------------------------------------------|
-| `_stakingModuleIds` | `uin256[]` | list of the reported staking module ids |
-| `_exitedValidatorsCounts` | `uin256[]` | new counts of exited validators for the specified staking modules |
+| `_stakingModuleIds` | `uin256[]` | lista de los ids reportados de los módulos de staking |
+| `_exitedValidatorsCounts` | `uin256[]` | nuevos conteos de validadores salidos para los módulos de staking especificados |
 
 ### `reportStakingModuleExitedValidatorsCountByNodeOperator`
 
-Updates exited validators counts per node operator for the staking module with the specified id.
+Actualiza el conteo de validadores salidos por operador de nodo para el módulo de staking con el id especificado.
 
 ```solidity
 function reportStakingModuleExitedValidatorsCountByNodeOperator(
@@ -763,17 +732,17 @@ function reportStakingModuleExitedValidatorsCountByNodeOperator(
 ) external;
 ```
 
-**Parameters:**
+**Parámetros:**
 
-| Name  | Type              | Description                                       |
+| Nombre  | Tipo              | Descripción                                       |
 |-------|-------------------|---------------------------------------------------|
-| `_stakingModuleId` | `uin256` | staking module id |
-| `_nodeOperatorIds` | `bytes` | ids of the node operators |
-| `_exitedValidatorsCounts` | `bytes` | new counts of exited validators for the specified node operators |
+| `_stakingModuleId` | `uin256` | id del módulo de staking |
+| `_nodeOperatorIds` | `bytes` | ids de los operadores de nodo |
+| `_exitedValidatorsCounts` | `bytes` | nuevos conteos de validadores salidos para los operadores de nodo especificados |
 
 ### `unsafeSetExitedValidatorsCount`
 
-Sets exited validators count for the given module and given node operator in that module without performing critical safety checks, e.g. that exited validators count cannot decrease.
+Establece el conteo de validadores salidos para el módulo y el operador de nodo dados en ese módulo sin realizar verificaciones críticas de seguridad, por ejemplo, que el conteo de validadores salidos no pueda disminuir.
 
 ```solidity
 function unsafeSetExitedValidatorsCount(
@@ -784,41 +753,40 @@ function unsafeSetExitedValidatorsCount(
 ) external;
 ```
 
-where `ValidatorsCountsCorrection` is a struct as seen below,
+donde `ValidatorsCountsCorrection` es una estructura como se muestra a continuación,
 
 ```solidity
 struct ValidatorsCountsCorrection {
-	/// @notice The expected current number of exited validators of the module that is
-	/// being corrected.
+	/// @notice El número esperado actual de validadores salidos del módulo que se
+	/// está corrigiendo.
 	uint256 currentModuleExitedValidatorsCount;
-	/// @notice The expected current number of exited validators of the node operator
-	/// that is being corrected.
+	/// @notice El número esperado actual de validadores salidos del operador de nodo
+	/// que se está corrigiendo.
 	uint256 currentNodeOperatorExitedValidatorsCount;
-	/// @notice The expected current number of stuck validators of the node operator
-	/// that is being corrected.
+	/// @notice El número esperado actual de validadores atascados del operador de nodo
+	/// que se está corrigiendo.
 	uint256 currentNodeOperatorStuckValidatorsCount;
-	/// @notice The corrected number of exited validators of the module.
+	/// @notice El número corregido de validadores salidos del módulo.
 	uint256 newModuleExitedValidatorsCount;
-	/// @notice The corrected number of exited validators of the node operator.
+	/// @notice El número corregido de validadores salidos del operador de nodo.
 	uint256 newNodeOperatorExitedValidatorsCount;
-	/// @notice The corrected number of stuck validators of the node operator.
+	/// @notice El número corregido de validadores atascados del operador de nodo.
 	uint256 newNodeOperatorStuckValidatorsCount;
 }
 ```
 
+**Parámetros:**
 
-**Parameters:**
-
-| Name  | Type              | Description                                       |
+| Nombre  | Tipo              | Descripción                                       |
 |-------|-------------------|---------------------------------------------------|
-| `_stakingModuleId` | `uin256` | staking module id |
-| `_nodeOperatorIds` | `bytes` | ids of the node operators |
-| `_triggerUpdateFinish` | `bool` | flag to call `onExitedAndStuckValidatorsCountsUpdated` on the module after applying the corrections |
-| `_correction` | `ValidatorsCountsCorrection` | correction details |
+| `_stakingModuleId` | `uin256` | id del módulo de staking |
+| `_nodeOperatorIds` | `bytes` | ids de los operadores de nodo |
+| `_triggerUpdateFinish` | `bool` | bandera para llamar a `onExitedAndStuckValidatorsCountsUpdated` en el módulo después de aplicar las correcciones |
+| `_correction` | `ValidatorsCountsCorrection` | detalles de la corrección |
 
 ### `reportStakingModuleStuckValidatorsCountByNodeOperator`
 
-Updates stuck validators counts per node operator for the staking module with the specified id.
+Actualiza el conteo de validadores atascados por operador de nodo para el módulo de staking con el id especificado.
 
 ```solidity
 function reportStakingModuleStuckValidatorsCountByNodeOperator(
@@ -828,17 +796,17 @@ function reportStakingModuleStuckValidatorsCountByNodeOperator(
 ) external;
 ```
 
-**Parameters:**
+**Parámetros:**
 
-| Name  | Type              | Description                                       |
+| Nombre  | Tipo              | Descripción                                       |
 |-------|-------------------|---------------------------------------------------|
-| `_stakingModuleId` | `uin256` | staking module id |
-| `_nodeOperatorIds` | `bytes` | ids of the node operators |
-| `_stuckValidatorsCounts` | `bytes` | new counts of stuck validators for the specified node operators |
+| `_stakingModuleId` | `uin256` | id del módulo de staking |
+| `_nodeOperatorIds` | `bytes` | ids de los operadores de nodo |
+| `_stuckValidatorsCounts` | `bytes` | nuevos conteos de validadores atascados para los operadores de nodo especificados |
 
 ### `onValidatorsCountsByNodeOperatorReportingFinished`
 
-Post-report hook called by the oracle when the second phase of data reporting finishes, i.e. when the oracle submitted the complete data on the stuck and exited validator counts per node operator for the current reporting frame.
+Gancho posterior al reporte llamado por el oráculo cuando finaliza la segunda fase de reporte de datos, es decir, cuando el oráculo ha enviado los datos completos sobre los conteos de validadores atascados y salidos por operador de nodo para el marco de reporte actual.
 
 ```solidity
 function onValidatorsCountsByNodeOperatorReportingFinished() external;
