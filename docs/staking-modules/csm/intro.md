@@ -1,66 +1,67 @@
 # Introducción
 
 :::info
-Los terminos "validator", "key", "validator key", y "deposit data" tienen el mismo significado dentro del documento.
+Los términos "validator", "key", "validator key" y "deposit data" tienen el mismo significado dentro del documento.
 :::
 
 ## ∑ TL;DR
-El Módulo de Staking Comunitario (CSM) es un módulo de staking sin permisos diseñado para atraer a los stakers de la comunidad a participar en Lido en el protocolo Ethereum como Operadores de Nodo. El único requisito para unirse al CSM como Operador de Nodo es poder ejecutar validadores (según las políticas de Lido en Ethereum) y proporcionar un bono. La participación se asigna a los validator keys en el orden en que se proporcionan las keys, siempre que sean válidas. El bono no está directamente asociado con la participación real del validador, sino que se trata como una garantía de seguridad. El bono es una característica de un Operador de Nodo; por lo tanto, es una garantía para todos los validadores del Operador de Nodo. Esto permite la reducción del bono. Cuantos más validadores tenga el Operador de Nodo, menor será el bono por cada validador. Los Operadores de Nodo obtienen sus recompensas del rebase del bono y de la porción de recompensas de staking del Operador de Nodo. La porción de recompensas de staking del Operador de Nodo se socializa (promedia) si los validadores superan el umbral. Las penalizaciones acumuladas de la CL que resulten en una reducción del saldo por debajo del saldo de depósito y las recompensas de la EL robadas se confiscan del bono del Operador de Nodo. Los Operadores de Nodo deben realizar salidas de validadores a solicitud del protocolo o pueden salir voluntariamente.
+El Módulo de Staking Comunitario (CSM) es un módulo de staking sin permisos diseñado para atraer a los stakers de la comunidad a participar en Lido en el protocolo Ethereum como Operadores de Nodo. El único requisito para unirse al CSM como Operador de Nodo es poder ejecutar validadores (según las políticas de Lido en Ethereum) y proporcionar un colateral. La participación se asigna a los validator keys en el orden en que se proporcionan las keys, siempre que sean válidas. El colateral no está directamente asociado con la participación real del validador, sino que se trata como una garantía de seguridad. El colateral es una característica de un Operador de Nodo; por lo tanto, es una garantía para todos los validadores del Operador de Nodo. Esto permite la reducción del colateral. Cuantos más validadores tenga el Operador de Nodo, menor será el colateral por cada validador. Los Operadores de Nodo obtienen sus recompensas del rebase del colateral y de la porción de recompensas de staking del Operador de Nodo. La porción de recompensas de staking del Operador de Nodo se socializa (promedia) si los validadores superan el umbral. Las penalizaciones acumuladas de la CL que resulten en una reducción del saldo por debajo del saldo de depósito y las recompensas de la EL robadas se confiscan del colateral del Operador de Nodo. Los Operadores de Nodo deben realizar salidas de validadores a solicitud del protocolo o pueden salir voluntariamente.
 
 ## 📓 Glosario
-- The [**staking router**](../../contracts/staking-router.md) (SR) es un contrato inteligente dentro del protocolo Lido en Ethereum que facilita la asignación de participación y la distribución de recompensas a través de diferentes módulos;
-- Un **staking module** (SM) es un contrato inteligente o un conjunto de contratos inteligentes conectados al enrutador de staking, que:
+- The [**staking router**](../../contracts/staking-router.md) (SR) es un contrato inteligente dentro del protocolo Lido en Ethereum que facilita la asignación de participación y la distribución de recompensas a través de diferentes módulos;
+- Un **staking module** (SM) es un contrato inteligente o un conjunto de contratos inteligentes conectados al enrutador de staking, que:
   - mantiene los conjuntos de operadores y validadores subyacentes,
   - es responsable de la incorporación y exclusión de operadores,
   - mantiene los depósitos, retiros y salidas de validadores,
   - mantiene la estructura de tarifas y la distribución para el módulo y los participantes, etc.,
   - se ajusta a la interfaz IStakingModule;
 - **Bono** - una garantía de seguridad que los Operadores de Nodo deben presentar antes de cargar validator keys en el CSM. Esta garantía cubre posibles pérdidas causadas por acciones inapropiadas del lado del Operador de Nodo. Una vez que el validador sale de la cadena Beacon y se cubren todas las pérdidas ocurridas, la garantía puede ser reclamada o reutilizada para cargar nuevas validator keys.
-- The **Lido DAO** is a Decentralized Autonomous Organization that decides on the critical parameters of controlled liquid staking protocols through the voting power of governance token (LDO).
-- A **Node Operator** (NO) is a person or entity that runs validators;
-- [`Lido`](../../contracts/lido.md) is a core contract of the Lido on Ethereum protocol that stores the protocol state, accepts user submissions, and includes the stETH token;
-- **stETH** is an ERC-20 token minted by [`Lido`](https://etherscan.io/address/0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84) smart contract and representing a share of the [`totalPooledEther`](../../contracts/lido.md#rebase);
-- **Deposit data** refers to a structure consisting of the validator’s public key and deposit signature submitted to `DepositContract`. This term can also be referred to as `keys` in the text. Validator private keys are created, stored, and managed by Node Operators exclusively;
-- `DepositContract` is the official Ethereum deposit contract for validator deposits;
-- `DepositSecurityModule` or [**DSM**](../../guías/deposit-security-manual.md) is a set of smart contract and off-chain parts mitigating the [deposit front-run vulnerability](../../guías/deposit-security-manual.md#la-vulnerabilidad);
-- A validator is considered to be [**“unbonded”**](join-csm.md#unbonded-validators) when the current Node Operator bond is not sufficient to cover this validator;
-- A validator is considered to be ["**stuck**"](../../contracts/staking-router.md#validadores-salidos-y-atascados) if it has not been exited timely following an exit signal from the protocol;
-- The **Curated module** is the first Lido staking module previously referred to as [Node Operators Registry](../../contracts/node-operators-registry);
-- **Easy Track** is a suite of smart contracts and an alternative veto-based voting model that streamlines routine DAO operations;
-- [**Accounting Oracle**](../../contracts/accounting-oracle.md) is a contract which collects information submitted by the off-chain oracles about state of the Lido-participating validators and their balances, the amount of funds accumulated on the protocol vaults (i.e., withdrawal and execution layer rewards vaults), the number of exited and stuck validators, the number of withdrawal requests the protocol can process and distributes node-operator rewards and performs `stETH` token rebase;
-- [**VEBO**](../../contracts/validators-exit-bus-oracle.md) or Validators Exit Bus Oracle is a contract that implements an on-chain "source of truth" message bus between the protocol's off-chain oracle and off-chain observers, with the main goal of delivering validator exit requests to the Lido-participating Node Operators.
+- The **Lido DAO** es una Organización Autónoma Descentralizada que decide sobre los parámetros críticos de los protocolos de staking líquido controlados a través del poder de voto del token de gobernanza (LDO).
+- Un **Node Operator** (NO) es una persona o entidad que ejecuta validadores;
+- [`Lido`](../../contracts/lido.md) es un contrato central del protocolo Lido en Ethereum que almacena el estado del protocolo, acepta las presentaciones de usuarios e incluye el token stETH;
+- **stETH** es un token ERC-20 creado por el contrato inteligente [`Lido`](https://etherscan.io/address/0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84) y representa una participación en el [`totalPooledEther`](../../contracts/lido.md#rebase);
+- **Deposit data** se refiere a una estructura que consiste en la clave pública del validador y la firma de depósito enviada al `DepositContract`. Este término también puede referirse como `keys` en el texto. Las claves privadas del validador son creadas, almacenadas y gestionadas exclusivamente por los Node Operators;
+- `DepositContract` es el contrato oficial de depósito de Ethereum para depósitos de validadores;
+- `DepositSecurityModule` o [**DSM**](../../guías/deposit-security-manual.md) es un conjunto de contratos inteligentes y partes fuera de la cadena que mitigan la [vulnerabilidad de front-running en los depósitos](../../guías/deposit-security-manual.md#la-vulnerabilidad);
+- Un validador se considera **"unbonded"** cuando el colateral actual del Node Operator no es suficiente para cubrir a este validador;
+- Un validador se considera **"stuck"** si no ha salido a tiempo después de recibir una señal de salida del protocolo;
+- El **Curated module** es el primer módulo de staking de Lido anteriormente conocido como [Node Operators Registry](../../contracts/node-operators-registry);
+- **Easy Track** es un conjunto de contratos inteligentes y un modelo de votación basado en veto que agiliza las operaciones rutinarias de la DAO;
+- [**Accounting Oracle**](../../contracts/accounting-oracle.md) es un contrato que recopila información enviada por oráculos fuera de la cadena sobre el estado de los validadores participantes en Lido y sus saldos, la cantidad de fondos acumulados en los almacenes del protocolo (por ejemplo, bóvedas de recompensas de capa de retiro y ejecución), el número de validadores salidos y atascados, el número de solicitudes de retiro que el protocolo puede procesar y distribuye recompensas a los node operators y realiza el rebase del token `stETH`;
+- [**VEBO**](../../contracts/validators-exit-bus-oracle.md) o Validadores Exit Bus Oracle es un contrato que implementa un bus de mensajes "fuente de verdad" en la cadena entre el oráculo fuera de la cadena del protocolo y los observadores fuera de la cadena, con el objetivo principal de enviar solicitudes de salida de validadores a los Node Operators participantes en Lido.
 
-## 🌎 General info
-CSM is a staking module offering permissionless entry with a bond. This module aims to become a clear pathway for independent [community stakers](https://research.lido.fi/t/lido-on-ethereum-community-validation-manifesto/3331#lido-on-ethereum-community-validation-manifesto-1) (solo stakers or home stakers) to enter the Lido on Ethereum protocol (LoE) node operator set. The bond requirement is an essential security and alignment tool that makes permissionless entry possible without compromising the security or reliability of the underlying staking protocol (LoE).
+## 🌎 Información general
+CSM es un módulo de staking que ofrece entrada sin permisos con un colateral. Este módulo tiene como objetivo convertirse en un camino claro para que los stakers independientes de la comunidad (stakers solitarios o stakers domésticos) ingresen al conjunto de operadores de nodo de Lido en el protocolo Ethereum (LoE). El requisito de colateral es una herramienta esencial de seguridad y alineación que permite la entrada sin permisos sin comprometer la seguridad o la confiabilidad del protocolo subyacente de staking (LoE).
 
-## 🤓 Module specifics
-All staking modules should conform to the same [IStakingModule](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/interfaces/IStakingModule.sol) interface. That inevitably results in modules having a lot of common or similar components and logic. CSM is no exception here. For example, key storage components are based on the existing [Curated module](../../contracts/node-operators-registry.md). However, several aspects are different and worth a separate mention.
+## 🤓 Especificaciones del módulo
+Todos los módulos de staking deben cumplir con la misma [interfaz IStakingModule](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/interfaces/IStakingModule.sol). Esto inevitablemente resulta en que los módulos tengan muchos componentes y lógicas comunes o similares. CSM no es una excepción aquí. Por ejemplo, los componentes de almacenamiento de keys se basan en el módulo Curated existente. Sin embargo, hay varios aspectos diferentes que vale la pena mencionar por separado.
 
-### Exited and Withdrawn
-The [Curated module](../../contracts/node-operators-registry.md) uses the "exited" statuses of the validator (both [Slashed and Exited](https://notes.ethereum.org/7CFxjwMgQSWOHIxLgJP2Bw#44-Step-4-Slashed-and-Exited) and [Unslashed and Exited](https://notes.ethereum.org/7CFxjwMgQSWOHIxLgJP2Bw#45-Step-5-Unslashed-and-Exited)) as the last meaningful status in accounting since, after this status, the validator is no longer responsible for any duties on the Beacon chain (except for the rare cases of the delayed sync committee participation). CSM, in turn, needs to know about each validator's exact withdrawal balance to decide on bond penalization. Hence, the module uses the "exited" counter reported by the accounting oracle only to return a correct number of "active" keys to the staking router and implements permissionless reporting methods to report the validator's withdrawal balance once the validator is [withdrawn](https://consensys.io/shanghai-capella-upgrade#:~:text=Finally%2C%20the%20withdrawable%20validator%20is%20subject%20to%20the%20same%2C%20automated%20%E2%80%9Csweep%E2%80%9D%20that%20processes%20partial%20withdrawals%2C%20and%20its%20balance%20is%20withdrawn).
+### Salidas y Retiros
+El módulo Curated utiliza los estados "exited" del validador (tanto [Slashed y Exited](https://notes.ethereum.org/7CFxjwMgQSWOHIxLgJP2Bw#44-Step-4-Slashed-and-Exited) y [Unslashed y Exited](https://notes.ethereum.org/7CFxjwMgQSWOHIxLgJP2Bw#45-Step-5-Unslashed-and-Exited)) como el último estado significativo en la contabilidad, ya que después de este estado, el validador ya no es responsable de ningún deber en la cadena Beacon (excepto en casos raros de participación tardía en el comité de sincronización). CSM, por otro lado, necesita conocer el saldo exacto de retiro de cada validador para decidir sobre la penalización del colateral. Por lo tanto, el módulo utiliza el contador "exited" reportado por el oráculo de contabilidad solo para devolver un número correcto de keys "activas" al enrutador de staking e implementa métodos de reporte sin permisos para reportar el saldo de retiro del validador una vez que el validador ha sido [retirado](https://consensys.io/shanghai-capella-upgrade#:~:text=Finally%2C%20the%20withdrawable%20validator%20is%20subject%20to%20the%20same%2C%20automated%20%E2%80%9Csweep%E2%80%9D%20that%20processes%20partial%20withdrawals%2C%20and%20its%20balance%20is%20withdrawn).
 
-### Stake distribution queue
-A Node Operator must supply a bond to upload a new validator key to CSM. It is reasonable to allocate a stake in an order similar to the bond submission order. For this purpose, a FIFO (first in, first out) [stake allocation queue](join-csm.md#stake-allocation-queue) is utilized. Once the Staking Router requests keys to make a deposit, the next `X` keys from the queue are returned, preserving the bond submit order.
+### Cola de distribución de Stake
+Un Node Operator debe proporcionar un colateral para cargar una nueva validator key en CSM. Es razonable asignar una participación en un orden similar al de la presentación del colateral. Con este propósito, se utiliza una cola de asignación de participación FIFO (primero en entrar, primero en salir) [stake allocation queue](join-csm.md#stake-allocation-queue). Una vez que el enrutador de staking solicita keys para hacer un depósito, se devuelven las próximas `X` keys de la cola, preservando el orden de presentación del colateral.
 
-### Alternative measures for "stuck" keys
-The presence of "stuck" ("Delinquent" in the [original terms](https://snapshot.org/#/lido-snapshot.eth/proposal/0xa4eb1220a15d46a1825d5a0f44de1b34644d4aa6bb95f910b86b29bb7654e330)) keys for the Node Operator indicates the [Lido exit policy](../../guías/node-operators/general-overview#política-de-salida-de-validadores-penalidades-y-recuperación) violation. In this case, a module should apply measures for the policy-violating Node Operator. CSM uses measures that are different from those of the curated module. The measures are described in the corresponding [section](validator-exits.md#protocol-initiated-exits).
+### Medidas alternativas para keys "stuck"
+La presencia de keys "stuck" ("Delinquent" en los [términos originales](https://snapshot.org/#/lido-snapshot.eth/proposal/0xa4eb1220a15d46a1825d5a0f44de1b34644d4aa6bb95f910b86b29bb7654e330)) para el Node Operator indica la violación de la [política de salida de Lido](../../guías/node-operators/general-overview#política-de-salida-de-validadores-penalidades-y-recuperación). En este caso, un módulo debe aplicar medidas para el Node Operator que ha violado la política. CSM utiliza medidas que son diferentes de las del módulo Curated. Las medidas se describen en la sección correspondiente [validator-exits.md#protocol-initiated-exits](validator-exits.md#protocol-initiated-exits).
 
 :::info
-Note: CSM does not apply any measures to "Delayed" validators.
+Nota: CSM no aplica medidas a validadores "Delayed".
 :::
 
-### Node Operator structure
-The Node Operator data structure in CSM is similar to that of the [Curated module](../../contracts/node-operators-registry.md), with several minor differences:
-- The `name` property is omitted as redundant for the permissionless module;
-- The `rewardAddress` is used as a recipient of rewards and excess bond claims;
-- A new property, `managerAddress`, is introduced. The Node Operator should perform method calls from this address;
-- A new property, `totalWithdrawnKeys`, is introduced to count the total count of the withdrawn keys per Node Operator;
-- A new property, `depositableValidatorsCount`, is introduced to count the current deposit data eligible for deposits;
-- A new property, `enqueuedCount`, is introduced to keep track of the depositable keys that are in the queue. Also useful to determine depositable keys that are not in the queue at the moment;
+### Estructura del Node Operator
+La estructura de datos del Node Operator en CSM es similar a la del [módulo Curated](../../contracts/node-operators-registry.md), con algunas diferencias menores:
+- La propiedad `name` se omite por redundante para el módulo sin permisos;
+- La propiedad `rewardAddress` se utiliza como destinatario de recompensas y reclamaciones de colaterales excedentes;
+- Se introduce una nueva propiedad, `managerAddress`. El Node Operator debe realizar llamadas de método desde esta dirección;
+- Se introduce una nueva propiedad, `totalWithdrawnKeys`, para contar el número total de keys retiradas por Node Operator;
+- Se introduce una nueva propiedad, `depositableValidatorsCount`, para contar los datos de depósito actuales elegibles para depósitos;
+- Se introduce una nueva propiedad, `enqueuedCount`, para realizar un seguimiento de las keys depositables que están en la cola. También es útil para determinar las keys depositables que no están en la cola en ese momento;
 
-## Further reading
+## Lecturas adicionales
 
-- [Join CSM](join-csm.md)
-- [Rewards](rewards.md)
-- [Penalties](penalties.md)
-- [Validator exits](validator-exits.md)
+- [Únete a CSM](join-csm.md)
+- [Recompensas](rewards.md)
+- [Penalizaciones](penalties.md)
+- [Salidas de validadores](validator-exits.md)
+
