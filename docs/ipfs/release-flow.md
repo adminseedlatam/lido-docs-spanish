@@ -1,56 +1,49 @@
-# Release Flow
+# Flujo de Lanzamiento
 
-Releasing the widget to IPFS involves several steps, including:
+Lanzar el widget a IPFS implica varios pasos, entre ellos:
 
-1. Creating a content-addressable archive (CAR file) containing the necessary files for the widget to function.
-2. Uploading the CAR file to the IPFS network using an IPFS provider.
-3. Pinning the uploaded CAR file to ensure its permanent availability on the IPFS network.
+1. Crear un archivo de contenido direccionable (archivo CAR) que contenga los archivos necesarios para el funcionamiento del widget.
+2. Subir el archivo CAR a la red IPFS utilizando un proveedor de IPFS.
+3. Fijar el archivo CAR subido para asegurar su disponibilidad permanente en la red IPFS.
 
-:::note IPFS Pinning
-By default, IPFS nodes only keep data in their cache for a limited time.
-Then, the data is removed by an automatic garbage collection process.
-To ensure that content remains available on the IPFS network permanently,
-it must be pinned using its Content Identifier (CID).
+:::note Fijación en IPFS
+Por defecto, los nodos de IPFS solo mantienen los datos en su caché durante un tiempo limitado.
+Luego, los datos se eliminan mediante un proceso automático de recolección de basura.
+Para asegurar que el contenido permanezca disponible en la red IPFS de manera permanente,
+debe ser fijado utilizando su Identificador de Contenido (CID).
 :::
 
-The power of GitHub Actions is used to complete and automate these and other required steps.
+El poder de GitHub Actions se utiliza para completar y automatizar estos y otros pasos necesarios.
 
-## GitHub Actions workflow
+## Flujo de trabajo de GitHub Actions
 
-GitHub Actions has already been used to build and deploy Lido applications, so it was decided to adapt them for IPFS releases.
+GitHub Actions ya se ha utilizado para construir y desplegar aplicaciones de Lido, por lo que se decidió adaptarlos para los lanzamientos en IPFS.
 
-IPFS release occurs as the next step after a regular application release.
-But only major or critical updates are released to IPFS due to the numerous
-actions required to make an IPFS release, and also the fact that each new release of a Lido app
-will produce a new CID and will be available at the new address,
-which is inconvenient for users willing to always use the latest version of an application.
+El lanzamiento en IPFS ocurre como el siguiente paso después de un lanzamiento regular de la aplicación.
 
-The developed workflow allows automatic pinning of any Lido app that is technically ready to operate on IPFS.
-Additionally, pinning is not limited to a single provider but can be performed on multiple providers simultaneously.
-This approach aims to leverage decentralization, guaranteeing accessibility to IPFS content
-from multiple providers in case one of them fails. This setup also enables independent testing of the UI on various
-networks and environments.
+Pero solo las actualizaciones mayores o críticas se lanzan a IPFS debido a las numerosas acciones requeridas para realizar un lanzamiento en IPFS, y también al hecho de que cada nuevo lanzamiento de una aplicación de Lido producirá un nuevo CID y estará disponible en la nueva dirección, lo cual es inconveniente para los usuarios que desean usar siempre la última versión de una aplicación.
 
-The IPFS pinning and preparing ENS transactions in the workflow are facilitated
-by the [Blumen](https://github.com/StauroDEV/blumen) package, developed in collaboration with Lido.
+El flujo de trabajo desarrollado permite la fijación automática de cualquier aplicación de Lido que esté técnicamente lista para operar en IPFS.
+Además, la fijación no se limita a un solo proveedor, sino que se puede realizar en varios proveedores simultáneamente.
+Este enfoque busca aprovechar la descentralización, garantizando la accesibilidad al contenido de IPFS desde múltiples proveedores en caso de que uno de ellos falle. Esta configuración también permite pruebas independientes de la interfaz de usuario en varias redes y entornos.
 
-On every IPFS release, the content verification is carried out by both development and QA Lido contributors
-to ensure that there is no unexpected content added to the code during CI process.
-The verification relies on hash comparisons, and if you want, you can also
-perform it using the [provided instructions](hash-verification.md).
+La fijación en IPFS y la preparación de transacciones ENS en el flujo de trabajo son facilitadas por el paquete [Blumen](https://github.com/StauroDEV/blumen), desarrollado en colaboración con Lido.
 
-After the verification, the IPFS release is initiated, which results in adding
-the obtained pinning information to the application [releases page](https://github.com/lidofinance/ethereum-staking-widget/releases).
-The details about IPFS pinning (CID, IPFS providers, https gateway, source code archives) is attached to the release description.
+En cada lanzamiento en IPFS, la verificación del contenido es realizada por contribuyentes de desarrollo y QA de Lido para asegurar que no se agregue contenido inesperado al código durante el proceso de CI.
+La verificación se basa en comparaciones de hash, y si lo deseas, también puedes
+realizarla utilizando las [instrucciones proporcionadas](hash-verification.md).
 
-### Workflow steps
+Después de la verificación, se inicia el lanzamiento en IPFS, lo que resulta en la adición de la información de fijación obtenida a la [página de lanzamientos](https://github.com/lidofinance/ethereum-staking-widget/releases) de la aplicación.
+Los detalles sobre la fijación en IPFS (CID, proveedores de IPFS, puerta de enlace HTTPS, archivos fuente) se adjuntan a la descripción del lanzamiento.
 
-You can find the source code of the workflow [on GitHub](https://github.com/lidofinance/actions/blob/main/.github/workflows/ci-ipfs.yml).
-The workflow performs further steps:
+### Pasos del flujo de trabajo
 
-- Retrieving necessary secrets, tags, and the application's build files.
-- Obtaining information about the date and the commit hash of the tag.
-- Executing the [Blumen](https://github.com/StauroDEV/blumen) script to perform IPFS pinning.
-- Creating artifacts to be attached to the release.
-- Searching for an existing release on GitHub based on the provided tag for modifying the description.
-- Generating and modifying the existing description of the release.
+Puedes encontrar el código fuente del flujo de trabajo [en GitHub](https://github.com/lidofinance/actions/blob/main/.github/workflows/ci-ipfs.yml).
+El flujo de trabajo realiza los siguientes pasos:
+
+- Recuperar los secretos necesarios, etiquetas y los archivos de compilación de la aplicación.
+- Obtener información sobre la fecha y el hash de commit de la etiqueta.
+- Ejecutar el script [Blumen](https://github.com/StauroDEV/blumen) para realizar la fijación en IPFS.
+- Crear artefactos para adjuntar al lanzamiento.
+- Buscar un lanzamiento existente en GitHub basado en la etiqueta proporcionada para modificar la descripción.
+- Generar y modificar la descripción existente del lanzamiento.
