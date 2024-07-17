@@ -1,74 +1,65 @@
 # wstETH
 
-- [Source Code](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.6.12/WstETH.sol)
-- [Deployed Contract](https://etherscan.io/token/0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0)
+- [Código Fuente](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.6.12/WstETH.sol)
+- [Contrato Desplegado](https://etherscan.io/token/0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0)
 
-## What is wrapped stETH (wstETH)?
+## ¿Qué es wrapped stETH (wstETH)?
 
-It's an [ERC-20](https://eips.ethereum.org/EIPS/eip-20) value-accruing token
-wrapper for `stETH`. Its balance does not change with each oracle report, but its
-value in `stETH` does. Internally, it represents the user's [share](/docs/guías/lido-tokens-integration-guide.md#internos-de-steth-mecánica-de-shares) of the total
-supply of `stETH` tokens.
+Es un token envoltorio [ERC-20](https://eips.ethereum.org/EIPS/eip-20) de acumulación de valor para `stETH`. Su balance no cambia con cada informe del oráculo, pero su valor en `stETH` sí lo hace. Internamente, representa la [participación](https://lidofinance.github.io/docs/guides/lido-tokens-integration-guide#steth-internals-share-mechanics) del usuario en el suministro total de tokens `stETH`.
 
-## Why use wstETH?
+## ¿Por qué usar wstETH?
 
-`wstETH` is mainly used as a layer of compatibility to integrate `stETH` into other
-DeFi protocols, that do not support rebasable tokens, especially bridges to L2s and
-other chains, as rebases don't work for bridged assets by default.
+`wstETH` se utiliza principalmente como una capa de compatibilidad para integrar `stETH` en otros protocolos DeFi que no soportan tokens rebasables, especialmente puentes hacia L2s y otras cadenas, ya que los rebases no funcionan por defecto para activos puenteados.
 
-## How to use wstETH?
+## ¿Cómo usar wstETH?
 
-The contract can be used as a trustless wrapper that accepts stETH tokens and mints
-wstETH in return. When the user unwraps, the contract burns the user's `wstETH`,
-and sends the user locked `stETH` in return.
+El contrato puede ser utilizado como un envoltorio sin confianza que acepta tokens stETH y emite wstETH a cambio. Cuando el usuario desenvuelve, el contrato quema el `wstETH` del usuario y le envía el `stETH` bloqueado a cambio.
 
-### Staking shortcut
+### Atajo de Staking
 
-The user can send ETH with regular transfer to the address of the contract and
-get wstETH in return. The contract will send ETH to Lido submit method,
-staking it and wrapping the received stETH seamlessly under the hood.
+El usuario puede enviar ETH con una transferencia regular a la dirección del contrato y recibir wstETH a cambio. El contrato enviará ETH al método submit de Lido, haciendo staking y envolviendo el stETH recibido de manera transparente.
 
-## Standards
+## Estándares
 
-Contract implements the following Ethereum standards:
+El contrato implementa los siguientes estándares de Ethereum:
 
-- [ERC-20: Token Standard](https://eips.ethereum.org/EIPS/eip-20)
-- [ERC-2612: Permit Extension for ERC-20 Signed Approvals](https://eips.ethereum.org/EIPS/eip-2612)
-- [EIP-712: Typed structured data hashing and signing](https://eips.ethereum.org/EIPS/eip-712)
+- [ERC-20: Estándar de Token](https://eips.ethereum.org/EIPS/eip-20)
+- [ERC-2612: Extensión de Permiso para Aprobaciones Firmadas ERC-20](https://eips.ethereum.org/EIPS/eip-2612)
+- [EIP-712: Hashing y firma de datos estructurados tipados](https://eips.ethereum.org/EIPS/eip-712)
 
-## View Methods
+## Métodos de Vista
 
 ### getWstETHByStETH()
 
-Returns amount of `wstETH` for a given amount of `stETH`
+Devuelve la cantidad de `wstETH` para una cantidad dada de `stETH`
 
 ```sol
 function getWstETHByStETH(uint256 _stETHAmount) returns (uint256)
 ```
 
-#### Parameters
+#### Parámetros
 
-| Name           | Type      | Description     |
-| -------------- | --------- | --------------- |
-| `_stETHAmount` | `uint256` | amount of stETH |
+| Nombre           | Tipo      | Descripción     |
+| ---------------- | --------- | --------------- |
+| `_stETHAmount`   | `uint256` | cantidad de stETH |
 
 ### getStETHByWstETH()
 
-Returns amount of `stETH` for a given amount of `wstETH`
+Devuelve la cantidad de `stETH` para una cantidad dada de `wstETH`
 
 ```sol
 function getStETHByWstETH(uint256 _wstETHAmount) returns (uint256)
 ```
 
-#### Parameters
+#### Parámetros
 
-| Parameter Name  | Type      | Description      |
-| --------------- | --------- | ---------------- |
-| `_wstETHAmount` | `uint256` | amount of wstETH |
+| Nombre del Parámetro | Tipo      | Descripción     |
+| -------------------- | --------- | --------------- |
+| `_wstETHAmount`      | `uint256` | cantidad de wstETH |
 
 ### stEthPerToken()
 
-Returns the amount of stETH tokens corresponding to one `wstETH`
+Devuelve la cantidad de tokens stETH correspondientes a un `wstETH`
 
 ```sol
 function stEthPerToken() returns (uint256)
@@ -76,70 +67,70 @@ function stEthPerToken() returns (uint256)
 
 ### tokensPerStEth()
 
-Returns the number of `wstETH` tokens corresponding to one `stETH`
+Devuelve la cantidad de tokens `wstETH` correspondientes a un `stETH`
 
 ```sol
 function tokensPerStEth() returns (uint256)
 ```
 
-## Methods
+## Métodos
 
 ### wrap()
 
-Exchanges `stETH` to `wstETH`
+Intercambia `stETH` por `wstETH`
 
 ```sol
 function wrap(uint256 _stETHAmount) returns (uint256)
 ```
 
 :::note
-Requirements:
+Requisitos:
 
-- `_stETHAmount` must be non-zero
-- `msg.sender` must approve at least `_stETHAmount` stETH to this contract.
-- `msg.sender` must have at least `_stETHAmount` of stETH.
+- `_stETHAmount` debe ser mayor a cero
+- `msg.sender` debe aprobar al menos `_stETHAmount` de stETH a este contrato.
+- `msg.sender` debe tener al menos `_stETHAmount` de stETH.
 
 :::
 
-#### Parameters
+#### Parámetros
 
-| Parameter Name | Type      | Description                                    |
-| -------------- | --------- | ---------------------------------------------- |
-| `_stETHAmount` | `uint256` | amount of stETH to wrap in exchange for wstETH |
+| Nombre del Parámetro | Tipo      | Descripción                                    |
+| -------------------- | --------- | ---------------------------------------------- |
+| `_stETHAmount`       | `uint256` | cantidad de stETH para envolver a cambio de wstETH |
 
-#### Returns
+#### Devuelve
 
-Amount of wstETH user receives after wrap
+Cantidad de wstETH que el usuario recibe después de envolver
 
 ### unwrap()
 
-Exchanges wstETH to `stETH`
+Intercambia wstETH por `stETH`
 
 ```sol
 function unwrap(uint256 _wstETHAmount) returns (uint256)
 ```
 
 :::note
-Requirements:
+Requisitos:
 
-- `_wstETHAmount` must be non-zero
-- `msg.sender` must have at least `_wstETHAmount` wstETH.
+- `_wstETHAmount` debe ser mayor a cero
+- `msg.sender` debe tener al menos `_wstETHAmount` de wstETH.
 
 :::
 
-#### Parameters
+#### Parámetros
 
-| Parameter Name  | Type      | Description                                     |
-| --------------- | --------- | ----------------------------------------------- |
-| `_wstETHAmount` | `uint256` | amount of wstETH to unwrap in exchange for stETH |
+| Nombre del Parámetro | Tipo      | Descripción                                    |
+| -------------------- | --------- | ---------------------------------------------- |
+| `_wstETHAmount`      | `uint256` | cantidad de wstETH para desenvolver a cambio de stETH |
 
-#### Returns
+#### Devuelve
 
-Amount of stETH user receives after unwrapping
+Cantidad de stETH que el usuario recibe después de desenvolver
 
 ### receive()
 
-Shortcut to stake ETH and auto-wrap returned `stETH`
+Atajo para hacer staking de ETH y envolver automáticamente el `stETH` recibido
 
 ```sol
 receive() payable
