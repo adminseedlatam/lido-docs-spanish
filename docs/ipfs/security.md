@@ -1,25 +1,23 @@
-# Security
+# Seguridad
 
-### RPC nodes
+### Nodos RPC
 
-The IPFS build utilizes non-secret environment variables since all IPFS content must be accessible to anyone.
-Therefore, the widget uses public RPC nodes to serve RPC requests. Users are explicitly notified about this fact in the UI,
-allowing them an option to specify necessary RPC nodes on the settings page. RPC nodes setup will be stored in a browser's localStorage and used for subsequent visits to the same IPFS gateway.
+La compilación de IPFS utiliza variables de entorno no secretas, ya que todo el contenido de IPFS debe ser accesible para todos.
+Por lo tanto, el widget utiliza nodos RPC públicos para atender las solicitudes RPC. Los usuarios son notificados explícitamente sobre este hecho en la interfaz de usuario, permitiéndoles la opción de especificar los nodos RPC necesarios en la página de configuración. La configuración de los nodos RPC se almacenará en el localStorage del navegador y se usará para visitas posteriores al mismo gateway de IPFS.
 
-### Possible localStorage leak
+### Posible fuga de localStorage
 
 :::warning
-The information below might severely affect your experience with IPFS applications.
+La información a continuación podría afectar gravemente su experiencia con las aplicaciones de IPFS.
 :::
-Lido widgets use your browser's localStorage to store some UI settings and RPC nodes urls.
-If you are using an IPFS gateway, which is referencing CID hash as a part of the URL path (e.g., `{GATEWAY_DOMAIN}/ipfs/{HASH}`),
-rather than the subdomain (e.g., `{HASH}.{GATEWAY}`), then other websites accessed from the same IPFS gateway
-can potentially view or edit your settings, because localStorage stays the same for the same domain.
 
-To avoid this possibility, it is suggested to use IPFS gateway URL, attached to the IPFS release description,
-see [instructions](about.md#dónde-obtener-cid-y-la-dirección-de-la-puerta-de-enlace). The offered gateway uses subdomain format.
+Los widgets de Lido utilizan el localStorage de su navegador para almacenar algunas configuraciones de la interfaz de usuario y las URLs de los nodos RPC.
+Si está utilizando un gateway de IPFS, que hace referencia al hash CID como parte de la ruta de la URL (por ejemplo, `{GATEWAY_DOMAIN}/ipfs/{HASH}`),
+en lugar del subdominio (por ejemplo, `{HASH}.{GATEWAY}`), entonces otros sitios web accedidos desde el mismo gateway de IPFS pueden potencialmente ver o editar sus configuraciones, ya que localStorage permanece igual para el mismo dominio.
 
-### Routing
+Para evitar esta posibilidad, se sugiere utilizar la URL del gateway de IPFS, adjunta a la descripción del lanzamiento de IPFS, vea [instrucciones](about.md#dónde-obtener-cid-y-la-dirección-de-la-puerta-de-enlace). El gateway ofrecido utiliza el formato de subdominio.
 
-Due to IPFS gateways not automatically serving `/index.html` as expected by many single-page applications,
-the Lido Interface uses a hash-based routing.
+### Enrutamiento
+
+Debido a que los gateways de IPFS no sirven automáticamente `/index.html` como se espera en muchas aplicaciones de una sola página,
+la interfaz de Lido utiliza un enrutamiento basado en hash.
