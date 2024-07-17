@@ -1,74 +1,70 @@
-# Hash verification
+# Verificación de hash
 
-You may want to verify the authenticity and integrity of the application, deployed on IPFS.
-It can be done by CID (hash) verifying. In order to do so, you will need to download the source code of the application and build it locally.  
-See the detailed instructions below.
+Es posible que desee verificar la autenticidad e integridad de la aplicación desplegada en IPFS. Esto se puede hacer verificando el CID (hash). Para hacerlo, necesitará descargar el código fuente de la aplicación y compilarlo localmente. A continuación, se detallan las instrucciones paso a paso.
 
-## Steps
+## Pasos
 
 :::info
-[Lido Ethereum Staking Widget](https://github.com/lidofinance/ethereum-staking-widget) is taken as example here.
+Tomaremos como ejemplo el [Lido Ethereum Staking Widget](https://github.com/lidofinance/ethereum-staking-widget).
 :::
 
-### Prerequisites
+### Requisitos previos
 
-You will need these tools installed in your system:
+Debe tener instaladas estas herramientas en su sistema:
 
 - Node.js 20+
-- Yarn package manager v1 (classic)
+- Gestor de paquetes Yarn v1 (classic)
 
-Alternatively, you can use Docker to set up a building environment; read the sections below for the instructions.
+Alternativamente, puede usar Docker para configurar un entorno de compilación. Lea las secciones a continuación para obtener las instrucciones.
 
-### 1. Clone the repository
+### 1. Clonar el repositorio
 
-The repo for Ethereum Staking Widget is here: https://github.com/lidofinance/ethereum-staking-widget
+El repositorio para Ethereum Staking Widget se encuentra aquí: [https://github.com/lidofinance/ethereum-staking-widget](https://github.com/lidofinance/ethereum-staking-widget)
 
-### 2. Git checkout a commit, matching the IPFS version
+### 2. Hacer checkout del commit que coincida con la versión de IPFS
 
-You need to `git checkout` the specific commit, matching the release of an app you want to verify.
-This way, you can be sure that the app will not include any other changes, which affect the CID.  
-There are several ways to do it.
+Debe hacer `git checkout` del commit específico que coincida con el lanzamiento de la aplicación que desea verificar. De esta manera, puede asegurarse de que la aplicación no incluya otros cambios que afecten al CID.
 
-#### Method 1 – using git tags
+#### Método 1 – Usando etiquetas de git
 
-Each released version has its own git tag, one can use it for git checkout.
+Cada versión lanzada tiene su propia etiqueta git, que puede utilizar para hacer checkout.
 
-1. Open the app in your browser and check the right side of its footer.
-   There will be a version number, which is actually a link to a Releases page on GitHub.
-2. Run `git fetch --all --tags --prune` to fetch all tags.
-3. Run `git checkout tags/<version>`, where `<version>` is the version from step 1.
+1. Abra la aplicación en su navegador y verifique el lado derecho de su pie de página.
+   Allí encontrará un número de versión, que en realidad es un enlace a la página de Releases en GitHub.
+2. Ejecute `git fetch --all --tags --prune` para obtener todas las etiquetas.
+3. Ejecute `git checkout tags/<version>`, donde `<version>` es la versión obtenida en el paso 1.
 
-#### Method 2 – searching on the GitHub Release page
+#### Método 2 – Búsqueda en la página de Releases de GitHub
 
-1. Open the Releases page of the project's repository on GitHub. For Ethereum Staking Widget it is [here](https://github.com/lidofinance/ethereum-staking-widget/releases).
-2. Search manually for the latest release, where IPFS pinning happened.
-3. Look for the commit hash near the release information.
-4. Run `git checkout <hash>`, where `<hash>` is the commit hash from the previous step.
+1. Abra la página de Releases del repositorio del proyecto en GitHub. Para Ethereum Staking Widget es [aquí](https://github.com/lidofinance/ethereum-staking-widget/releases).
+2. Busque manualmente el último lanzamiento donde se realizó el pinning a IPFS.
+3. Busque el hash del commit cerca de la información del lanzamiento.
+4. Ejecute `git checkout <hash>`, donde `<hash>` es el hash del commit obtenido en el paso anterior.
 
-### 3. Set up the project
+### 3. Configurar el proyecto
 
-#### Without Docker
+#### Sin Docker
 
-1. Add ENV variables as instructed in README.
-2. Remove `node_modules` directory if the project was set up earlier.
-3. Install node modules using `yarn install --frozen-lockfile`.
-4. Follow other instructions described in the project's README.
+1. Agregue las variables de entorno según las instrucciones en el README.
+2. Elimine el directorio `node_modules` si el proyecto ya estaba configurado anteriormente.
+3. Instale los módulos de Node usando `yarn install --frozen-lockfile`.
+4. Siga otras instrucciones descritas en el README del proyecto.
 
-#### Using Docker
+#### Usando Docker
 
-If you have problems with setting up the environment or if it is your preference,
-you can use Docker to set up and build the project.
+Si tiene problemas para configurar el entorno o si es su preferencia,
+puede usar Docker para configurar y compilar el proyecto.
 
 <details>
 <summary>
-**Steps for Docker**
+**Pasos para Docker**
 </summary>
 <div>
-1. Configure `build-info.json` as instructed in [this step](hash-verification.md#4-configure-build-infojson).
-2. Create `verification.Dockerfile` file in the project's root with this content:
+1. Configure `build-info.json` como se indica en [este paso](hash-verification.md#4-configurar-build-infojson).
+2. Cree el archivo `verification.Dockerfile` en la raíz del proyecto con el siguiente contenido:
 
 ```
-# build env
+# entorno de compilación
 FROM node:20-alpine as build
 
 WORKDIR /app
@@ -80,10 +76,10 @@ RUN yarn install --frozen-lockfile --non-interactive --ignore-scripts && yarn ca
 
 COPY . .
 RUN NODE_NO_BUILD_DYNAMICS=true yarn typechain && yarn build-ipfs
-# public/runtime is used to inject runtime vars; it should exist and user node should have write access there for it
+# public/runtime se utiliza para inyectar vars en tiempo de ejecución; debería existir y el usuario node debería tener acceso de escritura para ello
 RUN rm -rf /app/public/runtime && mkdir /app/public/runtime && chown node /app/public/runtime
 
-# final image
+# imagen final
 FROM node:20-alpine as base
 
 WORKDIR /app
@@ -91,8 +87,8 @@ RUN apk add --no-cache curl=~8
 COPY --from=build /app /app
 ```
 
-3. Add ENV variables as instructed in the project's README.
-4. Run these commands:
+3. Agregue las variables de entorno según las instrucciones en el README del proyecto.
+4. Ejecute estos comandos:
 
 ```
 docker build --no-cache -t verification:0 -f verification.Dockerfile .
@@ -101,46 +97,46 @@ docker cp verification-container:/app/out /Users/${Name}/${Path-to-project}/dock
 docker rm verification-container
 ```
 
-5. Run further steps from [step 6](hash-verification.md#6-create-a-car-file-and-get-its-cid-hash) of this instruction.
+5. Siga los pasos adicionales desde el [paso 6](hash-verification.md#6-crear-un-archivo-car-y-obtener-su-cid-hash) de estas instrucciones.
 </div>
 </details>
 
-### 4. Configure build-info.json
+### 4. Configurar build-info.json
 
-The `build-info.json` file is located in the project's root, [here is the link](https://github.com/lidofinance/ethereum-staking-widget/blob/develop/build-info.json).  
-It must contain information about the version of the application, which is currently deployed to IPFS.  
-You can take this information from the latest GitHub action in which IPFS pinning happened:
+El archivo `build-info.json` se encuentra en la raíz del proyecto, [aquí está el enlace](https://github.com/lidofinance/ethereum-staking-widget/blob/develop/build-info.json).
+Debe contener información sobre la versión de la aplicación que actualmente está desplegada en IPFS.
+Puede obtener esta información de la última acción de GitHub en la que se realizó el pinning a IPFS:
 
-1. Open the app's repo, follow the "Actions" tab.
-2. On the left, in the navigation, find the workflow for IPFS releasing, for the Ethereum Staking Widget it is called "[IPFS Release](https://github.com/lidofinance/ethereum-staking-widget/actions/workflows/ci-ipfs.yml)".
-3. Open the latest successful workflow and look for the "prepare-for-ipfs summary" title or the JSON data which looks like this:
+1. Abra el repositorio de la aplicación, vaya a la pestaña "Actions".
+2. En el lado izquierdo, en la navegación, busque el flujo de trabajo para el lanzamiento de IPFS, para el Ethereum Staking Widget se llama "[IPFS Release](https://github.com/lidofinance/ethereum-staking-widget/actions/workflows/ci-ipfs.yml)".
+3. Abra el último flujo de trabajo exitoso y busque el título "prepare-for-ipfs summary" o los datos JSON que se ven así:
    ```json
    { "branch": "main", "commit": "56ab68d", "version": "0.0.1" }
    ```
-4. Copy the data to your local `build-info.json`
+4. Copie los datos a su `build-info.json` local.
 
-### 5. Build the IPFS version
+### 5. Compilar la versión de IPFS
 
-Run a suitable npm script to build the IPFS version.  
-In case of Ethereum Staking Widget, it is `yarn build-ipfs`.
+Ejecute un script npm adecuado para compilar la versión de IPFS.  
+En el caso del Ethereum Staking Widget, es `yarn build-ipfs`.
 
-### 6. Create a CAR file and get its CID (hash)
+### 6. Crear un archivo CAR y obtener su CID (hash)
 
-For Next.js applications the build files will be in the `out` directory.  
-The following command generates a CAR file from the `out` directory with build files, and it will display the IPFS hash in the console:
+Para aplicaciones Next.js, los archivos de compilación estarán en el directorio `out`.
+El siguiente comando genera un archivo CAR a partir del directorio `out` con los archivos de compilación, y mostrará el hash IPFS en la consola:
 
 ```
 npx ipfs-car pack ./out --output ./out.car
 ```
 
-### 7. Get CID (hash) of the application deployed to IPFS
+### 7. Obtener el CID (hash) de la aplicación desplegada en IPFS
 
-You will need to get the hash of the latest released CAR file.  
-It can be found on the Releases page of the repository under the "Assets" collapsible block.
-Download the CAR file and run the following command:
+Necesitará obtener el hash del archivo CAR más recientemente lanzado.  
+Puede encontrarlo en la página de Releases del repositorio bajo el bloque "Assets" colapsable.
+Descargue el archivo CAR y ejecute el siguiente comando:
 
 ```
 npx ipfs-car roots ipfs_source_code.car
 ```
 
-It will show CID roots found in the CAR header. The CID (hash) must be the same as in the previous step.
+Esto mostrará las raíces CID encontradas en el encabezado del CAR. El CID (hash) debe ser el mismo que en el paso anterior.

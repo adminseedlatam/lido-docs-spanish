@@ -19,7 +19,7 @@ Un identificador de contenido, o CID, es una etiqueta utilizada para señalar ma
 
 ### Puertas de enlace HTTP de IPFS
 
-Una puerta de enlace IPFS es un servicio basado en la web que obtiene contenido de una red IPFS y lo hace disponible a través del protocolo HTTP que todos los navegadores web entienden. Una dirección de puerta de enlace puede verse así: `https://{CID}.ipfs.cf-ipfs.com`. Puedes usar la puerta de enlace disponible de [tu elección](security.md#possible-localstorage-leak). Verifica la disponibilidad de la puerta de enlace [aquí](https://ipfs.github.io/public-gateway-checker/).
+Una puerta de enlace IPFS es un servicio basado en la web que obtiene contenido de una red IPFS y lo hace disponible a través del protocolo HTTP que todos los navegadores web entienden. Una dirección de puerta de enlace puede verse así: `https://{CID}.ipfs.cf-ipfs.com`. Puedes usar la puerta de enlace disponible de [tu elección](security.md#posible-fuga-de-localstorage). Verifica la disponibilidad de la puerta de enlace [aquí](https://ipfs.github.io/public-gateway-checker/).
 
 ### Dónde obtener CID y la dirección de la puerta de enlace
 
