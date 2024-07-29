@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.4.0">
 <title data-rh="true">Introducción | Lido Docs</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://adminseedlatam.github.io/"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Introducción | Lido Docs"><meta data-rh="true" name="description" content="Esta documentación tiene como objetivo presentar el proyecto al usuario general, así como servir de guía para cualquiera que esté desarrollando software utilizando Lido."><meta data-rh="true" property="og:description" content="Esta documentación tiene como objetivo presentar el proyecto al usuario general, así como servir de guía para cualquiera que esté desarrollando software utilizando Lido."><link data-rh="true" rel="canonical" href="https://adminseedlatam.github.io/"><link data-rh="true" rel="alternate" href="https://adminseedlatam.github.io/" hreflang="en"><link data-rh="true" rel="alternate" href="https://adminseedlatam.github.io/" hreflang="x-default"><script data-rh="true">function insertBanner(){var n=document.createElement("div");n.id="__docusaurus-base-url-issue-banner-container";n.innerHTML='\n<div id="__docusaurus-base-url-issue-banner" style="border: thick solid red; background-color: rgb(255, 230, 179); margin: 20px; padding: 20px; font-size: 20px;">\n   <p style="font-weight: bold; font-size: 30px;">Your Docusaurus site did not load properly.</p>\n   <p>A very common reason is a wrong site <a href="https://docusaurus.io/docs/docusaurus.config.js/#baseUrl" style="font-weight: bold;">baseUrl configuration</a>.</p>\n   <p>Current configured baseUrl = <span style="font-weight: bold; color: red;">/</span>  (default value)</p>\n   <p>We suggest trying baseUrl = <span id="__docusaurus-base-url-issue-banner-suggestion-container" style="font-weight: bold; color: green;"></span></p>\n</div>\n',document.body.prepend(n);var e=document.getElementById("__docusaurus-base-url-issue-banner-suggestion-container"),s=window.location.pathname,o="/"===s.substr(-1)?s:s+"/";e.innerHTML=o}document.addEventListener("DOMContentLoaded",(function(){void 0===window.docusaurus&&insertBanner()}))</script><link rel="stylesheet" href="/assets/css/styles.4b5e42a6.css">
-<script src="/assets/js/runtime~main.0bd099e9.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.93111b86.js" defer="defer"></script>
 <script src="/assets/js/main.7bea6c5b.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -61,19 +61,17 @@
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="capa-de-consenso">Capa de Consenso<a class="hash-link" aria-label="Direct link to Capa de Consenso" title="Direct link to Capa de Consenso" href="/#capa-de-consenso">​</a></h3>
 <p>Los validadores reciben recompensas cuando realizan las funciones de validadores de la capa de consenso:</p>
 <ul>
-<li>atestiguar bloques</li>
-<li>proponer bloques</li>
-<li>participar en comités de sincronización.</li>
+<li>Atestiguar bloques</li>
+<li>Proponer bloques</li>
+<li>Participar en comités de sincronización.</li>
 </ul>
 <p>El valor de las recompensas en cada época se calcula a partir de una recompensa base. Esta es la unidad base que representa la recompensa promedio recibida por un validador en condiciones óptimas por época. Las recompensas base son inversamente proporcionales a la raíz cuadrada del total de ether en staking en Ethereum, por lo que la cantidad de recompensa por validador disminuye a medida que el número total de validadores en Ethereum crece.</p>
 <p>Además de las recompensas, se pueden aplicar penalizaciones y slashing a los validadores en la CL.</p>
 <p>Una penalización es una forma de reducir la participación del validador, que no está en línea o no cumple con ciertos criterios de especificaciones al atestiguar los bloques.</p>
 <p>Ser slashed significa que el validador que se comporta incorrectamente es obligado a salir de la cadena beacon en un punto futuro, recibiendo un <a href="https://docs.prylabs.network/docs/how-prysm-works/validator-lifecycle#slashing-state" target="_blank" rel="noopener noreferrer">número de penalizaciones hasta que se retire</a>. Como resultado, el APR también puede reducirse.</p>
 <blockquote>
-<p><strong>Rendimiento de los validadores de Lido</strong>
-Cuanto mejores sean los conjuntos de operadores subyacentes, más robusto, resiliente y eficiente será el protocolo subyacente. Consulta [Estad</p>
+<p><strong>Rendimiento de los validadores de Lido</strong> Cuanto mejores sean los conjuntos de operadores subyacentes, más robusto, resiliente y eficiente será el protocolo subyacente. Consulta <a href="https://operatorportal.lido.fi/operator-statistics-and-metrics" target="_blank" rel="noopener noreferrer">Estadísticas y Métricas de Operadores</a>.</p>
 </blockquote>
-<p>ísticas y Métricas de Operadores](<a href="https://operatorportal.lido.fi/operator-statistics-and-metrics" target="_blank" rel="noopener noreferrer">https://operatorportal.lido.fi/operator-statistics-and-metrics</a>).</p>
 <p>Aprende más sobre recompensas y penalizaciones - <a href="https://ethereum.org/en/developers/docs/consensus-mechanisms/pos/rewards-and-penalties/" target="_blank" rel="noopener noreferrer">ethereum.org</a></p>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="capa-de-ejecución">Capa de Ejecución<a class="hash-link" aria-label="Direct link to Capa de Ejecución" title="Direct link to Capa de Ejecución" href="/#capa-de-ejecución">​</a></h3>
 <p>Los validadores comenzaron a recibir recompensas de EL después de <a href="https://ethereum.org/en/roadmap/merge/" target="_blank" rel="noopener noreferrer">la Fusión</a>. Las recompensas de EL consisten en cuatro partes:</p>
