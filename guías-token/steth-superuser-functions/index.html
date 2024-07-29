@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.4.0">
 <title data-rh="true">Funciones de superusuario de stETH | Lido Docs</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://adminseedlatam.github.io/guías-token/steth-superuser-functions"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Funciones de superusuario de stETH | Lido Docs"><meta data-rh="true" name="description" content="Privilegios de superusuario y cuentas"><meta data-rh="true" property="og:description" content="Privilegios de superusuario y cuentas"><link data-rh="true" rel="canonical" href="https://adminseedlatam.github.io/guías-token/steth-superuser-functions"><link data-rh="true" rel="alternate" href="https://adminseedlatam.github.io/guías-token/steth-superuser-functions" hreflang="en"><link data-rh="true" rel="alternate" href="https://adminseedlatam.github.io/guías-token/steth-superuser-functions" hreflang="x-default"><link rel="stylesheet" href="/assets/css/styles.4b5e42a6.css">
-<script src="/assets/js/runtime~main.93111b86.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.9d76fe02.js" defer="defer"></script>
 <script src="/assets/js/main.7bea6c5b.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -22,7 +22,7 @@
 </ol>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="roles-de-superusuario">Roles de superusuario<a class="hash-link" aria-label="Direct link to Roles de superusuario" title="Direct link to Roles de superusuario" href="/guías-token/steth-superuser-functions#roles-de-superusuario">​</a></h2>
 <p>TODO: Rol <code>BURN_ROLE</code> desactualizado</p>
-<p>El contrato de StETH especifica el <code>PAUSE_ROLE</code> (dirección que puede pausar el protocolo) y el <code>BURN_ROLE</code> (dirección que puede quemar tokens stETH):</p>
+<p>El contrato de StETH espscdecifica el <code>PAUSE_ROLE</code> (dirección que puede pausar el protocolo) y el <code>BURN_ROLE</code> (dirección que puede quemar tokens stETH):</p>
 <ul>
 <li>El <code>PAUSE_ROLE</code> está asignado únicamente al contrato de Votación de la DAO <a href="https://etherscan.io/address/0x2e59a20f205bb85a89c53f1936454680651e618e" target="_blank" rel="noopener noreferrer">https://etherscan.io/address/0x2e59a20f205bb85a89c53f1936454680651e618e</a>.</li>
 <li>El <code>BURN_ROLE</code> está asignado al contrato <a href="/contracts/burner"><code>Burner</code></a>, con parámetros ACL adicionales que permiten quemar tokens stETH solo desde el balance propio del contrato. Los tokens solo pueden ser quemados por solicitud directa de la DAO.</li>

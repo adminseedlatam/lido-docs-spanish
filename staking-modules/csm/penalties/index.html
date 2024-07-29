@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.4.0">
 <title data-rh="true">Penalizaciones | Lido Docs</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://adminseedlatam.github.io/staking-modules/csm/penalties"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Penalizaciones | Lido Docs"><meta data-rh="true" name="description" content="Razones"><meta data-rh="true" property="og:description" content="Razones"><link data-rh="true" rel="canonical" href="https://adminseedlatam.github.io/staking-modules/csm/penalties"><link data-rh="true" rel="alternate" href="https://adminseedlatam.github.io/staking-modules/csm/penalties" hreflang="en"><link data-rh="true" rel="alternate" href="https://adminseedlatam.github.io/staking-modules/csm/penalties" hreflang="x-default"><link rel="stylesheet" href="/assets/css/styles.4b5e42a6.css">
-<script src="/assets/js/runtime~main.93111b86.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.9d76fe02.js" defer="defer"></script>
 <script src="/assets/js/main.7bea6c5b.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -12,15 +12,9 @@
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="razones">Razones<a class="hash-link" aria-label="Direct link to Razones" title="Direct link to Razones" href="/staking-modules/csm/penalties#razones">​</a></h2>
 <p>Existen tres razones principales por las cuales se puede penalizar el bono del Operador de Nodo de CSM:</p>
 <ol>
-<li>
-<p><strong>El validador ha sido penalizado.</strong> En este caso, se confisca la <a href="https://github.com/ethereum/consensus-specs/blob/dev/specs/altair/beacon-chain.md#modified-slash_validator" target="_blank" rel="noopener noreferrer">penalización inicial (mínima) por penalización</a>. Monto de la penalización = <code>1 ETH</code>;</p>
-</li>
-<li>
-<p><strong>El operador ha robado recompensas EL (MEV).</strong> Monto de la penalización = <code>cantidad robada + multa fija por robo</code> (puede aplicarse a través de múltiples validadores de ON);</p>
-</li>
-<li>
-<p><strong>El saldo de retiro del validador es menor que <code>DEPOSIT_AMOUNT</code> (32 ETH).</strong> Monto de la penalización = <code>DEPOSIT_AMOUNT - saldo de retiro del validador</code>;</p>
-</li>
+<li><strong>El validador ha sido penalizado.</strong> En este caso, se confisca la <a href="https://github.com/ethereum/consensus-specs/blob/dev/specs/altair/beacon-chain.md#modified-slash_validator" target="_blank" rel="noopener noreferrer">penalización inicial (mínima) por penalización</a>. Monto de la penalización = <code>1 ETH</code>;</li>
+<li><strong>El operador ha robado recompensas EL (MEV).</strong> Monto de la penalización = <code>cantidad robada + multa fija por robo</code> (puede aplicarse a través de múltiples validadores de ON);</li>
+<li><strong>El saldo de retiro del validador es menor que <code>DEPOSIT_AMOUNT</code> (32 ETH).</strong> Monto de la penalización = <code>DEPOSIT_AMOUNT - saldo de retiro del validador</code>;</li>
 </ol>
 <p>La primera penalización se informa de manera permisiva utilizando <a href="https://eips.ethereum.org/EIPS/eip-4788" target="_blank" rel="noopener noreferrer">EIP-4788</a> para demostrar el hecho del penalización. Esta penalización se aplica inmediatamente dentro de la transacción de informe.</p>
 <p>La segunda penalización tiene la forma de una penalización retrasada con un período de desafío. Un comité dedicado (reportero) detecta el robo de MEV (violación de la <a href="https://snapshot.org/#/lido-snapshot.eth/proposal/0x7ac2431dc0eddcad4a02ba220a19f451ab6b064a0eaef961ed386dc573722a7f" target="_blank" rel="noopener noreferrer">Política de Recompensas de Propositor de Bloques Lido en Ethereum</a>) y reporta este hecho en cadena, bloqueando los fondos del bono. La resolución sobre la propuesta de EasyTrack (asentador) asegura la alineación entre la DAO y el comité de detección. Una vez que se resuelve la penalización (confirmada), todos los beneficios del Operador de Nodo se restablecen debido a la violación de las reglas del protocolo. Si la penalización no se resuelve dentro del <code>periodo_retención</code>, el bono bloqueado se desbloquea automáticamente.</p>
@@ -28,12 +22,8 @@
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="inmediata-y-con-período-de-desafío">Inmediata y con período de desafío<a class="hash-link" aria-label="Direct link to Inmediata y con período de desafío" title="Direct link to Inmediata y con período de desafío" href="/staking-modules/csm/penalties#inmediata-y-con-período-de-desafío">​</a></h2>
 <p>Se introducen los siguientes esquemas de penalización:</p>
 <ol>
-<li>
-<p><strong>Penalización inmediata</strong> (para penalizaciones que son inequívocas y pueden evaluarse mediante pruebas sin confianza);</p>
-</li>
-<li>
-<p><strong>Penalización retrasada con período de desafío</strong> (para casos donde pueden ocurrir falsos positivos o se necesita investigación);</p>
-</li>
+<li><strong>Penalización inmediata</strong> (para penalizaciones que son inequívocas y pueden evaluarse mediante pruebas sin confianza);</li>
+<li><strong>Penalización retrasada con período de desafío</strong> (para casos donde pueden ocurrir falsos positivos o se necesita investigación);</li>
 </ol>
 <p>El período de desafío para las penalizaciones retrasadas se implementa separando dos roles involucrados en la aplicación de la penalización.</p>
 <p>El primer rol es el &quot;reportero&quot;. Los miembros de este rol pueden informar inicialmente sobre un hecho que debería resultar en una penalización. Los fondos del bono se bloquearán pero no se quemarán ni confiscarán en esta etapa. Los &quot;reporteros&quot; también pueden revocar el informe inicial en caso de que se resuelva el desafío a favor del Operador de Nodo.</p>
