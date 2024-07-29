@@ -2,7 +2,7 @@
 
 Lido DAO es una Organización Autónoma Descentralizada que gestiona los protocolos de staking líquido, decidiendo sobre parámetros clave (por ejemplo, establecer tarifas, asignar operadores de nodos y oráculos, etc.) mediante el poder de voto de los titulares del token de gobernanza (`LDO`). Además, la DAO acumula tarifas de servicio y las gasta en investigación, desarrollo, incentivos de minería de liquidez y mejoras del protocolo.
 
-## ¿Por qué DAO?
+## ¿Por qué una DAO?
 
 La DAO es el compromiso lógico entre la centralización completa y la descentralización, lo que permite el despliegue de productos competitivos sin centralización total y custodia en los intercambios. No creemos que sea posible hacer un protocolo de staking líquido completamente sin confianza en el futuro previsible. Una DAO es una estructura óptima para lanzar Lido porque:
 
@@ -15,9 +15,10 @@ La DAO acumulará tarifas de servicio de Lido, que se canalizarán hacia los fon
 ## Funciones
 
 Lido es gestionado por Lido DAO. Los miembros de la DAO gobiernan Lido para garantizar su eficiencia y estabilidad. Lido DAO debe hacer lo siguiente:
+
 - Construir, desplegar, actualizar y decidir sobre parámetros clave de los protocolos de staking líquido, aprobar incentivos para las partes que contribuyan a los objetivos de la DAO.
 - Gestión de operadores de nodos. Asignar operadores de nodos iniciales aprobados por la DAO, buscar y calificar nuevos operadores de nodos y penalizar a los existentes que sean sancionados según las reglas de las cadenas.
-- Aprobar subvenciones LEGO para apoyar diferentes investigaciones e iniciativas de los gremios del protocolo.
+- Aprobar subvenciones de LEGO para apoyar diferentes investigaciones e iniciativas de los gremios del protocolo.
 - Pagos a colaboradores a tiempo completo y otras tareas operativas.
 - Programa de recompensas por errores, responder a emergencias.
 - Acumulación de tarifas de servicio de Lido, que pueden canalizarse hacia los fondos de seguro y desarrollo, distribuidos por la DAO.
