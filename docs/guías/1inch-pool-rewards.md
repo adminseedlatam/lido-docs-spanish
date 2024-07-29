@@ -9,7 +9,7 @@ Las recompensas se distribuyen a los LP (Proveedores de Liquidez) en el [pool 1i
 
 Encuentra tu dirección [aquí](https://github.com/lidofinance/airdrop-data/blob/main/oneinch_lido_airdrop.csv) y obtén tu índice.
 
-Si tu dirección no aparece [aquí](https://github.com/lidofinance/airdrop-data/blob/main/oneinch_lido_airdrop.csv), no eres elegible para reclamar la recompensa.
+Si tu dirección no aparece [aquí](https://github.com/lidofinance/airdrop-data/blob/main/oneinch_lido_airdrop.csv), no eres elegible para reclamar el reward.
 
 ### 2. Verifica si no has reclamado tu recompensa anteriormente
 2.1 Ve a [Etherscan](https://etherscan.io/address/0xdB46C277dA1599390eAb394327602889E9546296) (dirección del contrato: [0xdB46C277dA1599390eAb394327602889E9546296](https://etherscan.io/address/0xdB46C277dA1599390eAb394327602889E9546296))
