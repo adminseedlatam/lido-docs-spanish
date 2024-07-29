@@ -42,10 +42,10 @@ Actualmente, solo tiene un módulo ([NodeOperatorsRegistry](https://github.com/l
 
 Los miembros del oráculo se pueden obtener del contrato HashConsensus (para el Oracle del Bus de Salida de Validadores) en cadena, directamente desde el contrato usando Etherscan.
 
-| Red      | Llamada al Contrato                                  |
-| -------- | ---------------------------------------------------- |
-| Mainnet  | [getMembers()](https://etherscan.io/address/0x7FaDB6358950c5fAA66Cb5EB8eE5147De3df355a#readContract#F16) |
-| Holešky  | [getMembers()](https://holesky.etherscan.io/address/0xe77Cf1A027d7C10Ee6bb7Ede5E922a181FF40E8f#readContract#F16) |
+| Red     | Llamada al Contrato                                                                                              |
+| ------- | ---------------------------------------------------------------------------------------------------------------- |
+| Mainnet | [getMembers()](https://etherscan.io/address/0x7FaDB6358950c5fAA66Cb5EB8eE5147De3df355a#readContract#F16)         |
+| Holešky | [getMembers()](https://holesky.etherscan.io/address/0xe77Cf1A027d7C10Ee6bb7Ede5E922a181FF40E8f#readContract#F16) |
 
 ## Ejemplo de Configuración de Infraestructura
 

@@ -36,11 +36,11 @@ function getChainConfig() external view returns (
 
 ##### Retornos
 
-| Nombre             | Tipo      | Descripción                                                |
-| ------------------ | --------- | ---------------------------------------------------------- |
-| `slotsPerEpoch`    | `uint256` | Número de ranuras por época, `32` por defecto              |
-| `secondsPerSlot`   | `uint256` | El tiempo asignado para cada ranura, `12` por defecto      |
-| `genesisTime`      | `uint256` | Hora de génesis de la capa de consenso, `1606824023` en [Mainnet](https://blog.ethereum.org/2020/11/27/eth2-quick-update-no-21) |
+| Nombre           | Tipo      | Descripción                                                                                                                     |
+| ---------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `slotsPerEpoch`  | `uint256` | Número de ranuras por época, `32` por defecto                                                                                   |
+| `secondsPerSlot` | `uint256` | El tiempo asignado para cada ranura, `12` por defecto                                                                           |
+| `genesisTime`    | `uint256` | Hora de génesis de la capa de consenso, `1606824023` en [Mainnet](https://blog.ethereum.org/2020/11/27/eth2-quick-update-no-21) |
 
 #### getFrameConfig()
 
@@ -56,11 +56,11 @@ function getFrameConfig() external view returns (
 
 ##### Retornos
 
-| Nombre                  | Tipo      | Descripción                                                           |
-| ----------------------- | --------- | --------------------------------------------------------------------- |
-| `initialEpoch`          | `uint256` | Época del marco con índice cero                                       |
-| `epochsPerFrame`        | `uint256` | Longitud de un marco en épocas                                        |
-| `fastLaneLengthSlots`   | `uint256` | Longitud del intervalo de fast lane en ranuras; ver `getIsFastLaneMember`  |
+| Nombre                | Tipo      | Descripción                                                               |
+| --------------------- | --------- | ------------------------------------------------------------------------- |
+| `initialEpoch`        | `uint256` | Época del marco con índice cero                                           |
+| `epochsPerFrame`      | `uint256` | Longitud de un marco en épocas                                            |
+| `fastLaneLengthSlots` | `uint256` | Longitud del intervalo de fast lane en ranuras; ver `getIsFastLaneMember` |
 
 #### getCurrentFrame()
 
@@ -79,10 +79,10 @@ function getCurrentFrame() external view returns (
 
 Devuelve el marco de informe actual.
 
-| Nombre                          | Tipo      | Descripción                                                                          |
-| ------------------------------- | --------- | ------------------------------------------------------------------------------------ |
-| `refSlot`                       | `uint256` | El slot de referencia del marco: Si los datos sobre los que se alcanza el consenso dependen de algún estado en la cadena, este estado debe consultarse en el slot de referencia. Si este slot contiene un bloque, todos los cambios de ese bloque deben incluirse. |
-| `reportProcessingDeadlineSlot`  | `uint256` | El último slot en el cual el informe puede ser procesado por el contrato procesador de informes. |
+| Nombre                         | Tipo      | Descripción                                                                                                                                                                                                                                                        |
+| ------------------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `refSlot`                      | `uint256` | El slot de referencia del marco: Si los datos sobre los que se alcanza el consenso dependen de algún estado en la cadena, este estado debe consultarse en el slot de referencia. Si este slot contiene un bloque, todos los cambios de ese bloque deben incluirse. |
+| `reportProcessingDeadlineSlot` | `uint256` | El último slot en el cual el informe puede ser procesado por el contrato procesador de informes.                                                                                                                                                                   |
 
 #### getInitialRefSlot()
 
@@ -162,11 +162,11 @@ function getConsensusState() external view returns (
 
 Devuelve información sobre el marco actual y el estado de consenso en ese marco.
 
-| Nombre                 | Tipo      | Descripción                                                           |
-| ---------------------- | --------- | --------------------------------------------------------------------- |
-| `refSlot`              | `uint256` | Slot de referencia del marco de informe actual.                       |
-| `consensusReport`      | `bytes32` | Informe de consenso para el marco actual, si existe. Cero bytes de lo contrario. |
-| `isReportProcessing`   | `bool`    | Indica si el informe de consenso para el marco actual ya está siendo procesado. El consenso puede cambiar antes de que comience el procesamiento. |
+| Nombre               | Tipo      | Descripción                                                                                                                                       |
+| -------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `refSlot`            | `uint256` | Slot de referencia del marco de informe actual.                                                                                                   |
+| `consensusReport`    | `bytes32` | Informe de consenso para el marco actual, si existe. Cero bytes de lo contrario.                                                                  |
+| `isReportProcessing` | `bool`    | Indica si el informe de consenso para el marco actual ya está siendo procesado. El consenso puede cambiar antes de que comience el procesamiento. |
 
 #### getReportVariants()
 
@@ -189,14 +189,13 @@ function getConsensusStateForMember(address addr) external view returns (MemberC
 
 #### Parámetros
 
-| Nombre   | Tipo      | Descripción         |
-| ------   | --------- | ------------------- |
-| `addr`   | `address` | La dirección del miembro. |
+| Nombre | Tipo      | Descripción               |
+| ------ | --------- | ------------------------- |
+| `addr` | `address` | La dirección del miembro. |
 
 #### Devoluciones
 
 Devuelve un nuevo tipo `MemberConsensusState`
-
 
 ```solidity
 struct MemberConsensusState {
@@ -258,10 +257,10 @@ function setFrameConfig(uint256 epochsPerFrame, uint256 fastLaneLengthSlots) ext
 
 #### Parámetros
 
-| Nombre                  | Tipo      | Descripción                                                           |
-| ---------------------   | --------- | --------------------------------------------------------------------- |
-| `epochsPerFrame`        | `uint256` | Longitud de un marco en épocas.                                       |
-| `fastLaneLengthSlots`   | `uint256` | Longitud del intervalo de carril rápido en slots; ver `getIsFastLaneMember`. |
+| Nombre                | Tipo      | Descripción                                                                  |
+| --------------------- | --------- | ---------------------------------------------------------------------------- |
+| `epochsPerFrame`      | `uint256` | Longitud de un marco en épocas.                                              |
+| `fastLaneLengthSlots` | `uint256` | Longitud del intervalo de carril rápido en slots; ver `getIsFastLaneMember`. |
 
 ### setFastLaneLengthSlots()
 
@@ -277,9 +276,9 @@ function setFastLaneLengthSlots(uint256 fastLaneLengthSlots) external
 
 #### Parámetros
 
-| Nombre                  | Tipo      | Descripción                                                           |
-| ---------------------   | --------- | --------------------------------------------------------------------- |
-| `fastLaneLengthSlots`   | `uint256` | La longitud del intervalo de informe rápido en slots. Configurándolo a cero desactiva el subconjunto de carril rápido, permitiendo que cualquier oráculo informe a partir del primer slot de un marco y hasta el plazo de presentación del marco. |
+| Nombre                | Tipo      | Descripción                                                                                                                                                                                                                                       |
+| --------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fastLaneLengthSlots` | `uint256` | La longitud del intervalo de informe rápido en slots. Configurándolo a cero desactiva el subconjunto de carril rápido, permitiendo que cualquier oráculo informe a partir del primer slot de un marco y hasta el plazo de presentación del marco. |
 
 ### addMember()
 
@@ -361,11 +360,11 @@ function submitReport(uint256 slot, bytes32 report, uint256 consensusVersion) ex
 
 #### Parámetros
 
-| Nombre              | Tipo      | Descripción                                                           |
-| ------------------- | --------- | --------------------------------------------------------------------- |
-| `slot`              | `uint256` | El slot de referencia para el que se calcularon los datos. Revierte si no coincide con el slot de referencia actual.                                         |
-| `report`            | `bytes32` | Hash de los datos calculados para el slot de referencia dado. |
-| `consensusVersion`  | `uint256` | Versión de las reglas de consenso del oráculo. Revierte si no coincide con la versión devuelta por el procesador de informes de consenso actualmente configurado, o cero si no se ha establecido un procesador de informes. |
+| Nombre             | Tipo      | Descripción                                                                                                                                                                                                                 |
+| ------------------ | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `slot`             | `uint256` | El slot de referencia para el que se calcularon los datos. Revierte si no coincide con el slot de referencia actual.                                                                                                        |
+| `report`           | `bytes32` | Hash de los datos calculados para el slot de referencia dado.                                                                                                                                                               |
+| `consensusVersion` | `uint256` | Versión de las reglas de consenso del oráculo. Revierte si no coincide con la versión devuelta por el procesador de informes de consenso actualmente configurado, o cero si no se ha establecido un procesador de informes. |
 
 #### Revierte
 

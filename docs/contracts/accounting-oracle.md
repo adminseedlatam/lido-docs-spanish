@@ -132,7 +132,7 @@ Los datos adicionales son un array de elementos, cada elemento codificado de la 
 
 Los elementos deben estar ordenados de manera ascendente por la clave compuesta `(itemType, ...itemSortingKey)` donde el cálculo de `itemSortingKey` depende del tipo de elemento (ver más abajo).
 
----------------------------------------------------------------------------------------
+---
 
 **`itemType=0`** (`EXTRA_DATA_TYPE_STUCK_VALIDATORS`): validadores atascados por operadores de nodos.
 
@@ -159,13 +159,13 @@ La clave de ordenación del elemento es una clave compuesta que consiste en el I
 
     itemSortingKey = (moduleId, nodeOperatorIds[0:8])
 
----------------------------------------------------------------------------------------
+---
 
 **`itemType=1`** (`EXTRA_DATA_TYPE_EXITED_VALIDATORS`): validadores salidos por operadores de nodos.
 
 El formato de carga útil es exactamente el mismo que para `itemType=EXTRA_DATA_TYPE_STUCK_VALIDATORS`, excepto que, en lugar de los conteos de validadores atascados, se informan los conteos de validadores salidos. La clave de ordenación del elemento se calcula de manera idéntica.
 
----------------------------------------------------------------------------------------
+---
 
 El daemon del oráculo debe informar los conteos de validadores salidos/atascados SOLO para aquellos pares `(moduleId, nodeOperatorId)` que contienen conteos desactualizados en el almacenamiento del contrato inteligente del módulo de staking observado en el slot de referencia.
 
@@ -321,12 +321,12 @@ function getConsensusReport() external view returns (
 
 #### Returns
 
-| Nombre                     | Tipo      | Descripción                                                                                                                                                                                                                                    |
-| ------------------------ | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `hash`                   | `bytes32` | El último hash reportado                                                                                                                                                                                                                       |
+| Nombre                   | Tipo      | Descripción                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `hash`                   | `bytes32` | El último hash reportado                                                                                                                                                                                                                                                                                                                    |
 | `refSlot`                | `uint256` | El slot de referencia del marco: si los datos sobre los cuales se está alcanzando el consenso incluyen o dependen de algún estado on-chain, este estado debe consultarse en el slot de referencia. El estado reportado debe incluir todos los cambios de estado resultantes de todos los bloques hasta este slot de referencia (inclusive). |
-| `processingDeadlineTime` | `uint256` | Marca de tiempo del último slot en el cual un informe puede ser reportado y procesado                                                                                                                                                          |
-| `processingStarted`      | `bool`    | Indica si se ha iniciado o no el procesamiento del informe                                                                                                                                                                                     |
+| `processingDeadlineTime` | `uint256` | Marca de tiempo del último slot en el cual un informe puede ser reportado y procesado                                                                                                                                                                                                                                                       |
+| `processingStarted`      | `bool`    | Indica si se ha iniciado o no el procesamiento del informe                                                                                                                                                                                                                                                                                  |
 
 ### getConsensusVersion()
 
@@ -376,10 +376,10 @@ function submitReportData(ReportData calldata data, uint256 contractVersion)
 
 #### Parámetros
 
-| Nombre            | Tipo         | Descripción                                                                                           |
-| ----------------- | ------------ | ----------------------------------------------------------------------------------------------------- |
+| Nombre            | Tipo         | Descripción                                                                                                             |
+| ----------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------- |
 | `data`            | `ReportData` | Los datos. Ver la documentación de la estructura [ReportData](./accounting-oracle#datos-del-informe) para más detalles. |
-| `contractVersion` | `uint256`    | Versión esperada del contrato del oráculo.                                                            |
+| `contractVersion` | `uint256`    | Versión esperada del contrato del oráculo.                                                                              |
 
 #### Reverts
 
@@ -407,8 +407,8 @@ function submitReportExtraDataList(bytes calldata items)
 
 #### Parámetros
 
-| Nombre  | Tipo    | Descripción                                                                                               |
-| ------- | ------- | --------------------------------------------------------------------------------------------------------- |
+| Nombre  | Tipo    | Descripción                                                                                                                                             |
+| ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `items` | `bytes` | La lista de elementos de datos adicionales. Ver la documentación para la constante [EXTRA_DATA_FORMAT_LIST](#extra_data_format_list) para más detalles. |
 
 #### Reverts
@@ -429,17 +429,17 @@ function submitConsensusReport(bytes32 reportHash, uint256 refSlot, uint256 dead
 
 #### Parámetros
 
-| Nombre       | Tipo      | Descripción                                                                                             |
-| ------------ | --------- | ------------------------------------------------------------------------------------------------------- |
-| `reportHash` | `bytes32` | Hash de los datos calculados para el slot de referencia dado.                                           |
-| `refSlot`    | `uint256` | El slot de referencia para el cual se calcularon los datos. Revierte si no coincide con el slot de referencia actual. |
+| Nombre       | Tipo      | Descripción                                                                                                                |
+| ------------ | --------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `reportHash` | `bytes32` | Hash de los datos calculados para el slot de referencia dado.                                                              |
+| `refSlot`    | `uint256` | El slot de referencia para el cual se calcularon los datos. Revierte si no coincide con el slot de referencia actual.      |
 | `deadline`   | `uint256` | La marca de tiempo del último slot en el cual el informe puede ser procesado por el contrato de procesamiento de informes. |
 
 ### discardConsensusReport()
 
 Llamado por el contrato HashConsensus para notificar que el informe para el slot de referencia dado
- ya no es un informe de consenso y debe ser descartado. Esto puede suceder cuando un miembro
- cambia su informe, es removido del conjunto, o cuando se incrementa el valor del quórum.
+ya no es un informe de consenso y debe ser descartado. Esto puede suceder cuando un miembro
+cambia su informe, es removido del conjunto, o cuando se incrementa el valor del quórum.
 
 Solo se llama cuando, para el slot de referencia dado:
 

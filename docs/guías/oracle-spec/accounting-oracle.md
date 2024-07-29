@@ -95,7 +95,7 @@ Y `SLOTS_PER_EPOCH = 32`, `SECONDS_PER_SLOT = 12`, `request_timestamp_margin` - 
 
 El límite representa la última época antes del slot de referencia antes del cual no hay reducciones
 
- asociadas incompletas.
+asociadas incompletas.
 
 ![Safe border 4](../../../static/img/oracle-spec/safe-border-4.png)
 
@@ -164,6 +164,7 @@ def get_safe_border_epoch(ref_epoch):
     associated_slashings_border_epoch,
   )
 ```
+
 ### Finalización de solicitudes de retiro
 
 Con la cantidad de ETH disponible, la tasa de participación y el límite seguro, el oráculo llama al método `WithdrawalQueue.calculateFinalizationBatches` para obtener los lotes de finalización de retiros.
@@ -171,7 +172,7 @@ Con la cantidad de ETH disponible, la tasa de participación y el límite seguro
 El valor de una solicitud después de la finalización puede ser:
 
 - `nominal` (cuando la cantidad de ETH bloqueada para esta solicitud es igual al `stETH` de la solicitud)
-- `descontado` (cuando la cantidad de ETH será menor, porque la tasa de participación del protocolo disminuyó antes de finalizar la solicitud, por lo que será igual a `las acciones de la solicitud` * `tasa de participación del protocolo`)
+- `descontado` (cuando la cantidad de ETH será menor, porque la tasa de participación del protocolo disminuyó antes de finalizar la solicitud, por lo que será igual a `las acciones de la solicitud` \* `tasa de participación del protocolo`)
 
 **Lotes**: array de ID de solicitud final. Cada lote consiste en solicitudes que todas tienen la tasa de participación por debajo del `_maxShareRate` o por encima de él (nominal o descontado).
 
@@ -234,10 +235,10 @@ La primera condición es cuando hay una nueva o continua reducción masiva que p
 
 #### Condición 2. Rebase negativa en la capa de consenso en el marco actual
 
-La segunda condición es cuando se detecta una rebase negativa en la capa de consenso en el marco actual. Se activa el "modo búnker" y hay un límite en el tiempo máximo de finalización de solicitudes de retiro que se establece en 2 * tiempo_de_reacción_de_gobernanza (~6 días) si no hay reducciones asociadas.
+La segunda condición es cuando se detecta una rebase negativa en la capa de consenso en el marco actual. Se activa el "modo búnker" y hay un límite en el tiempo máximo de finalización de solicitudes de retiro que se establece en 2 \* tiempo_de_reacción_de_gobernanza (~6 días) si no hay reducciones asociadas.
 
 #### Condición 3. Rebase en la capa de consenso inferior a la esperada en el marco actual y una rebase negativa al final del marco
 
-La tercera condición es cuando hay una rebase en la capa de consenso inferior a la esperada en el marco actual y una rebase negativa al final del marco. El "modo búnker" se activa cuando el Oráculo detecta esta condición. El límite en el tiempo máximo de finalización de solicitudes de retiro se establece en 2 * tiempo_de_reacción_de_gobernanza + 1 (~7 días) si no hay reducciones asociadas.
+La tercera condición es cuando hay una rebase en la capa de consenso inferior a la esperada en el marco actual y una rebase negativa al final del marco. El "modo búnker" se activa cuando el Oráculo detecta esta condición. El límite en el tiempo máximo de finalización de solicitudes de retiro se establece en 2 \* tiempo_de_reacción_de_gobernanza + 1 (~7 días) si no hay reducciones asociadas.
 
 Para más detalles, consulte [“Bunker mode”: what it is and how it works](https://docs.google.com/document/d/1NoJ3rbVZ1OJfByjibHPA91Ghqk487tT0djAf6PFu8s8/).

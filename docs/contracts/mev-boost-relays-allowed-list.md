@@ -60,9 +60,9 @@ def get_relay_by_uri(relay_uri: String[MAX_STRING_LENGTH]) -> bool
 
 #### Parámetros:
 
-| Nombre       | Tipo                        | Descripción      |
-|--------------|-----------------------------|------------------|
-| `relay_uri`  | `String[MAX_STRING_LENGTH]` | URI del relé     |
+| Nombre      | Tipo                        | Descripción  |
+| ----------- | --------------------------- | ------------ |
+| `relay_uri` | `String[MAX_STRING_LENGTH]` | URI del relé |
 
 :::note
 Revoca si no se encuentra ningún relé.
@@ -97,19 +97,20 @@ def add_relay(
 
 #### Parámetros:
 
-| Nombre          | Tipo                        | Descripción                                                 |
-|-----------------|-----------------------------|-------------------------------------------------------------|
-| `uri`           | `String[MAX_STRING_LENGTH]` | URI del relé                                                |
-| `operator`      | `String[MAX_STRING_LENGTH]` | Nombre del operador del relé                                |
-| `is_mandatory`  | `bool`                      | Si el relé es obligatorio para el uso por parte del Operador de Nodo de Lido |
-| `description`   | `String[MAX_STRING_LENGTH]` | Descripción del relé en formato libre                        |
+| Nombre         | Tipo                        | Descripción                                                                  |
+| -------------- | --------------------------- | ---------------------------------------------------------------------------- |
+| `uri`          | `String[MAX_STRING_LENGTH]` | URI del relé                                                                 |
+| `operator`     | `String[MAX_STRING_LENGTH]` | Nombre del operador del relé                                                 |
+| `is_mandatory` | `bool`                      | Si el relé es obligatorio para el uso por parte del Operador de Nodo de Lido |
+| `description`  | `String[MAX_STRING_LENGTH]` | Descripción del relé en formato libre                                        |
 
 :::note
 Revoca si alguna de las siguientes condiciones es verdadera:
+
 - llamado por cualquier persona que no sea el propietario o el gestor
 - el relé con el URI proporcionado ya está permitido
 - el URI está vacío
-:::
+  :::
 
 ### remove_relay()
 
@@ -123,16 +124,17 @@ def remove_relay(uri: String[MAX_STRING_LENGTH])
 
 #### Parámetros:
 
-| Nombre  | Tipo                        | Descripción      |
-|---------|-----------------------------|------------------|
-| `uri`   | `String[MAX_STRING_LENGTH]` | URI del relé     |
+| Nombre | Tipo                        | Descripción  |
+| ------ | --------------------------- | ------------ |
+| `uri`  | `String[MAX_STRING_LENGTH]` | URI del relé |
 
 :::note
 Revoca si alguna de las siguientes condiciones es verdadera:
+
 - llamado por cualquier persona que no sea el propietario o el gestor
 - el relé con el URI proporcionado no está permitido
 - el URI está vacío
-:::
+  :::
 
 ### change_owner()
 
@@ -145,16 +147,17 @@ def change_owner(owner: address)
 
 #### Parámetros:
 
-| Nombre   | Tipo      | Descripción                  |
-|----------|-----------|------------------------------|
-| `owner`  | `address` | Dirección del nuevo propietario |
+| Nombre  | Tipo      | Descripción                     |
+| ------- | --------- | ------------------------------- |
+| `owner` | `address` | Dirección del nuevo propietario |
 
 :::note
 Revoca si alguna de las siguientes condiciones es verdadera:
+
 - llamado por cualquier persona que no sea el propietario actual
 - `owner` es el propietario actual
 - `owner` es una dirección cero
-:::
+  :::
 
 ### set_manager()
 
@@ -167,16 +170,17 @@ def set_manager(manager: address)
 
 #### Parámetros:
 
-| Nombre    | Tipo      | Descripción                      |
-|-----------|-----------|----------------------------------|
-| `manager` | `address` | Dirección del nuevo gestor       |
+| Nombre    | Tipo      | Descripción                |
+| --------- | --------- | -------------------------- |
+| `manager` | `address` | Dirección del nuevo gestor |
 
 :::note
 Revoca si alguna de las siguientes condiciones es verdadera:
+
 - llamado por cualquier persona que no sea el propietario actual
 - `manager` es igual al valor establecido previamente
 - `manager` es una dirección cero
-:::
+  :::
 
 ### dismiss_manager()
 
@@ -189,9 +193,10 @@ def dismiss_manager()
 
 :::note
 Revoca si alguna de las siguientes condiciones es verdadera:
+
 - llamado por cualquier persona que no sea el propietario actual
 - no se había establecido ningún `manager` previamente
-:::
+  :::
 
 ### recover_erc20()
 
@@ -204,7 +209,8 @@ def recover_erc20(token: address, amount: uint256, recipient: address)
 
 :::note
 Revoca si alguna de las siguientes condiciones es verdadera:
+
 - llamado por cualquier persona que no sea el propietario
 - la transferencia ERC20 revierte
 - `recipient` es una dirección cero
-:::
+  :::

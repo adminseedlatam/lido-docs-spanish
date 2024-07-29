@@ -14,17 +14,19 @@
 ### Contratos y Roles:
 
 **Token stMatic:** [`0x9ee91F9f426fA633d227f7a9b000E28b9dfd8599`](https://etherscan.io/address/0x9ee91F9f426fA633d227f7a9b000E28b9dfd8599)
-- **Roles:** DAO_ROLE, PAUSE_ROLE, UNPAUSE_ROLE 
+
+- **Roles:** DAO_ROLE, PAUSE_ROLE, UNPAUSE_ROLE
 
 **Registro NO de Lido en Polygon:** [`0x216B8b78e0632138dc38907dd089aAB601ED6EDC`](https://etherscan.io/address/0x216B8b78e0632138dc38907dd089aAB601ED6EDC)
+
 - **Roles:** DAO_ROLE, PAUSE_ROLE, UNPAUSE_ROLE
 
 ### Lista de Firmantes:
 
-| Nombre  | Dirección                                    | Verificación                             | Verificación Pública |
-|---------|----------------------------------------------|------------------------------------------|----------------------|
-| Jakov   | 0x59d07dc34B135B17b87840a86BFF7302039E7EDf   | https://etherscan.io/verifySig/11733 | https://twitter.com/defiyaco/status/1587222297936633857?s=61&t=zNY2z0koPK_WF8W9MSgaww |
-| vsh     | 0x6E83d6f57012D74e0F131753f8B5Ab557824507D   |                                          |                      |
-| kadmil  | 0x9A3f38AF97b791C85c043D46a64f56f87E0283D4   | https://etherscan.io/verifySig/17851 | https://twitter.com/kadmil_eth/status/1655865828544266242 |
-| Hamzah  | 0xF20825cab04cc430Fe941eaa9C2Ae6b9DA9bc3B5   |                                          |                      |
-| Aishwary| 0xc156C57231a9302D9f5C7b5eF22871cC25F40736   |                                          |                      |
+| Nombre   | Dirección                                  | Verificación                         | Verificación Pública                                                                  |
+| -------- | ------------------------------------------ | ------------------------------------ | ------------------------------------------------------------------------------------- |
+| Jakov    | 0x59d07dc34B135B17b87840a86BFF7302039E7EDf | https://etherscan.io/verifySig/11733 | https://twitter.com/defiyaco/status/1587222297936633857?s=61&t=zNY2z0koPK_WF8W9MSgaww |
+| vsh      | 0x6E83d6f57012D74e0F131753f8B5Ab557824507D |                                      |                                                                                       |
+| kadmil   | 0x9A3f38AF97b791C85c043D46a64f56f87E0283D4 | https://etherscan.io/verifySig/17851 | https://twitter.com/kadmil_eth/status/1655865828544266242                             |
+| Hamzah   | 0xF20825cab04cc430Fe941eaa9C2Ae6b9DA9bc3B5 |                                      |                                                                                       |
+| Aishwary | 0xc156C57231a9302D9f5C7b5eF22871cC25F40736 |                                      |                                                                                       |

@@ -3,7 +3,7 @@
 :::warning
 Sepolia testnet tiene solo un conjunto limitado de partes funcionales del protocolo.
 
-Por ejemplo, los [retiros](/docs/contracts/withdrawal-queue-erc721.md) en el protocolo  no están disponibles (en pausa indefinidamente), utilice la implementación [Holešky testnet](./holesky.md) si es posible.
+Por ejemplo, los [retiros](/docs/contracts/withdrawal-queue-erc721.md) en el protocolo no están disponibles (en pausa indefinidamente), utilice la implementación [Holešky testnet](./holesky.md) si es posible.
 
 Los objetivos para esta implementación de testnet son:
 
@@ -125,4 +125,4 @@ y configuración basada en permisos [conjunto de validadores](https://github.com
 - (proposed) WstEthL2Token: [`0x0B15635FCF5316EdFD2a9A0b0dC3700aeA4D09E6`](https://testnet.bscscan.com/address/0x0B15635FCF5316EdFD2a9A0b0dC3700aeA4D09E6) (proxy)
 - (proposed) WstEthL2Token: [`0x83bc41aae95b447134e72892ba659d6ea664d496`](https://testnet.bscscan.com/address/0x83bc41aae95b447134e72892ba659d6ea664d496) (impl)
 - (proposed) NTT Manager: [`0x66Cb5a992570EF01b522Bc59A056a64A84Bd0aAa`](https://testnet.bscscan.com/address/0x66Cb5a992570EF01b522Bc59A056a64A84Bd0aAa) (proxy)
-- (proposed) NTT Manager: [`0xa0310f52f4ac9c394a82b2e19267a78d3390a16f`](https://testnet.bscscan.com/address/0xa0310f52f4ac9c394a82b2e19267a78d3390a16f) (impl) 
+- (proposed) NTT Manager: [`0xa0310f52f4ac9c394a82b2e19267a78d3390a16f`](https://testnet.bscscan.com/address/0xa0310f52f4ac9c394a82b2e19267a78d3390a16f) (impl)

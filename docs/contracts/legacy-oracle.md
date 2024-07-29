@@ -26,9 +26,9 @@ El contrato `LegacyOracle` recibe los cambios de datos en cada reporte de `Accou
 (aún dentro de la misma transacción):
 
 1. Invoca [`handleConsensusLayerReport`](./legacy-oracle#handleconsensuslayerreport)
-proporcionando el slot de referencia y los datos de los validadores del `AccountingOracle` en sí mismo.
+   proporcionando el slot de referencia y los datos de los validadores del `AccountingOracle` en sí mismo.
 1. Invoca [`handlePostTokenRebase`](./legacy-oracle#handleposttokenrebase)
-desde [`Lido`](/contracts/lido).
+   desde [`Lido`](/contracts/lido).
 
 ```mermaid
 graph LR;
@@ -48,7 +48,7 @@ La fórmula está desactualizada e inexacta desde la [actualización a Lido V2](
 :::
 
 ```javascript
-protocolAPR = (postTotalPooledEther - preTotalPooledEther) * secondsInYear / (preTotalPooledEther * timeElapsed)
+protocolAPR = ((postTotalPooledEther - preTotalPooledEther) * secondsInYear) / (preTotalPooledEther * timeElapsed)
 lidoFeeAsFraction = lidoFee / basisPoint
 userAPR = protocolAPR * (1 - lidoFeeAsFraction)
 ```
@@ -190,18 +190,18 @@ Siempre devuelve (225, 32, 12, 1606824023) para Mainnet y (225, 32, 12, 16165080
 
 #### Devoluciones
 
-| Nombre            | Tipo      | Descripción                                                         |
-| ----------------- | --------- | ------------------------------------------------------------------- |
-| `epochsPerFrame`  | `uint64`  | Épocas de Beacon Chain por marco de reporte de `AccountingOracle`   |
-| `slotsPerEpoch`   | `uint64`  | Slots de Beacon Chain por época de Beacon Chain                      |
-| `secondsPerSlot`  | `uint64`  | Segundos por slot de Beacon Chain                                    |
-| `genesisTime`     | `uint64`  | Marca de tiempo de génesis de Beacon Chain                           |
+| Nombre           | Tipo     | Descripción                                                       |
+| ---------------- | -------- | ----------------------------------------------------------------- |
+| `epochsPerFrame` | `uint64` | Épocas de Beacon Chain por marco de reporte de `AccountingOracle` |
+| `slotsPerEpoch`  | `uint64` | Slots de Beacon Chain por época de Beacon Chain                   |
+| `secondsPerSlot` | `uint64` | Segundos por slot de Beacon Chain                                 |
+| `genesisTime`    | `uint64` | Marca de tiempo de génesis de Beacon Chain                        |
 
 ### getCurrentEpochId()
 
 Devuelve el ID de época de
 
- Beacon Chain calculado a partir del timestamp actual usando la [especificación de cadena de Beacon](./legacy-oracle#getbeaconspec).
+Beacon Chain calculado a partir del timestamp actual usando la [especificación de cadena de Beacon](./legacy-oracle#getbeaconspec).
 
 ```sol
 function getCurrentEpochId() returns (uint256)
@@ -221,11 +221,11 @@ function getCurrentFrame() returns (
 
 #### Devoluciones
 
-| Nombre             | Tipo       | Descripción                                                       |
-| ------------------ | ---------- | ----------------------------------------------------------------- |
-| `frameEpochId`     | `uint256`  | La primera época del marco de reporte actual de `AccountingOracle` |
-| `frameStartTime`   | `uint256`  | El timestamp de inicio del marco de reporte actual                 |
-| `frameEndTime`     | `uint256`  | El timestamp de fin del marco de reporte actual                    |
+| Nombre           | Tipo      | Descripción                                                        |
+| ---------------- | --------- | ------------------------------------------------------------------ |
+| `frameEpochId`   | `uint256` | La primera época del marco de reporte actual de `AccountingOracle` |
+| `frameStartTime` | `uint256` | El timestamp de inicio del marco de reporte actual                 |
+| `frameEndTime`   | `uint256` | El timestamp de fin del marco de reporte actual                    |
 
 ### getLastCompletedEpochId()
 
@@ -249,11 +249,11 @@ function getLastCompletedReportDelta() returns (
 
 #### Devoluciones
 
-| Nombre                     | Tipo       | Descripción                                                   |
-| -------------------------- | ---------- | ------------------------------------------------------------- |
-| `postTotalPooledEther`     | `uint256`  | `stETH` total pooled ether post-report (es decir, suministro total)  |
-| `preTotalPooledEther`      | `uint256`  | `stETH` total pooled ether pre-report (es decir, suministro total)   |
-| `timeElapsed`              | `uint256`  | Tiempo transcurrido desde el último reporte completado, segundos |
+| Nombre                 | Tipo      | Descripción                                                         |
+| ---------------------- | --------- | ------------------------------------------------------------------- |
+| `postTotalPooledEther` | `uint256` | `stETH` total pooled ether post-report (es decir, suministro total) |
+| `preTotalPooledEther`  | `uint256` | `stETH` total pooled ether pre-report (es decir, suministro total)  |
+| `timeElapsed`          | `uint256` | Tiempo transcurrido desde el último reporte completado, segundos    |
 
 ## Métodos
 
@@ -282,15 +282,15 @@ El llamante debe ser `Lido`.
 
 #### Parámetros
 
-| Nombre                      | Tipo       | Descripción                                                                             |
-| --------------------------- | ---------- | --------------------------------------------------------------------------------------- |
-| `reportTimestamp`           | `uint256`  | El timestamp de referencia correspondiente al momento del cálculo del reporte del oráculo |
-| `timeElapsed`               | `uint256`  | Tiempo transcurrido desde el último reporte completado, segundos                         |
-| `preTotalShares`            | `uint256`  | `stETH` total shares pre-report                                                         |
-| `preTotalEther`             | `uint256`  | `stETH` total pooled ether pre-report (es decir, suministro total)                        |
-| `postTotalShares`           | `uint256`  | `stETH` total shares post-report                                                        |
-| `postTotalEther`            | `uint256`  | `stETH` total pooled ether post-report (es decir, suministro total)                       |
-| `totalSharesMintedAsFees`   | `uint256`  | Cantidad total de acciones acuñadas como tarifas del protocolo además de las recompensas acumuladas |
+| Nombre                    | Tipo      | Descripción                                                                                         |
+| ------------------------- | --------- | --------------------------------------------------------------------------------------------------- |
+| `reportTimestamp`         | `uint256` | El timestamp de referencia correspondiente al momento del cálculo del reporte del oráculo           |
+| `timeElapsed`             | `uint256` | Tiempo transcurrido desde el último reporte completado, segundos                                    |
+| `preTotalShares`          | `uint256` | `stETH` total shares pre-report                                                                     |
+| `preTotalEther`           | `uint256` | `stETH` total pooled ether pre-report (es decir, suministro total)                                  |
+| `postTotalShares`         | `uint256` | `stETH` total shares post-report                                                                    |
+| `postTotalEther`          | `uint256` | `stETH` total pooled ether post-report (es decir, suministro total)                                 |
+| `totalSharesMintedAsFees` | `uint256` | Cantidad total de acciones acuñadas como tarifas del protocolo además de las recompensas acumuladas |
 
 ### handleConsensusLayerReport()
 
@@ -312,11 +312,11 @@ El llamante debe ser `AccountingOracle`.
 
 #### Parámetros
 
-| Nombre            | Tipo       | Descripción                                                                           |
-| ----------------- | ---------- | ------------------------------------------------------------------------------------- |
-| `_refSlot`        | `uint256`  | El slot de referencia correspondiente al momento del cálculo del reporte del oráculo   |
-| `_clBalance`      | `uint256`  | Balance de validadores participantes de Lido en el lado de Beacon Chain                 |
-| `_clValidators`   | `uint256`  | Número de validadores participantes de Lido en el lado de Beacon Chain                   |
+| Nombre          | Tipo      | Descripción                                                                          |
+| --------------- | --------- | ------------------------------------------------------------------------------------ |
+| `_refSlot`      | `uint256` | El slot de referencia correspondiente al momento del cálculo del reporte del oráculo |
+| `_clBalance`    | `uint256` | Balance de validadores participantes de Lido en el lado de Beacon Chain              |
+| `_clValidators` | `uint256` | Número de validadores participantes de Lido en el lado de Beacon Chain               |
 
 ## Eventos
 
@@ -341,11 +341,11 @@ Se emite dentro de los métodos [`handleConsensusLayerReport`](./legacy-oracle#h
 
 #### Parámetros
 
-| Nombre               | Tipo      | Descripción                                                                  |
-| -------------------- | --------- | ---------------------------------------------------------------------------- |
-| `epochId`            | `uint256` | Identificador de época de referencia del reporte                             |
-| `beaconBalance`      | `uint128` | El balance de los validadores participantes de Lido en el lado de Consenso    |
-| `beaconValidators`   | `uint128` | El número de los validadores participantes de Lido que han aparecido          |
+| Nombre             | Tipo      | Descripción                                                                |
+| ------------------ | --------- | -------------------------------------------------------------------------- |
+| `epochId`          | `uint256` | Identificador de época de referencia del reporte                           |
+| `beaconBalance`    | `uint128` | El balance de los validadores participantes de Lido en el lado de Consenso |
+| `beaconValidators` | `uint128` | El número de los validadores participantes de Lido que han aparecido       |
 
 ### PostTotalShares()
 
@@ -368,9 +368,9 @@ El nuevo evento [`TokenRebased`](/docs/integrations/api.md#ultimo-apr-de-lido-pa
 
 #### Parámetros
 
-| Nombre                   | Tipo      | Descripción                                     |
-| ------------------------ | --------- | ----------------------------------------------- |
-| `postTotalPooledEther`   | `uint256` | Ether total post-report (es decir, suministro total) |
-| `preTotalPooledEther`    | `uint256` | Ether total pre-report (es decir, suministro total)  |
-| `timeElapsed`            | `uint256` | Tiempo transcurrido desde el reporte anterior, segundos |
-| `totalShares`            | `uint256` | Acciones totales post-report                          |
+| Nombre                 | Tipo      | Descripción                                             |
+| ---------------------- | --------- | ------------------------------------------------------- |
+| `postTotalPooledEther` | `uint256` | Ether total post-report (es decir, suministro total)    |
+| `preTotalPooledEther`  | `uint256` | Ether total pre-report (es decir, suministro total)     |
+| `timeElapsed`          | `uint256` | Tiempo transcurrido desde el reporte anterior, segundos |
+| `totalShares`          | `uint256` | Acciones totales post-report                            |

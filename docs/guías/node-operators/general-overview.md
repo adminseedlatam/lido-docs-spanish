@@ -5,29 +5,36 @@ Los Operadores de Nodo gestionan una infraestructura segura y estable para ejecu
 El flujo general es el siguiente:
 
 1. **Expresión de interés y votación de la DAO:**
+
    - Un Operador de Nodo expresa su interés a los miembros de la DAO. Su dirección se propone para ser incluida en la lista de Operadores de Nodo de la DAO.
    - La dirección del Operador de Nodo debe ser suministrada al DAO con un límite de cero claves de firma.
 
 2. **Votación de la DAO:**
+
    - la DAO vota para incluir al Operador en la lista de operadores activos. Después de una votación exitosa para la inclusión, el Operador de Nodo se vuelve activo.
 
 3. **Generación y presentación de claves de firma:**
+
    - El Operador de Nodo genera y presenta un conjunto de claves públicas de firma y las firmas asociadas para futuros validadores que serán gestionados por el Operador.
    - Al generar las firmas, el Operador debe usar credenciales de retiro derivadas de la dirección de retiro proporcionada por la DAO.
 
 4. **Verificación y aprobación de claves:**
+
    - Los miembros de la DAO verifican las claves presentadas para asegurar su corrección. Si todo está en orden, votan para aprobarlas.
    - Después de la aprobación exitosa, las claves se vuelven utilizables por el protocolo.
 
 5. **Distribución de ether:**
+
    - El protocolo distribuye ether agrupado de manera uniforme entre todos los Operadores de Nodo activos en lotes de `32 ether`.
    - Al asignar el próximo depósito a un Operador de Nodo, se toma la primera clave de firma no utilizada, junto con la firma asociada, del conjunto utilizable del Operador de Nodo.
    - Se realiza un depósito en el `DepositContract` oficial, enviando los fondos agrupados en ese momento. En este punto, el Operador de Nodo debe tener el validador ya en funcionamiento y configurado con la clave pública utilizada.
 
 6. **Responsabilidad del Operador de Nodo:**
+
    - A partir de este punto, el Operador de Nodo es responsable de mantener el validador asociado con la clave de firma operativo y en buen funcionamiento.
 
 7. **Inclusión de Oráculos:**
+
    - El protocolo incluye Oráculos que periódicamente informan el saldo combinado de Beacon de todos los validadores lanzados por el protocolo.
    - Cuando el saldo aumenta debido a las recompensas de la cadena Beacon, se aplica una tarifa del monto de las recompensas (ver más abajo para los detalles sobre cómo se denomina la tarifa) y se distribuye entre los Operadores de Nodo activos.
 

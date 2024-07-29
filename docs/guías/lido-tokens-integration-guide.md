@@ -60,9 +60,9 @@ Hay feeds de tasa `wstETH/stETH` disponibles para usar en conjunto con (w)stETH:
 - [Base](https://data.chain.link/feeds/base/base/wsteth-steth%20exchangerate)
 - [Polygon PoS](https://data.chain.link/feeds/polygon/mainnet/wsteth-steth)
 - [Era ZKSync](https://data.chain.link/feeds/zksync/zksync/wsteth-steth%20exchangerate)
-:::note
-El feed compatible con Chainlink en Ethereum Mainnet está desplegado y es utilizado por los vaults de Mellow LRT, siendo un envoltorio para `wstETH.getStETHByWstETH(10 ** decimals)`
-:::
+  :::note
+  El feed compatible con Chainlink en Ethereum Mainnet está desplegado y es utilizado por los vaults de Mellow LRT, siendo un envoltorio para `wstETH.getStETHByWstETH(10 ** decimals)`
+  :::
 
 Estos feeds pueden utilizarse para componer un feed objetivo, por ejemplo, para el par `wstETH/USD`, consulte los ejemplos de los mercados AAVE v3:
 
@@ -132,7 +132,7 @@ El `share` es una unidad básica que representa la participación del titular de
 El saldo de shares por saldo de stETH se puede calcular mediante esta fórmula:
 
 ```js
-shares[account] = balanceOf(account) * totalShares / totalPooledEther
+shares[account] = (balanceOf(account) * totalShares) / totalPooledEther
 ```
 
 #### Caso especial de 1-2 wei
@@ -148,6 +148,7 @@ Ejemplo:
 5. En muchos casos, la cantidad realmente transferida es 1-2 wei menos de lo esperado.
 
 El problema está documentado aquí: [lido-dao/issues/442](https://github.com/lidofinance/lido-dao/issues/442)
+
 ### Bookkeeping shares
 
 Aunque es amigable para el usuario, los rebases de stETH añaden un nivel completo de complejidad a la integración de stETH en otras dApps y protocolos. Cuando se integra stETH como un token en cualquier dApp, se recomienda encarecidamente almacenar y operar con shares en lugar de los saldos públicos de stETH directamente, porque los saldos de stETH cambian tanto en las transferencias, mint/burns y rebases, mientras que los saldos de shares solo pueden cambiar en las transferencias y mint/burns.
@@ -160,10 +161,10 @@ Cualquier operación en stETH se puede realizar directamente en shares, sin dife
 
 La forma preferida de operar con stETH debería ser:
 
-1) Obtener el saldo del token stETH;
-2) Convertir el saldo de stETH en saldo de shares y usarlo como unidad de saldo principal en tu dApp;
-3) Cuando se realice cualquier operación en el saldo, hazlo en el saldo de shares;
-4) Cuando los usuarios interactúen con stETH, convierte el saldo de shares de vuelta al saldo del token stETH.
+1. Obtener el saldo del token stETH;
+2. Convertir el saldo de stETH en saldo de shares y usarlo como unidad de saldo principal en tu dApp;
+3. Cuando se realice cualquier operación en el saldo, hazlo en el saldo de shares;
+4. Cuando los usuarios interactúen con stETH, convierte el saldo de shares de vuelta al saldo del token stETH.
 
 Ten en cuenta que un APR del 10% en el saldo de shares y un APR del 10% en el saldo del token stETH darán como resultado valores de salida diferentes con el tiempo, porque el saldo de shares es estable, mientras que el saldo del token stETH cambia eventualmente.
 
@@ -220,6 +221,7 @@ Todos los premios que se retiran de la Capa de Consenso o se reciben como tarifa
 
 Debido a la naturaleza de rebasing de stETH, el saldo de stETH en la dirección del titular no es constante, cambia diariamente a medida que llega el informe del oráculo.
 Aunque los tokens rebaseables están siendo comunes en DeFi recientemente, muchas dApps no admiten tokens rebaseables. Por ejemplo, Maker, UniSwap y SushiSwap no están diseñados para tokens rebaseables. Listar stETH en estas aplicaciones puede resultar en que los titulares no reciban sus recompensas diarias de staking, lo que efectivamente anula los beneficios del staking líquido. Para integrarse con estas dApps, existe otra forma de stTokens de Lido llamada wstETH (ether con stake envuelto).
+
 ### ¿Qué es wstETH?
 
 wstETH es un token ERC20 que representa la participación de una cuenta en el suministro total de stETH (envoltura de token stETH con saldos estáticos). Para wstETH, 1 wei en [participaciones](#internos-de-steth-mecánica-de-shares) es equivalente a 1 wei en saldo. El saldo de wstETH solo puede modificarse mediante transferencias, creación y quema de tokens. El saldo de wstETH no se rebasea; en cambio, el precio de wstETH denominado en stETH cambia.
@@ -283,7 +285,7 @@ Aunque LDO cumple completamente con ERC-20, es importante destacar que el token 
 Es crítico verificar el estado de retorno para integraciones externas, ya que el estándar de token ERC-20 [requiere](https://eips.ethereum.org/EIPS/eip-20#methods) prevenir varios vectores de ataque (por ejemplo, depósitos de tokens en bóvedas):
 
 > Los llamadores DEBEN manejar `false` de los `returns (bool success)`. ¡Los llamadores NO DEBEN asumir que `false` nunca se devuelve!
-:::
+> :::
 
 ## ERC20Permit
 
@@ -405,7 +407,7 @@ struct WithdrawalRequestStatus {
 }
 ```
 
->NOTA: Dado que stETH es un token esencial si el usuario solicita un retiro usando wstETH directamente, la cantidad se designará en stETH en la creación de la solicitud.
+> NOTA: Dado que stETH es un token esencial si el usuario solicita un retiro usando wstETH directamente, la cantidad se designará en stETH en la creación de la solicitud.
 
 Puedes llamar a `getClaimableEther(uint256[] _requestIds, uint256[] _hints)` para obtener la cantidad exacta de ether reservado para las solicitudes, donde `_hints` se puede encontrar llamando a `findCheckpointHints(__requestIds, 1, getLastCheckpointIndex())`. Devolverá un valor distinto de cero solo si la solicitud es reclamable (`isFinalized && !isClaimed`).
 

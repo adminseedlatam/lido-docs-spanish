@@ -1,6 +1,6 @@
-| título               | estado    | autor                | descripción breve                                        | discusión                                                        | creado      |
-| -------------------- | --------  | -------------------  | -------------------------------------------------------- | ----------------------------------------------------------------- | ---------- |
-| Añadir stETH a AAVE v2| Propuesta | @jbeezy @grstepanov  | Propuesta de gobernanza de AAVE para habilitar stETH como token base | [arc-add-support-for-steth-lido/5793](https://governance.aave.com/t/arc-add-support-for-steth-lido/5793) | 2022-04-02 |
+| título                 | estado    | autor               | descripción breve                                                    | discusión                                                                                                | creado     |
+| ---------------------- | --------- | ------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ---------- |
+| Añadir stETH a AAVE v2 | Propuesta | @jbeezy @grstepanov | Propuesta de gobernanza de AAVE para habilitar stETH como token base | [arc-add-support-for-steth-lido/5793](https://governance.aave.com/t/arc-add-support-for-steth-lido/5793) | 2022-04-02 |
 
 ### Resumen Simple
 
@@ -115,16 +115,19 @@ Lido ya ha migrado a una solución completamente no custodial y más del 60% de 
 **Volúmenes y DEXes**
 
 **[Balancer (wstETH/WETH)](https://app.balancer.fi/#/pool/0x32296969ef14eb0c6d29669c550d4a0449130230000200000000000000000080)**
+
 - Liquidez: $409.3M
 - Volumen (24h): $509,3
 - [Consulta en Dune](https://dune.xyz/embeds/153863/304423/684fdf22-161c-4352-a41d-81ce8a705c01)
 
 **[SushiSwap (wstETH/DAI)](https://analytics.sushi.com/pairs/0xc5578194d457dcce3f272538d1ad52c68d1ce849)**
+
 - Liquidez: $32.2M
 - Volumen (24h): $756,211
 - [Consulta en Dune](https://dune.xyz/embeds/153729/304165/5c53e046-47ef-485d-9767-6ec188a5629e)
 
 **[Curve (stETH/ETH)](https://curve.fi/steth)**
+
 - Liquidez: $3,75B
 - Volumen (24h): $5,7M
 - [Consulta en Dune](https://dune.xyz/embeds/153374/303383/9c8cb193-4538-497e-a774-c33e78bcd34d)
@@ -166,7 +169,7 @@ La implementación actual no admite préstamos, ni con tasas de interés variabl
 - [variableDebtSTETH](https://etherscan.io/address/0xde2c414b671d2db93617d1592f0490c13674de24)
 - [stableDebtSTETH](https://etherscan.io/address/0x8180949ac41ef18e844ff8dafe604a195d86aea9)
 - [DefaultReserveInterestRateStrategy](https://etherscan.io/address/0xff04ed5f7a6C3a0F1e5Ea20617F8C6f513D5A77c)
-Pasos que la propuesta ejecutará: iniciar una votación para agregar stETH como nuevo token.
+  Pasos que la propuesta ejecutará: iniciar una votación para agregar stETH como nuevo token.
 
 ### Consideraciones de Seguridad
 
@@ -180,6 +183,7 @@ Se aplican los riesgos técnicos estándar de los contratos inteligentes a la im
 - **Factor de Reserva:** 10%
 
 **Modelo de Tasa de Interés:**
+
 - UÓptimo: 60%
 - Base: 0%
 - Pendiente 1: 8%

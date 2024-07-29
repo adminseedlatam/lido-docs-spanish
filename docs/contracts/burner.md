@@ -104,12 +104,12 @@ Revoca si alguna de las siguientes condiciones es verdadera:
 - El remitente del mensaje no es titular del rol `REQUEST_BURN_MY_STETH_ROLE`.
 - No se proporciona stETH (`_stETHAmountToBurn == 0`).
 - No se transfieren stETH (se excede la asignación).
-:::
+  :::
 
 #### Parámetros
 
-| Nombre               | Tipo      | Descripción                                         |
-| -------------------- | --------- | --------------------------------------------------- |
+| Nombre               | Tipo      | Descripción                                                 |
+| -------------------- | --------- | ----------------------------------------------------------- |
 | `_stETHAmountToBurn` | `uint256` | cantidad de tokens stETH (no cantidad de acciones) a quemar |
 
 ### requestBurnSharesForCover()
@@ -128,14 +128,14 @@ Revoca si alguna de las siguientes condiciones es verdadera:
 - El remitente del mensaje no es titular del rol `REQUEST_BURN_SHARES_ROLE`.
 - No se proporcionan acciones stETH (`_sharesAmountToBurn == 0`).
 - No se transfieren acciones stETH (se excede la asignación).
-:::
+  :::
 
 #### Parámetros
 
-| Nombre                  | Tipo      | Descripción                                         |
-| ----------------------- | --------- | --------------------------------------------------- |
-| `_from`                 | `address` | dirección desde la cual transferir las acciones     |
-| `_sharesAmountToBurn`   | `uint256` | cantidad de acciones (no cantidad de tokens stETH) a quemar |
+| Nombre                | Tipo      | Descripción                                                 |
+| --------------------- | --------- | ----------------------------------------------------------- |
+| `_from`               | `address` | dirección desde la cual transferir las acciones             |
+| `_sharesAmountToBurn` | `uint256` | cantidad de acciones (no cantidad de tokens stETH) a quemar |
 
 ### requestBurnMyStETH()
 
@@ -151,13 +151,13 @@ Revoca si alguna de las siguientes condiciones es verdadera:
 - El remitente del mensaje no es titular del rol `REQUEST_BURN_MY_STETH_ROLE`.
 - No se proporciona stETH (`_stETHAmountToBurn == 0`).
 - No se transfieren stETH (se excede la asignación).
-:::
+  :::
 
 #### Parámetros
 
-| Nombre               | Tipo      | Descripción                                         |
-| -------------------- | --------- | --------------------------------------------------- |
-| `_stETHAmountToBurn` | `uint256` | cantidad de tokens stETH (no cantidad de acciones) a quemar.
+| Nombre               | Tipo      | Descripción                                                  |
+| -------------------- | --------- | ------------------------------------------------------------ |
+| `_stETHAmountToBurn` | `uint256` | cantidad de tokens stETH (no cantidad de acciones) a quemar. |
 
 ### requestBurnShares()
 
@@ -177,13 +177,13 @@ Revoca si alguna de las siguientes condiciones es verdadera:
 - El remitente del mensaje no es titular del rol `REQUEST_BURN_SHARES_ROLE`.
 - No se proporcionan acciones stETH (`_sharesAmountToBurn == 0`).
 - No se transfieren acciones stETH (se excede la asignación).
-:::
+  :::
 
 #### Parámetros
 
-| Nombre                  | Tipo      | Descripción                                         |
-| ----------------------- | --------- | --------------------------------------------------- |
-|        `_from`           | `address` | dirección desde la cual transferir las acciones     |
+| Nombre                | Tipo      | Descripción                                                 |
+| --------------------- | --------- | ----------------------------------------------------------- |
+| `_from`               | `address` | dirección desde la cual transferir las acciones             |
 | `_sharesAmountToBurn` | `uint256` | cantidad de acciones (no cantidad de tokens stETH) a quemar |
 
 ### recoverExcessStETH()
@@ -210,14 +210,14 @@ Revoca si alguna de las siguientes condiciones es verdadera:
 - El valor `_amount` es 0 (cero).
 - La dirección `_token` es 0 (cero).
 - La dirección `_token` es igual a la dirección de `stETH` (usar `recoverExcessStETH` en su lugar).
-:::
+  :::
 
 #### Parámetros
 
-| Nombre      | Tipo      | Descripción                                 |
-| ----------- | --------- | ------------------------------------------- |
-| `_token`    | `address` | dirección del token ERC20 para recuperar    |
-| `_amount`   | `uint256` | Cantidad a recuperar                        |
+| Nombre    | Tipo      | Descripción                              |
+| --------- | --------- | ---------------------------------------- |
+| `_token`  | `address` | dirección del token ERC20 para recuperar |
+| `_amount` | `uint256` | Cantidad a recuperar                     |
 
 ### recoverERC721()
 
@@ -232,14 +232,14 @@ Revoca si alguna de las siguientes condiciones es verdadera:
 
 - La dirección `_token` es 0 (cero).
 - La dirección `_token` es igual a la dirección de `stETH` (usar `recoverExcessStETH` en su lugar).
-:::
+  :::
 
 #### Parámetros
 
-| Nombre       | Tipo      | Descripción                                 |
-| ------------ | --------- | ------------------------------------------- |
-| `_token`     | `address` | dirección del token compatible con ERC721 para recuperar |
-| `_tokenId`   | `uint256` | ID del token a recuperar                     |
+| Nombre     | Tipo      | Descripción                                              |
+| ---------- | --------- | -------------------------------------------------------- |
+| `_token`   | `address` | dirección del token compatible con ERC721 para recuperar |
+| `_tokenId` | `uint256` | ID del token a recuperar                                 |
 
 ### commitSharesToBurn()
 
@@ -264,9 +264,9 @@ Revoca si alguna de las siguientes condiciones es verdadera:
 
 #### Parámetros
 
-| Nombre            | Tipo      | Descripción                                            |
-| ----------------- | --------- | ------------------------------------------------------ |
-| `_sharesToBurn`   | `uint256` | Cantidad de acciones de cobertura más no de cobertura para marcar como quemadas |
+| Nombre          | Tipo      | Descripción                                                                     |
+| --------------- | --------- | ------------------------------------------------------------------------------- |
+| `_sharesToBurn` | `uint256` | Cantidad de acciones de cobertura más no de cobertura para marcar como quemadas |
 
 ### requestBurnShares()
 
@@ -295,7 +295,7 @@ Reverts if any of the following is true:
 
 | Name                  | Type      | Description                                     |
 | --------------------- | --------- | ----------------------------------------------- |
-|        `_from`        | `address` |         address to transfer shares from         |
+| `_from`               | `address` | address to transfer shares from                 |
 | `_sharesAmountToBurn` | `uint256` | shares amount (not stETH tokens amount) to burn |
 
 ### recoverExcessStETH()
@@ -330,10 +330,10 @@ Reverts if any of the following is true:
 
 #### Parameters
 
-| Name      | Type      | Description                                 |
-| --------- | --------- | ------------------------------------------- |
-| `_token`  | `address` | ERC20-compatible token address to recover   |
-| `_amount` | `uint256` | Amount to recover                           |
+| Name      | Type      | Description                               |
+| --------- | --------- | ----------------------------------------- |
+| `_token`  | `address` | ERC20-compatible token address to recover |
+| `_amount` | `uint256` | Amount to recover                         |
 
 ### recoverERC721()
 
@@ -354,10 +354,10 @@ Reverts if any of the following is true:
 
 #### Parameters
 
-| Name       | Type      | Description                                 |
-| ---------- | --------- | ------------------------------------------- |
-| `_token`   | `address` | ERC721-compatible token address to recover  |
-| `_tokenId` | `uint256` | Token id to recover                         |
+| Name       | Type      | Description                                |
+| ---------- | --------- | ------------------------------------------ |
+| `_token`   | `address` | ERC721-compatible token address to recover |
+| `_tokenId` | `uint256` | Token id to recover                        |
 
 ### commitSharesToBurn()
 

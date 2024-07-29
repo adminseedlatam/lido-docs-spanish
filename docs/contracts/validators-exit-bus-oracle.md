@@ -81,8 +81,8 @@ Cada solicitud de salida de validador se describe con el siguiente array de 64 b
     |  moduleId  |  nodeOpId  |  validatorIndex  | validatorPubkey |
 ```
 
- Todas las solicitudes están empaquetadas estrechamente en un array de bytes donde las solicitudes siguen
- unas a otras sin ningún separador o relleno, y se pasan al campo `data` de la estructura del informe.
+Todas las solicitudes están empaquetadas estrechamente en un array de bytes donde las solicitudes siguen
+unas a otras sin ningún separador o relleno, y se pasan al campo `data` de la estructura del informe.
 
 Las solicitudes deben estar ordenadas en orden ascendente por la siguiente clave compuesta: `(moduleId, nodeOpId, validatorIndex)`.
 :::
@@ -114,6 +114,7 @@ Siempre devuelve 1606824023 (1 de diciembre de 2020, 12:00:23pm UTC) en la [Main
 ```solidity
 uint256 public immutable GENESIS_TIME
 ```
+
 ### PAUSE_INFINITELY()
 
 Valor especial para la pausa infinita.
@@ -168,9 +169,9 @@ function getLastRequestedValidatorIndices(uint256 moduleId, uint256[] calldata n
 
 #### Parámetros
 
-| Nombre      | Tipo      | Descripción                                 |
-| ----------- | --------- | ------------------------------------------- |
-| `moduleId`  | `uint256` | ID del módulo de staking.                   |
+| Nombre      | Tipo      | Descripción                                           |
+| ----------- | --------- | ----------------------------------------------------- |
+| `moduleId`  | `uint256` | ID del módulo de staking.                             |
 | `nodeOpIds` | `uint256` | IDs de los operadores de nodos del módulo de staking. |
 
 #### Reversiones
@@ -238,12 +239,12 @@ function getLastProcessingRefSlot() external view returns (uint256)
 
 #### Devuelve
 
-| Nombre                  | Tipo      | Descripción                                                                 |
-| ----------------------- | --------- | --------------------------------------------------------------------------- |
-| `hash`                  | `bytes32` | El último hash informado                                                    |
-| `refSlot`               | `uint256` | La ranura de referencia del marco: si los datos de los que se está alcanzando el consenso incluyen o dependen de algún estado en la cadena, este estado debe consultarse en la ranura de referencia. Si la ranura contiene un bloque, el estado debe incluir todos los cambios de ese bloque. |
-| `processingDeadlineTime`| `uint256` | La marca de tiempo de la última ranura en la que se puede informar y procesar un informe |
-| `processingStarted`     | `bool`    | Si se ha iniciado o no el procesamiento del informe                          |
+| Nombre                   | Tipo      | Descripción                                                                                                                                                                                                                                                                                   |
+| ------------------------ | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `hash`                   | `bytes32` | El último hash informado                                                                                                                                                                                                                                                                      |
+| `refSlot`                | `uint256` | La ranura de referencia del marco: si los datos de los que se está alcanzando el consenso incluyen o dependen de algún estado en la cadena, este estado debe consultarse en la ranura de referencia. Si la ranura contiene un bloque, el estado debe incluir todos los cambios de ese bloque. |
+| `processingDeadlineTime` | `uint256` | La marca de tiempo de la última ranura en la que se puede informar y procesar un informe                                                                                                                                                                                                      |
+| `processingStarted`      | `bool`    | Si se ha iniciado o no el procesamiento del informe                                                                                                                                                                                                                                           |
 
 ### getResumeSinceTimestamp()
 
@@ -278,10 +279,10 @@ function submitReportData(ReportData calldata data, uint256 contractVersion)
 
 #### Parámetros
 
-| Nombre            | Tipo         | Descripción                                      |
-| ----------------- | ------------ | ------------------------------------------------ |
+| Nombre            | Tipo         | Descripción                                                                           |
+| ----------------- | ------------ | ------------------------------------------------------------------------------------- |
 | `data`            | `ReportData` | Los datos del informe. Consulte [`ReportData`](#datos-del-informe) para más detalles. |
-| `contractVersion` | `uint256`    | Versión esperada del contrato del oráculo.       |
+| `contractVersion` | `uint256`    | Versión esperada del contrato del oráculo.                                            |
 
 #### Reversiones
 
@@ -297,11 +298,11 @@ function submitReportData(ReportData calldata data, uint256 contractVersion)
 - Revierte con `UnexpectedRequestsDataLength()` si la longitud de los datos empaquetados proporcionados no es igual a `data.requestsCount`
 - Revierte con `InvalidRequestsDataSortOrder` cuando los datos proporcionados no están ordenados
 - Revierte con `NodeOpValidatorIndexMustIncrease(
-        uint256 moduleId,
-        uint256 nodeOpId,
-        uint256 prevRequestedValidatorIndex,
-        uint256 requestedValidatorIndex
-    )` si `requested validator index <= last requested index` del mismo módulo
+      uint256 moduleId,
+      uint256 nodeOpId,
+      uint256 prevRequestedValidatorIndex,
+      uint256 requestedValidatorIndex
+  )` si `requested validator index <= last requested index` del mismo módulo
 
 ### pauseFor()
 
@@ -313,8 +314,8 @@ function pauseFor(uint256 _duration) external
 
 #### Parámetros
 
-| Nombre      | Tipo      | Descripción                                                  |
-| ----------- | --------- | ------------------------------------------------------------ |
+| Nombre      | Tipo      | Descripción                                                                |
+| ----------- | --------- | -------------------------------------------------------------------------- |
 | `_duration` | `uint256` | duración de la pausa, en segundos (usar `PAUSE_INFINITELY` para ilimitado) |
 
 #### Reversiones
@@ -333,9 +334,9 @@ function pauseUntil(uint256 _pauseUntilInclusive) external
 
 #### Parámetros
 
-| Nombre                | Tipo      | Descripción                     |
-| --------------------- | --------- | ------------------------------- |
-| `_pauseUntilInclusive`| `uint256` | el último segundo para pausar (inclusive) |
+| Nombre                 | Tipo      | Descripción                               |
+| ---------------------- | --------- | ----------------------------------------- |
+| `_pauseUntilInclusive` | `uint256` | el último segundo para pausar (inclusive) |
 
 #### Reversiones
 

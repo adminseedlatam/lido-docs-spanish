@@ -39,9 +39,9 @@ function getWstETHByStETH(uint256 _stETHAmount) returns (uint256)
 
 #### Parámetros
 
-| Nombre           | Tipo      | Descripción     |
-| ---------------- | --------- | --------------- |
-| `_stETHAmount`   | `uint256` | cantidad de stETH |
+| Nombre         | Tipo      | Descripción       |
+| -------------- | --------- | ----------------- |
+| `_stETHAmount` | `uint256` | cantidad de stETH |
 
 ### getStETHByWstETH()
 
@@ -53,8 +53,8 @@ function getStETHByWstETH(uint256 _wstETHAmount) returns (uint256)
 
 #### Parámetros
 
-| Nombre del Parámetro | Tipo      | Descripción     |
-| -------------------- | --------- | --------------- |
+| Nombre del Parámetro | Tipo      | Descripción        |
+| -------------------- | --------- | ------------------ |
 | `_wstETHAmount`      | `uint256` | cantidad de wstETH |
 
 ### stEthPerToken()
@@ -94,8 +94,8 @@ Requisitos:
 
 #### Parámetros
 
-| Nombre del Parámetro | Tipo      | Descripción                                    |
-| -------------------- | --------- | ---------------------------------------------- |
+| Nombre del Parámetro | Tipo      | Descripción                                        |
+| -------------------- | --------- | -------------------------------------------------- |
 | `_stETHAmount`       | `uint256` | cantidad de stETH para envolver a cambio de wstETH |
 
 #### Devuelve
@@ -120,8 +120,8 @@ Requisitos:
 
 #### Parámetros
 
-| Nombre del Parámetro | Tipo      | Descripción                                    |
-| -------------------- | --------- | ---------------------------------------------- |
+| Nombre del Parámetro | Tipo      | Descripción                                           |
+| -------------------- | --------- | ----------------------------------------------------- |
 | `_wstETHAmount`      | `uint256` | cantidad de wstETH para desenvolver a cambio de stETH |
 
 #### Devuelve

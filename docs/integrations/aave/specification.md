@@ -30,11 +30,11 @@ La implementación de aSTETH garantiza lo siguiente:
 - **Cuando stETH hace rebase, aSTETH también hace rebase.**
   Supongamos que hay 1000 stETH bloqueados en la reserva. Consideremos las siguientes situaciones:
   1. Caso común: ocurre un rebase positivo y la oferta total de stETH aumenta en un 1%:
-    - La oferta total del token aSTETH se vuelve igual a 1010 aSTETH.
-    - El saldo de cada tenedor de aSTETH también aumenta en un 1%.
+  - La oferta total del token aSTETH se vuelve igual a 1010 aSTETH.
+  - El saldo de cada tenedor de aSTETH también aumenta en un 1%.
   2. Caso raro: ocurre un rebase negativo y la oferta total de stETH disminuye en un 1%:
-    - La oferta total del token aSTETH se vuelve igual a 990 aSTETH.
-    - El saldo de cada tenedor de aSTETH también disminuye en un 1%.
+  - La oferta total del token aSTETH se vuelve igual a 990 aSTETH.
+  - El saldo de cada tenedor de aSTETH también disminuye en un 1%.
 
 **\*** La cantidad real de tokens será menor o igual a X debido a operaciones de redondeo enteras de la tasa de rebase del token subyacente y la tasa de interés de AAVE. Sin embargo, el error de redondeo real no excederá un par de WEI en ningún momento.
 
@@ -47,6 +47,7 @@ El aToken predeterminado implementa la interfaz ERC20 pero tiene dos métodos es
 - `scaledBalanceOf(user)` - Devuelve el **saldo escalado** del usuario como un `uint256`. El saldo escalado es el saldo del token subyacente del usuario (cantidad depositada), dividido por el índice de liquidez actual en el momento de la actualización. $scaledBalance = amountDeposited/currentLiquidityIndex$
   Esto esencialmente 'marca' cuando un usuario ha depositado en el pool de reservas y puede usarse para calcular el saldo actual compuesto de aToken del usuario.
   Ejemplo:
+
   - El usuario A deposita 1000 DAI con un índice de liquidez de 1.1
   - El usuario B deposita otra cantidad en el mismo pool
   - El índice de liquidez ahora es 1.2

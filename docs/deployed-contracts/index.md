@@ -66,10 +66,12 @@ pagination_next: deployed-contracts/holesky
 ## Price feeds
 
 - Primary price feeds
+
   - Chainlink stETH/USD Price Feed: [`0xCfE54B5cD566aB89272946F602D76Ea879CAb4a8`](https://etherscan.io/address/0xCfE54B5cD566aB89272946F602D76Ea879CAb4a8) ([steth-usd.data.eth](https://app.ens.domains/name/steth-usd.data.eth))
   - Chainlink stETH/ETH Price Feed: [`0x86392dC19c0b719886221c78AB11eb8Cf5c52812`](https://etherscan.io/address/0x86392dC19c0b719886221c78AB11eb8Cf5c52812)
 
 - Reserve price feeds (obsolete)
+
   - stETH/ETH Merkle Price Oracle [`0x3a6bd15abf19581e411621d669b6a2bbe741ffd6`](https://etherscan.io/address/0x3a6bd15abf19581e411621d669b6a2bbe741ffd6)
   - stETH/ETH Price Feed [`0xab55bf4dfbf469ebfe082b7872557d1f87692fe6`](https://etherscan.io/address/0xab55bf4dfbf469ebfe082b7872557d1f87692fe6) (proxy)
 
@@ -122,16 +124,15 @@ pagination_next: deployed-contracts/holesky
 
 ## Lido Stonks contracts
 
-  - STETH→DAI [`0x3e2D251275A92a8169A3B17A2C49016e2de492a7`](https://etherscan.io/address/0x3e2D251275A92a8169A3B17A2C49016e2de492a7)
-  - STETH→USDC [`0xf4F6A03E3dbf0aA22083be80fDD340943d275Ea5`](https://etherscan.io/address/0xf4F6A03E3dbf0aA22083be80fDD340943d275Ea5)
-  - STETH→USDT [`0x7C2a1E25cA6D778eCaEBC8549371062487846aAF`](https://etherscan.io/address/0x7C2a1E25cA6D778eCaEBC8549371062487846aAF)
-  - DAI→USDC [`0x79f5E20996abE9f6a48AF6f9b13f1E55AED6f06D`](https://etherscan.io/address/0x79f5E20996abE9f6a48AF6f9b13f1E55AED6f06D)
-  - DAI→USDT [`0x8Ba6D367D15Ebc52f3eBBdb4a8710948C0918d42`](https://etherscan.io/address/0x8Ba6D367D15Ebc52f3eBBdb4a8710948C0918d42)
-  - USDT→USDC [`0x281e6BB6F26A94250aCEb24396a8E4190726C97e`](https://etherscan.io/address/0x281e6BB6F26A94250aCEb24396a8E4190726C97e)
-  - USDT→DAI [`0x64B6aF9A108dCdF470E48e4c0147127F26221A7C`](https://etherscan.io/address/0x64B6aF9A108dCdF470E48e4c0147127F26221A7C)
-  - USDC→USDT [`0x278f7B6CBB3Cc37374e6a40bDFEBfff08f65A5C7`](https://etherscan.io/address/0x278f7B6CBB3Cc37374e6a40bDFEBfff08f65A5C7)
-  - USDC→DAI [`0x2B5a3944A654439379B206DE999639508bA2e850`](https://etherscan.io/address/0x2B5a3944A654439379B206DE999639508bA2e850)
-
+- STETH→DAI [`0x3e2D251275A92a8169A3B17A2C49016e2de492a7`](https://etherscan.io/address/0x3e2D251275A92a8169A3B17A2C49016e2de492a7)
+- STETH→USDC [`0xf4F6A03E3dbf0aA22083be80fDD340943d275Ea5`](https://etherscan.io/address/0xf4F6A03E3dbf0aA22083be80fDD340943d275Ea5)
+- STETH→USDT [`0x7C2a1E25cA6D778eCaEBC8549371062487846aAF`](https://etherscan.io/address/0x7C2a1E25cA6D778eCaEBC8549371062487846aAF)
+- DAI→USDC [`0x79f5E20996abE9f6a48AF6f9b13f1E55AED6f06D`](https://etherscan.io/address/0x79f5E20996abE9f6a48AF6f9b13f1E55AED6f06D)
+- DAI→USDT [`0x8Ba6D367D15Ebc52f3eBBdb4a8710948C0918d42`](https://etherscan.io/address/0x8Ba6D367D15Ebc52f3eBBdb4a8710948C0918d42)
+- USDT→USDC [`0x281e6BB6F26A94250aCEb24396a8E4190726C97e`](https://etherscan.io/address/0x281e6BB6F26A94250aCEb24396a8E4190726C97e)
+- USDT→DAI [`0x64B6aF9A108dCdF470E48e4c0147127F26221A7C`](https://etherscan.io/address/0x64B6aF9A108dCdF470E48e4c0147127F26221A7C)
+- USDC→USDT [`0x278f7B6CBB3Cc37374e6a40bDFEBfff08f65A5C7`](https://etherscan.io/address/0x278f7B6CBB3Cc37374e6a40bDFEBfff08f65A5C7)
+- USDC→DAI [`0x2B5a3944A654439379B206DE999639508bA2e850`](https://etherscan.io/address/0x2B5a3944A654439379B206DE999639508bA2e850)
 
 ## Easy Track
 
@@ -433,7 +434,7 @@ Kyber Network
 - (proposed) WstEthL2Token: [`0x26c5e01524d2E6280A48F2c50fF6De7e52E9611C`](https://bscscan.com/address/0x26c5e01524d2E6280A48F2c50fF6De7e52E9611C) (proxy)
 - (proposed) WstEthL2Token: [`0x451d447776778870bdfe76d031689703aba73ee5`](https://bscscan.com/address/0x451d447776778870bdfe76d031689703aba73ee5) (impl)
 - (proposed) NTT Manager: [`0x6981F5621691CBfE3DdD524dE71076b79F0A0278`](https://bscscan.com/address/0x6981F5621691CBfE3DdD524dE71076b79F0A0278) (proxy)
-- (proposed) NTT Manager: [`0xe82c2a5846cfb6d8683d6b636719e7aa61486838`](https://bscscan.com/address/0xe82c2a5846cfb6d8683d6b636719e7aa61486838) (impl) 
+- (proposed) NTT Manager: [`0xe82c2a5846cfb6d8683d6b636719e7aa61486838`](https://bscscan.com/address/0xe82c2a5846cfb6d8683d6b636719e7aa61486838) (impl)
 
 ## LRT Vaults on Mellow Protocol
 

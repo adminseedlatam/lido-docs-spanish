@@ -12,7 +12,7 @@ A diferencia de [`OracleReportSanityChecker`](/contracts/oracle-report-sanity-ch
 
 ## Métodos de vista
 
-### get(string calldata _key)
+### get(string calldata \_key)
 
 Recupera el valor correspondiente a la clave proporcionada.
 
@@ -24,7 +24,7 @@ function get(string calldata _key) external view returns (bytes memory)
 Revirtirá si el valor está ausente.
 :::
 
-### getList(string[] calldata _keys)
+### getList(string[] calldata \_keys)
 
 Recupera una lista de valores correspondientes a las claves proporcionadas.
 
@@ -38,7 +38,7 @@ Revirtirá si falta algún valor para una clave específica.
 
 ## Métodos
 
-### set(string calldata _key, bytes calldata _value)
+### set(string calldata \_key, bytes calldata \_value)
 
 Establece el valor para la clave proporcionada. Solo puede ser llamado por usuarios con el rol `CONFIG_MANAGER_ROLE`.
 
@@ -48,12 +48,13 @@ function set(string calldata _key, bytes calldata _value) external
 
 :::note
 Revirtirá si ocurre alguna de las siguientes condiciones:
+
 - el valor con la clave proporcionada ya existe
 - el valor está vacío
 - es llamado por alguien que no tiene el rol `CONFIG_MANAGER_ROLE`
-:::
+  :::
 
-### update(string calldata _key, bytes calldata _value)
+### update(string calldata \_key, bytes calldata \_value)
 
 Actualiza el valor para la clave proporcionada. Solo puede ser llamado por usuarios con el rol `CONFIG_MANAGER_ROLE`.
 
@@ -63,13 +64,14 @@ function update(string calldata _key, bytes calldata _value) external
 
 :::note
 Revirtirá si ocurre alguna de las siguientes condiciones:
+
 - el valor con la clave proporcionada no existe
 - el valor es el mismo que el ya establecido
 - el valor está vacío
 - es llamado por alguien que no tiene el rol `CONFIG_MANAGER_ROLE`
-:::
+  :::
 
-### unset(string calldata _key)
+### unset(string calldata \_key)
 
 Elimina el valor de la clave proporcionada. Solo puede ser llamado por usuarios con el rol `CONFIG_MANAGER_ROLE`.
 
@@ -79,9 +81,10 @@ function unset(string calldata _key) external
 
 :::note
 Revirtirá si ocurre alguna de las siguientes condiciones:
+
 - el valor con la clave proporcionada no existe
 - es llamado por alguien que no tiene el rol `CONFIG_MANAGER_ROLE`
-:::
+  :::
 
 ## Eventos
 

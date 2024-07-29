@@ -1,10 +1,13 @@
 # Salidas de Validadores
+
 ![exits-1](../../../static/img/csm/exits-1.png)
 
 ## Salidas voluntarias
+
 Dada la naturaleza sin permisos de CSM, los Operadores de Nodo (ON) pueden salir voluntariamente de sus validadores en cualquier momento.
 
 ## Salidas iniciadas por el protocolo
+
 Para mantener la consistencia con el protocolo central y otros módulos de participación, CSM utiliza [VEBO](../../contracts/validators-exit-bus-oracle) para solicitar o activar salidas (para implementarse después del hardfork Pectra que trae [EIP-7002](https://eips.ethereum.org/EIPS/eip-7002) a la vida) para los validadores.
 
 :::info
@@ -20,6 +23,7 @@ El `forcedTargetLimit` está actualmente en desarrollo dentro de la versión act
 :::
 
 Los Operadores de Nodo deben seguir los eventos de [VEBO](../../contracts/validators-exit-bus-oracle) (por ejemplo, utilizando el [Ejector](https://github.com/lidofinance/validator-ejector)) para asegurarse de que salgan de los validadores a tiempo. Se deben aplicar las siguientes penalizaciones y medidas limitantes si el Operador de Nodo se niega a salir de los validadores después de la solicitud del protocolo:
+
 1. Excluir las claves del Operador de Nodo de la cola de depósitos de CSM y no volver a colocarlas hasta que `stuckKeysCount = 0`.
 2. Excluir al Operador de Nodo del ciclo de asignación de recompensas de participación dentro del período de informe del Oráculo de Rendimiento si `stuckKeysCount` del Operador de Nodo fue > 0 durante el mismo.
 
@@ -36,6 +40,7 @@ Si un validador tiene un rendimiento por debajo del umbral de rendimiento durant
 Para obtener más información sobre la expulsión de malos desempeñadores, consulte el [documento separado](https://hackmd.io/@lido/Sy0nRd36a).
 
 ## Reporte de saldo de retiro
+
 Se requiere el saldo de retiro del validador para liberar el bono y calcular la penalización de salida, si la hubiera. Este saldo se informa sin permisos utilizando [EIP-4788](https://eips.ethereum.org/EIPS/eip-4788) por parte del bot de CSM o por el propio Operador de Nodo.
 
 ## Enlaces útiles

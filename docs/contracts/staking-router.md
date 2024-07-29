@@ -10,6 +10,7 @@ StakingRouter es un registro de módulos de staking, cada uno encapsulando un su
 StakingRouter es un contrato controlador de alto nivel para módulos de staking. Cada módulo de staking es un contrato que gestiona su propio subconjunto de validadores, por ejemplo, el [módulo Curated](https://etherscan.io/address/0x55032650b14df07b85bF18A3a3eC8E0Af2e028d5) es un conjunto de operadores de nodos verificados por Lido DAO. Este diseño modular abre la oportunidad para que cualquier persona construya un módulo de staking y se una a la plataforma de staking de Lido, incluyendo stakers comunitarios sin permisos, validadores habilitados por DVT o cualquier otro subconjunto de validadores, tecnología o mecánica.
 
 StakingRouter realiza varias funciones, incluyendo:
+
 - Mantener un registro de módulos de staking,
 - Asignar stake a los módulos, y
 - Distribuir tarifas del protocolo.
@@ -21,6 +22,7 @@ StakingRouter realiza varias funciones, incluyendo:
 Los módulos se registran en StakingRouter a través del proceso de votación de Lido DAO. Para ser considerado por la gobernanza, el contrato de módulo solicitante debe implementar la interfaz de módulo adecuada, cumplir con requisitos de seguridad y tener una estructura de tarifas alineada con la sostenibilidad del protocolo Lido. Una vez aprobado en la votación, el módulo comienza a recibir stake y tarifas del protocolo.
 
 Los módulos de staking se registran utilizando la función `addStakingModule`, proporcionando detalles como:
+
 - El nombre del módulo: un nombre legible por humanos;
 - La dirección del contrato de módulo de staking desplegado;
 - El share objetivo, un límite relativo duro en los depósitos dentro de Lido;
@@ -30,6 +32,7 @@ Los módulos de staking se registran utilizando la función `addStakingModule`, 
 ### Pausa de módulos
 
 Cada módulo de staking tiene un estado: un estado que determina si el módulo puede realizar depósitos y recibir recompensas:
+
 - `Active`, puede realizar depósitos y recibir recompensas,
 - `DepositsPaused`, no se permiten depósitos pero sí se reciben recompensas,
 - `Stopped`, no puede realizar depósitos y no recibe recompensas.
@@ -45,6 +48,7 @@ enum StakingModuleStatus {
 ### Validadores salidos y atascados
 
 Cuando las solicitudes de retiro exceden el éter almacenado en Lido junto con las recompensas proyectadas, el protocolo indica a los operadores de nodos que comiencen a sacar validadores para cubrir los retiros. En este contexto, StakingRouter distingue dos tipos de estados de validadores:
+
 - Validadores [salidos](https://hackmd.io/zHYFZr4eRGm3Ju9_vkcSgQ?view),
 - Y validadores atascados, es decir, aquellos validadores que no cumplieron con la señal de salida.
 
@@ -80,20 +84,20 @@ aking.
 
 4. Si hay módulos de staking disponibles (`stakingModulesCount > 0`), la función procede con el proceso de asignación:
 
-    a. Calcula un nuevo total estimado de validadores activos, sumando los nuevos depósitos al total de validadores activos (`totalActiveValidators += _depositsToAllocate`).
+   a. Calcula un nuevo total estimado de validadores activos, sumando los nuevos depósitos al total de validadores activos (`totalActiveValidators += _depositsToAllocate`).
 
-    b. Crea una matriz `capacities` del mismo tamaño que el número de módulos de staking. Cada entrada en esta matriz representa la capacidad máxima de un módulo de staking particular, es decir, el número máximo de validadores que puede tener ese módulo. Esto se calcula como el mínimo de:
+   b. Crea una matriz `capacities` del mismo tamaño que el número de módulos de staking. Cada entrada en esta matriz representa la capacidad máxima de un módulo de staking particular, es decir, el número máximo de validadores que puede tener ese módulo. Esto se calcula como el mínimo de:
 
-    - El número objetivo de validadores para un módulo, que se basa en un share objetivo deseado (`stakingModulesCache[i].targetShare * totalActiveValidators / TOTAL_BASIS_POINTS`), o
-    - La suma de los validadores activos actuales y los validadores disponibles en el módulo (`stakingModulesCache[i].activeValidatorsCount + stakingModulesCache[i].availableValidatorsCount`).
+   - El número objetivo de validadores para un módulo, que se basa en un share objetivo deseado (`stakingModulesCache[i].targetShare * totalActiveValidators / TOTAL_BASIS_POINTS`), o
+   - La suma de los validadores activos actuales y los validadores disponibles en el módulo (`stakingModulesCache[i].activeValidatorsCount + stakingModulesCache[i].availableValidatorsCount`).
 
-    c. Finalmente, llama a la función `allocate` de `MinFirstAllocationStrategy`, pasando las `asignaciones`, `capacidades` y `_depositsToAllocate`. La cantidad asignada correctamente se almacena en `allocated`.
+   c. Finalmente, llama a la función `allocate` de `MinFirstAllocationStrategy`, pasando las `asignaciones`, `capacidades` y `_depositsToAllocate`. La cantidad asignada correctamente se almacena en `allocated`.
 
 En resumen, esta función utiliza el algoritmo `MinFirstAllocationStrategy` para distribuir nuevos depósitos (validadores) entre diferentes módulos de staking de manera que prioriza llenar los módulos menos poblados, teniendo en cuenta el share objetivo y la capacidad de cada módulo. Las asignaciones resultantes y la cantidad total asignada se devuelven luego para su uso adicional.
 
 ## Distribución de tarifas
 
-La estructura de tarifas se establece de manera independiente en cada módulo. Hay dos componentes en la estructura de tarifas: la tarifa del módulo y la tarifa de tesorería, ambas especificadas como porcentajes (puntos base). Por ejemplo, una tarifa del 5% (500 puntos base) para el módulo dividida entre los operadores de nodo en el módulo y una tarifa de tesorería del 5% (500 puntos base) enviada a la tesorería. Además, `StakingRouter` utiliza un factor de precisión de 100 * 10^18 para las tarifas que evita que las operaciones aritméticas truncen las tarifas de módulos pequeños.
+La estructura de tarifas se establece de manera independiente en cada módulo. Hay dos componentes en la estructura de tarifas: la tarifa del módulo y la tarifa de tesorería, ambas especificadas como porcentajes (puntos base). Por ejemplo, una tarifa del 5% (500 puntos base) para el módulo dividida entre los operadores de nodo en el módulo y una tarifa de tesorería del 5% (500 puntos base) enviada a la tesorería. Además, `StakingRouter` utiliza un factor de precisión de 100 \* 10^18 para las tarifas que evita que las operaciones aritméticas truncen las tarifas de módulos pequeños.
 
 Dado que el protocolo actualmente no tiene en cuenta el rendimiento por validador, la tarifa del protocolo se distribuye entre los módulos proporcionalmente a los validadores activos y la tarifa específica del módulo. Por ejemplo, un módulo con el 75% de todos los validadores en el protocolo y una tarifa del 5% recibirá el 3.75% de las recompensas totales en todo el protocolo. Esto significa que si las tarifas del módulo y de la tesorería no superan el 10%, la tarifa total del protocolo tampoco lo hará, sin importar cuántos módulos haya. También existe un caso especial en el que el módulo se detiene por emergencia mientras sus validadores siguen activos. En este caso, la tarifa del módulo se transferirá a la tesorería y una vez que el módulo vuelva en línea, las recompensas se devolverán al módulo desde la tesorería.
 
@@ -107,10 +111,10 @@ La función de distribución funciona de la siguiente manera:
 
 4. Luego recorre cada módulo de staking. Para cada módulo que tenga al menos un validador activo, hace lo siguiente:
 
-    - Almacena el ID del módulo y la dirección del destinatario en las matrices respectivas.
-    - Calcula `stakingModuleValidatorsShare`, que es la proporción de validadores activos totales que forman parte de este módulo de staking.
-    - Calcula `stakingModuleFee` como el producto de `stakingModuleValidatorsShare` y la tarifa del módulo de staking dividido por `TOTAL_BASIS_POINTS` (es decir, la proporción de la tarifa del módulo de staking en relación con las tarifas posibles totales). Si el módulo no está detenido, esta tarifa se almacena en la matriz `stakingModuleFees`.
-    - Añade a `totalFee` la suma de la tarifa del módulo de staking y una tarifa destinada a la tesorería (calculada de manera similar a `stakingModuleFee`), donde la tesorería es un fondo central de fondos.
+   - Almacena el ID del módulo y la dirección del destinatario en las matrices respectivas.
+   - Calcula `stakingModuleValidatorsShare`, que es la proporción de validadores activos totales que forman parte de este módulo de staking.
+   - Calcula `stakingModuleFee` como el producto de `stakingModuleValidatorsShare` y la tarifa del módulo de staking dividido por `TOTAL_BASIS_POINTS` (es decir, la proporción de la tarifa del módulo de staking en relación con las tarifas posibles totales). Si el módulo no está detenido, esta tarifa se almacena en la matriz `stakingModuleFees`.
+   - Añade a `totalFee` la suma de la tarifa del módulo de staking y una tarifa destinada a la tesorería (calculada de manera similar a `stakingModuleFee`), donde la tesorería es un fondo central de fondos.
 
 5. Después de recorrer todos los módulos, hace una afirmación de que `totalFee` no excede el 100% (representado por `precisionPoints`).
 
@@ -159,9 +163,9 @@ function getStakingModules() external view returns (StakingModule[] memory res)
 
 **Devuelve:**
 
-| Nombre | Tipo | Descripción |
-|-------|-------------------|---------------------------------------------------|
-| `res` | `StakingModule[]` | lista de estructuras de todos los módulos de staking registrados |
+| Nombre | Tipo              | Descripción                                                      |
+| ------ | ----------------- | ---------------------------------------------------------------- |
+| `res`  | `StakingModule[]` | lista de estructuras de todos los módulos de staking registrados |
 
 ### `getStakingModuleIds`
 
@@ -173,8 +177,8 @@ function getStakingModuleIds() public view returns (uint256[] memory stakingModu
 
 **Devuelve:**
 
-| Nombre | Tipo | Descripción |
-|-------|-------------------|---------------------------------------------------|
+| Nombre             | Tipo        | Descripción                                  |
+| ------------------ | ----------- | -------------------------------------------- |
 | `stakingModuleIds` | `uint256[]` | lista de IDs de todos los módulos de staking |
 
 ### `getStakingModule`
@@ -187,15 +191,15 @@ function getStakingModule(uint256 _stakingModuleId) public view returns(StakingM
 
 **Parámetros:**
 
-| Nombre | Tipo | Descripción |
-|-------|-------------------|---------------------------------------------------|
+| Nombre             | Tipo      | Descripción              |
+| ------------------ | --------- | ------------------------ |
 | `_stakingModuleId` | `uint256` | ID del módulo de staking |
 
 **Devuelve:**
 
-| Nombre | Tipo | Descripción |
-|-------|-------------------|---------------------------------------------------|
-| | `StakingModule` | información del módulo de staking |
+| Nombre | Tipo            | Descripción                       |
+| ------ | --------------- | --------------------------------- |
+|        | `StakingModule` | información del módulo de staking |
 
 ### `getStakingModulesCount`
 
@@ -215,8 +219,8 @@ function hasStakingModule(uint256 _stakingModuleId) external view returns (bool)
 
 **Parámetros:**
 
-| Nombre             | Tipo      | Descripción            |
-|--------------------|-----------|------------------------|
+| Nombre             | Tipo      | Descripción              |
+| ------------------ | --------- | ------------------------ |
 | `_stakingModuleId` | `uint256` | ID del módulo de staking |
 
 ### `getStakingModuleStatus`
@@ -229,15 +233,15 @@ function getStakingModuleStatus(uint256 _stakingModuleId) public view returns (S
 
 **Parámetros:**
 
-| Nombre             | Tipo      | Descripción            |
-|--------------------|-----------|------------------------|
+| Nombre             | Tipo      | Descripción              |
+| ------------------ | --------- | ------------------------ |
 | `_stakingModuleId` | `uint256` | ID del módulo de staking |
 
 **Devuelve:**
 
-| Nombre              | Tipo                   | Descripción                        |
-|---------------------|------------------------|------------------------------------|
-|                     | `StakingModuleStatus`  | Estado del módulo de staking       |
+| Nombre | Tipo                  | Descripción                  |
+| ------ | --------------------- | ---------------------------- |
+|        | `StakingModuleStatus` | Estado del módulo de staking |
 
 ### `getStakingModuleSummary`
 
@@ -255,15 +259,15 @@ function getStakingModuleSummary(uint256 _stakingModuleId) public view returns (
 
 **Parámetros:**
 
-| Nombre             | Tipo      | Descripción            |
-|--------------------|-----------|------------------------|
+| Nombre             | Tipo      | Descripción              |
+| ------------------ | --------- | ------------------------ |
 | `_stakingModuleId` | `uint256` | ID del módulo de staking |
 
 **Devuelve:**
 
-| Nombre              | Tipo                      | Descripción                           |
-|---------------------|---------------------------|---------------------------------------|
-|                     | `StakingModuleSummary`    | Resumen de los validadores del módulo |
+| Nombre | Tipo                   | Descripción                           |
+| ------ | ---------------------- | ------------------------------------- |
+|        | `StakingModuleSummary` | Resumen de los validadores del módulo |
 
 ### `getNodeOperatorSummary`
 
@@ -286,16 +290,16 @@ function getNodeOperatorSummary(uint256 _stakingModuleId, uint256 _nodeOperatorI
 
 **Parámetros:**
 
-| Nombre             | Tipo      | Descripción            |
-|--------------------|-----------|------------------------|
+| Nombre             | Tipo      | Descripción              |
+| ------------------ | --------- | ------------------------ |
 | `_stakingModuleId` | `uint256` | ID del módulo de staking |
-| `_nodeOperatorId`  | `uint256` | ID del operador de nodo |
+| `_nodeOperatorId`  | `uint256` | ID del operador de nodo  |
 
 **Devuelve:**
 
-| Nombre              | Tipo                    | Descripción                           |
-|---------------------|-------------------------|---------------------------------------|
-|                     | `NodeOperatorSummary`   | Resumen del operador de nodo          |
+| Nombre | Tipo                  | Descripción                  |
+| ------ | --------------------- | ---------------------------- |
+|        | `NodeOperatorSummary` | Resumen del operador de nodo |
 
 ### `getAllStakingModuleDigests`
 
@@ -314,9 +318,9 @@ function getAllStakingModuleDigests() external view returns (StakingModuleDigest
 
 **Devuelve:**
 
-| Nombre              | Tipo                      | Descripción                           |
-|---------------------|---------------------------|---------------------------------------|
-|                     | `StakingModuleDigest[]`   | Array de resúmenes de módulos de staking |
+| Nombre | Tipo                    | Descripción                              |
+| ------ | ----------------------- | ---------------------------------------- |
+|        | `StakingModuleDigest[]` | Array de resúmenes de módulos de staking |
 
 ### `getStakingModuleDigests`
 
@@ -328,15 +332,15 @@ function getStakingModuleDigests(uint256[] memory _stakingModuleIds) public view
 
 **Parámetros:**
 
-| Nombre             | Tipo         | Descripción            |
-|--------------------|--------------|------------------------|
-| `_stakingModuleIds`| `uint256[]`  | Array de IDs de módulos de staking |
+| Nombre              | Tipo        | Descripción                        |
+| ------------------- | ----------- | ---------------------------------- |
+| `_stakingModuleIds` | `uint256[]` | Array de IDs de módulos de staking |
 
 **Devuelve:**
 
-| Nombre              | Tipo                      | Descripción                           |
-|---------------------|---------------------------|---------------------------------------|
-|                     | `StakingModuleDigest[]`   | Array de resúmenes de módulos de staking |
+| Nombre | Tipo                    | Descripción                              |
+| ------ | ----------------------- | ---------------------------------------- |
+|        | `StakingModuleDigest[]` | Array de resúmenes de módulos de staking |
 
 ### `getAllNodeOperatorDigests`
 
@@ -354,15 +358,15 @@ function getAllNodeOperatorDigests(uint256 _stakingModuleId) external view retur
 
 **Parámetros:**
 
-| Nombre             | Tipo      | Descripción            |
-|--------------------|-----------|------------------------|
+| Nombre             | Tipo      | Descripción              |
+| ------------------ | --------- | ------------------------ |
 | `_stakingModuleId` | `uint256` | ID del módulo de staking |
 
 **Devuelve:**
 
-| Nombre              | Tipo                      | Descripción                           |
-|---------------------|---------------------------|---------------------------------------|
-|                     | `NodeOperatorDigest[]`    | Array de resúmenes de operadores de nodo |
+| Nombre | Tipo                   | Descripción                              |
+| ------ | ---------------------- | ---------------------------------------- |
+|        | `NodeOperatorDigest[]` | Array de resúmenes de operadores de nodo |
 
 ### `getNodeOperatorDigests`
 
@@ -374,16 +378,16 @@ function getNodeOperatorDigests(uint256 _stakingModuleId, uint256[] memory _node
 
 **Parámetros:**
 
-| Nombre             | Tipo         | Descripción            |
-|--------------------|--------------|------------------------|
-| `_stakingModuleId` | `uint256`    | ID del módulo de staking |
-| `_nodeOperatorIds` | `uint256[]`  | Array de IDs de operadores de nodo |
+| Nombre             | Tipo        | Descripción                        |
+| ------------------ | ----------- | ---------------------------------- |
+| `_stakingModuleId` | `uint256`   | ID del módulo de staking           |
+| `_nodeOperatorIds` | `uint256[]` | Array de IDs de operadores de nodo |
 
 **Devuelve:**
 
-| Nombre              | Tipo                      | Descripción                           |
-|---------------------|---------------------------|---------------------------------------|
-|                     | `NodeOperatorDigest[]`    | Array de resúmenes de operadores de nodo |
+| Nombre | Tipo                   | Descripción                              |
+| ------ | ---------------------- | ---------------------------------------- |
+|        | `NodeOperatorDigest[]` | Array de resúmenes de operadores de nodo |
 
 ### `getStakingModuleIsStopped`
 
@@ -395,15 +399,15 @@ function getStakingModuleIsStopped(uint256 _stakingModuleId) external view retur
 
 **Parámetros:**
 
-| Nombre             | Tipo      | Descripción            |
-|--------------------|-----------|------------------------|
+| Nombre             | Tipo      | Descripción              |
+| ------------------ | --------- | ------------------------ |
 | `_stakingModuleId` | `uint256` | ID del módulo de staking |
 
 **Devuelve:**
 
-| Nombre              | Tipo                   | Descripción                        |
-|---------------------|------------------------|------------------------------------|
-|                     | `bool`                 | true si el módulo de staking está detenido, false en caso contrario |
+| Nombre | Tipo   | Descripción                                                         |
+| ------ | ------ | ------------------------------------------------------------------- |
+|        | `bool` | true si el módulo de staking está detenido, false en caso contrario |
 
 ### `getStakingModuleIsDepositsPaused`
 
@@ -415,15 +419,15 @@ function getStakingModuleIsDepositsPaused(uint256 _stakingModuleId) external vie
 
 **Parámetros:**
 
-| Nombre             | Tipo      | Descripción            |
-|--------------------|-----------|------------------------|
+| Nombre             | Tipo      | Descripción              |
+| ------------------ | --------- | ------------------------ |
 | `_stakingModuleId` | `uint256` | ID del módulo de staking |
 
 **Devuelve:**
 
-| Nombre              | Tipo                   | Descripción                        |
-|---------------------|------------------------|------------------------------------|
-|                     | `bool`                 | true si los depósitos están pausados para el módulo de staking, false en caso contrario |
+| Nombre | Tipo   | Descripción                                                                             |
+| ------ | ------ | --------------------------------------------------------------------------------------- |
+|        | `bool` | true si los depósitos están pausados para el módulo de staking, false en caso contrario |
 
 ### `getStakingModuleIsActive`
 
@@ -435,15 +439,15 @@ function getStakingModuleIsActive(uint256 _stakingModuleId) external view return
 
 **Parámetros:**
 
-| Nombre             | Tipo      | Descripción            |
-|--------------------|-----------|------------------------|
+| Nombre             | Tipo      | Descripción              |
+| ------------------ | --------- | ------------------------ |
 | `_stakingModuleId` | `uint256` | ID del módulo de staking |
 
 **Devuelve:**
 
-| Nombre              | Tipo                   | Descripción                        |
-|---------------------|------------------------|------------------------------------|
-|                     | `bool`                 | true si el módulo de staking está activo, false en caso contrario |
+| Nombre | Tipo   | Descripción                                                       |
+| ------ | ------ | ----------------------------------------------------------------- |
+|        | `bool` | true si el módulo de staking está activo, false en caso contrario |
 
 ### `getStakingModuleNonce`
 
@@ -455,15 +459,15 @@ function getStakingModuleNonce(uint256 _stakingModuleId) external view returns (
 
 **Parámetros:**
 
-| Nombre             | Tipo      | Descripción            |
-|--------------------|-----------|------------------------|
+| Nombre             | Tipo      | Descripción              |
+| ------------------ | --------- | ------------------------ |
 | `_stakingModuleId` | `uint256` | ID del módulo de staking |
 
 **Devuelve:**
 
-| Nombre              | Tipo                   | Descripción                        |
-|---------------------|------------------------|------------------------------------|
-|                     | `uint256`              | nonce del módulo de staking         |
+| Nombre | Tipo      | Descripción                 |
+| ------ | --------- | --------------------------- |
+|        | `uint256` | nonce del módulo de staking |
 
 ### `getStakingModuleLastDepositBlock`
 
@@ -475,15 +479,15 @@ function getStakingModuleLastDepositBlock(uint256 _stakingModuleId) external vie
 
 **Parámetros:**
 
-| Nombre             | Tipo      | Descripción            |
-|--------------------|-----------|------------------------|
+| Nombre             | Tipo      | Descripción              |
+| ------------------ | --------- | ------------------------ |
 | `_stakingModuleId` | `uint256` | ID del módulo de staking |
 
 **Devuelve:**
 
-| Nombre              | Tipo                   | Descripción                        |
-|---------------------|------------------------|------------------------------------|
-|                     | `uint256`              | número de bloque del último depósito |
+| Nombre | Tipo      | Descripción                          |
+| ------ | --------- | ------------------------------------ |
+|        | `uint256` | número de bloque del último depósito |
 
 ### `getStakingModuleActiveValidatorsCount`
 
@@ -495,15 +499,15 @@ function getStakingModuleActiveValidatorsCount(uint256 _stakingModuleId) externa
 
 **Parámetros:**
 
-| Nombre             | Tipo      | Descripción            |
-|--------------------|-----------|------------------------|
+| Nombre             | Tipo      | Descripción              |
+| ------------------ | --------- | ------------------------ |
 | `_stakingModuleId` | `uint256` | ID del módulo de staking |
 
 **Devuelve:**
 
-| Nombre              | Tipo                   | Descripción                        |
-|---------------------|------------------------|------------------------------------|
-| `activeValidatorsCount` | `uint256`       | número de validadores activos      |
+| Nombre                  | Tipo      | Descripción                   |
+| ----------------------- | --------- | ----------------------------- |
+| `activeValidatorsCount` | `uint256` | número de validadores activos |
 
 ### `getStakingModuleMaxDepositsCount`
 
@@ -515,16 +519,16 @@ function getStakingModuleMaxDepositsCount(uint256 _stakingModuleId, uint256 _max
 
 **Parámetros:**
 
-| Nombre             | Tipo      | Descripción            |
-|--------------------|-----------|------------------------|
-| `_stakingModuleId` | `uint256` | ID del módulo de staking |
-| `_maxDepositsValue`| `uint256` | cantidad máxima de depósitos basada en el ether disponible |
+| Nombre              | Tipo      | Descripción                                                |
+| ------------------- | --------- | ---------------------------------------------------------- |
+| `_stakingModuleId`  | `uint256` | ID del módulo de staking                                   |
+| `_maxDepositsValue` | `uint256` | cantidad máxima de depósitos basada en el ether disponible |
 
 **Devuelve:**
 
-| Nombre              | Tipo                   | Descripción                        |
-|---------------------|------------------------|------------------------------------|
-|                     | `uint256`              | número máximo de depósitos que se pueden realizar usando el módulo de staking dado |
+| Nombre | Tipo      | Descripción                                                                        |
+| ------ | --------- | ---------------------------------------------------------------------------------- |
+|        | `uint256` | número máximo de depósitos que se pueden realizar usando el módulo de staking dado |
 
 ### `getStakingFeeAggregateDistribution`
 
@@ -536,11 +540,11 @@ function getStakingFeeAggregateDistribution() public view returns (uint96 module
 
 **Devuelve:**
 
-| Nombre              | Tipo                   | Descripción                        |
-|---------------------|------------------------|------------------------------------|
-| `modulesFee`        | `uint96`               | tarifas totales para todos los módulos de staking |
-| `treasuryFee`       | `uint96`               | tarifa total para el tesoro        |
-| `basePrecision`     | `uint256`              | número de precisión base, un valor que corresponde a la tarifa completa |
+| Nombre          | Tipo      | Descripción                                                             |
+| --------------- | --------- | ----------------------------------------------------------------------- |
+| `modulesFee`    | `uint96`  | tarifas totales para todos los módulos de staking                       |
+| `treasuryFee`   | `uint96`  | tarifa total para el tesoro                                             |
+| `basePrecision` | `uint256` | número de precisión base, un valor que corresponde a la tarifa completa |
 
 ### `getStakingRewardsDistribution`
 
@@ -558,13 +562,13 @@ function getStakingRewardsDistribution() public view returns (
 
 **Devuelve:**
 
-| Nombre              | Tipo                   | Descripción                        |
-|---------------------|------------------------|------------------------------------|
-| `recipients`        | `address[]`            | direcciones totales de módulos de estaca |
-| `stakingModuleIds`  | `uint256[]`            | ids de módulos de estaca |
-| `stakingModuleFees` | `uint96[]`             | tarifas del módulo de estaca |
-| `totalFee`          | `uint96`               | tarifa total |
-| `precisionPoints`   | `uint256`              | número de precisión base, un valor que corresponde a la tarifa completa |
+| Nombre              | Tipo        | Descripción                                                             |
+| ------------------- | ----------- | ----------------------------------------------------------------------- |
+| `recipients`        | `address[]` | direcciones totales de módulos de estaca                                |
+| `stakingModuleIds`  | `uint256[]` | ids de módulos de estaca                                                |
+| `stakingModuleFees` | `uint96[]`  | tarifas del módulo de estaca                                            |
+| `totalFee`          | `uint96`    | tarifa total                                                            |
+| `precisionPoints`   | `uint256`   | número de precisión base, un valor que corresponde a la tarifa completa |
 
 ### `getDepositsAllocation`
 
@@ -576,16 +580,16 @@ function getDepositsAllocation(uint256 _depositsCount) external view returns (ui
 
 **Parámetros:**
 
-| Nombre             | Tipo      | Descripción            |
-|--------------------|-----------|------------------------|
-| `_depositsCount`   | `uint256` | depósitos para asignar entre módulos de estaca |
+| Nombre           | Tipo      | Descripción                                    |
+| ---------------- | --------- | ---------------------------------------------- |
+| `_depositsCount` | `uint256` | depósitos para asignar entre módulos de estaca |
 
 **Devuelve:**
 
-| Nombre              | Tipo                      | Descripción                           |
-|---------------------|---------------------------|---------------------------------------|
-| `allocated`         | `uint256`                 | direcciones totales de módulos de estaca |
-| `allocations`       | `uint256[]`               | array de nuevo total de depósitos entre módulos de estaca |
+| Nombre        | Tipo        | Descripción                                               |
+| ------------- | ----------- | --------------------------------------------------------- |
+| `allocated`   | `uint256`   | direcciones totales de módulos de estaca                  |
+| `allocations` | `uint256[]` | array de nuevo total de depósitos entre módulos de estaca |
 
 ### `getWithdrawalCredentials`
 
@@ -597,9 +601,9 @@ function getWithdrawalCredentials() public view returns (bytes32)
 
 **Devuelve:**
 
-| Nombre              | Tipo                      | Descripción                           |
-|---------------------|---------------------------|---------------------------------------|
-|                     | `bytes32`                 | credenciales de retiro                 |
+| Nombre | Tipo      | Descripción            |
+| ------ | --------- | ---------------------- |
+|        | `bytes32` | credenciales de retiro |
 
 ## Métodos de escritura
 
@@ -619,13 +623,13 @@ function addStakingModule(
 
 **Parámetros:**
 
-| Nombre             | Tipo         | Descripción            |
-|--------------------|--------------|------------------------|
-| `_name`            | `string`     | nombre legible del módulo |
+| Nombre                  | Tipo      | Descripción                       |
+| ----------------------- | --------- | --------------------------------- |
+| `_name`                 | `string`  | nombre legible del módulo         |
 | `_stakingModuleAddress` | `address` | dirección del contrato del módulo |
-| `_targetShare`     | `uin256`     | participación objetivo del módulo |
-| `_stakingModuleFee`| `uin256`     | tarifa del módulo |
-| `_treasuryFee`     | `uint256`    | tarifa del tesoro del módulo |
+| `_targetShare`          | `uin256`  | participación objetivo del módulo |
+| `_stakingModuleFee`     | `uin256`  | tarifa del módulo                 |
+| `_treasuryFee`          | `uint256` | tarifa del tesoro del módulo      |
 
 ### `updateStakingModule`
 
@@ -644,12 +648,12 @@ function updateStakingModule(
 
 **Parámetros:**
 
-| Nombre             | Tipo         | Descripción            |
-|--------------------|--------------|------------------------|
-| `_stakingModuleId` | `address`    | id del módulo |
-| `_targetShare`     | `uin256`     | actualización de la participación objetivo del módulo |
-| `_stakingModuleFee`| `uin256`     | actualización de la tarifa del módulo |
-| `_treasuryFee`     | `uint256`    | actualización de la tarifa del tesoro del módulo |
+| Nombre              | Tipo      | Descripción                                           |
+| ------------------- | --------- | ----------------------------------------------------- |
+| `_stakingModuleId`  | `address` | id del módulo                                         |
+| `_targetShare`      | `uin256`  | actualización de la participación objetivo del módulo |
+| `_stakingModuleFee` | `uin256`  | actualización de la tarifa del módulo                 |
+| `_treasuryFee`      | `uint256` | actualización de la tarifa del tesoro del módulo      |
 
 ### `updateTargetValidatorsLimits`
 
@@ -678,10 +682,10 @@ function updateRefundedValidatorsCount(
 
 **Parámetros:**
 
-| Nombre  | Tipo              | Descripción                                       |
-|-------|-------------------|---------------------------------------------------|
-| `_stakingModuleId` | `uin256` | id del módulo |
-| `_nodeOperatorId` | `uin256` | id del operador de nodo |
+| Nombre                     | Tipo      | Descripción                                                   |
+| -------------------------- | --------- | ------------------------------------------------------------- |
+| `_stakingModuleId`         | `uin256`  | id del módulo                                                 |
+| `_nodeOperatorId`          | `uin256`  | id del operador de nodo                                       |
 | `_refundedValidatorsCount` | `uint256` | nuevo número de validadores reembolsados del operador de nodo |
 
 ### `reportRewardsMinted`
@@ -697,10 +701,10 @@ function reportRewardsMinted(
 
 **Parámetros:**
 
-| Nombre  | Tipo              | Descripción                                       |
-|-------|-------------------|---------------------------------------------------|
-| `_stakingModuleIds` | `uin256[]` | lista de los ids reportados de los módulos de staking |
-| `_totalShares` | `uin256[]` | total de participaciones emitidas para los módulos de staking dados |
+| Nombre              | Tipo       | Descripción                                                         |
+| ------------------- | ---------- | ------------------------------------------------------------------- |
+| `_stakingModuleIds` | `uin256[]` | lista de los ids reportados de los módulos de staking               |
+| `_totalShares`      | `uin256[]` | total de participaciones emitidas para los módulos de staking dados |
 
 ### `updateExitedValidatorsCountByStakingModule`
 
@@ -715,9 +719,9 @@ function reportRewardsMinted(
 
 **Parámetros:**
 
-| Nombre  | Tipo              | Descripción                                       |
-|-------|-------------------|---------------------------------------------------|
-| `_stakingModuleIds` | `uin256[]` | lista de los ids reportados de los módulos de staking |
+| Nombre                    | Tipo       | Descripción                                                                     |
+| ------------------------- | ---------- | ------------------------------------------------------------------------------- |
+| `_stakingModuleIds`       | `uin256[]` | lista de los ids reportados de los módulos de staking                           |
 | `_exitedValidatorsCounts` | `uin256[]` | nuevos conteos de validadores salidos para los módulos de staking especificados |
 
 ### `reportStakingModuleExitedValidatorsCountByNodeOperator`
@@ -734,11 +738,11 @@ function reportStakingModuleExitedValidatorsCountByNodeOperator(
 
 **Parámetros:**
 
-| Nombre  | Tipo              | Descripción                                       |
-|-------|-------------------|---------------------------------------------------|
-| `_stakingModuleId` | `uin256` | id del módulo de staking |
-| `_nodeOperatorIds` | `bytes` | ids de los operadores de nodo |
-| `_exitedValidatorsCounts` | `bytes` | nuevos conteos de validadores salidos para los operadores de nodo especificados |
+| Nombre                    | Tipo     | Descripción                                                                     |
+| ------------------------- | -------- | ------------------------------------------------------------------------------- |
+| `_stakingModuleId`        | `uin256` | id del módulo de staking                                                        |
+| `_nodeOperatorIds`        | `bytes`  | ids de los operadores de nodo                                                   |
+| `_exitedValidatorsCounts` | `bytes`  | nuevos conteos de validadores salidos para los operadores de nodo especificados |
 
 ### `unsafeSetExitedValidatorsCount`
 
@@ -777,12 +781,12 @@ struct ValidatorsCountsCorrection {
 
 **Parámetros:**
 
-| Nombre  | Tipo              | Descripción                                       |
-|-------|-------------------|---------------------------------------------------|
-| `_stakingModuleId` | `uin256` | id del módulo de staking |
-| `_nodeOperatorIds` | `bytes` | ids de los operadores de nodo |
-| `_triggerUpdateFinish` | `bool` | bandera para llamar a `onExitedAndStuckValidatorsCountsUpdated` en el módulo después de aplicar las correcciones |
-| `_correction` | `ValidatorsCountsCorrection` | detalles de la corrección |
+| Nombre                 | Tipo                         | Descripción                                                                                                      |
+| ---------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `_stakingModuleId`     | `uin256`                     | id del módulo de staking                                                                                         |
+| `_nodeOperatorIds`     | `bytes`                      | ids de los operadores de nodo                                                                                    |
+| `_triggerUpdateFinish` | `bool`                       | bandera para llamar a `onExitedAndStuckValidatorsCountsUpdated` en el módulo después de aplicar las correcciones |
+| `_correction`          | `ValidatorsCountsCorrection` | detalles de la corrección                                                                                        |
 
 ### `reportStakingModuleStuckValidatorsCountByNodeOperator`
 
@@ -798,11 +802,11 @@ function reportStakingModuleStuckValidatorsCountByNodeOperator(
 
 **Parámetros:**
 
-| Nombre  | Tipo              | Descripción                                       |
-|-------|-------------------|---------------------------------------------------|
-| `_stakingModuleId` | `uin256` | id del módulo de staking |
-| `_nodeOperatorIds` | `bytes` | ids de los operadores de nodo |
-| `_stuckValidatorsCounts` | `bytes` | nuevos conteos de validadores atascados para los operadores de nodo especificados |
+| Nombre                   | Tipo     | Descripción                                                                       |
+| ------------------------ | -------- | --------------------------------------------------------------------------------- |
+| `_stakingModuleId`       | `uin256` | id del módulo de staking                                                          |
+| `_nodeOperatorIds`       | `bytes`  | ids de los operadores de nodo                                                     |
+| `_stuckValidatorsCounts` | `bytes`  | nuevos conteos de validadores atascados para los operadores de nodo especificados |
 
 ### `onValidatorsCountsByNodeOperatorReportingFinished`
 

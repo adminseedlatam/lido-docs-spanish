@@ -44,9 +44,9 @@ donde
 
 - **`amountOfStETH`** — la cantidad de tokens `stETH` transferidos al contrato al solicitar
 - **`amountOfShares`** — la cantidad de participaciones subyacentes correspondientes a los tokens `stETH` transferidos.
-Consulta el [capítulo de rebalanceo de Lido](lido.md#rebase) para aprender sobre la mecánica de las participaciones
+  Consulta el [capítulo de rebalanceo de Lido](lido.md#rebase) para aprender sobre la mecánica de las participaciones
 - **`owner`** — la dirección del propietario de esta solicitud. El propietario también es titular del NFT `unstETH`
-y puede transferir la propiedad y reclamar el ether subyacente una vez finalizado
+  y puede transferir la propiedad y reclamar el ether subyacente una vez finalizado
 - **`timestamp`** — la hora de creación de la solicitud
 - **`isFinalized`** — estado de finalización de la solicitud; las solicitudes finalizadas están disponibles para reclamar
 - **`isClaimed`** — estado de reclamación de la solicitud. Una vez reclamada, el NFT se quema y la solicitud no está disponible para reclamar nuevamente
@@ -64,10 +64,10 @@ El informe del [Accounting Oracle](accounting-oracle.md) finaliza un lote de sol
 eligiendo el `_maxShareRate` y el tamaño del lote teniendo en cuenta los siguientes factores:
 
 - Si hay suficiente ether para cumplir con la solicitud. El ether puede obtenerse del buffer de Lido, que se llena con la participación de nuevos usuarios, retiros parciales y totales de la cadena Beacon, propinas del protocolo y recompensas MEV.
-Los retiros tienen prioridad sobre los depósitos, por lo que el ether no puede depositarse en la cadena Beacon si algunas solicitudes de retiro pueden ser cumplidas.
+  Los retiros tienen prioridad sobre los depósitos, por lo que el ether no puede depositarse en la cadena Beacon si algunas solicitudes de retiro pueden ser cumplidas.
 - Si ha pasado suficiente tiempo desde que se colocó la solicitud de retiro en la cola (bloqueo de tiempo)
 - Si ha habido alguna pérdida masiva para el protocolo en el lado de la cadena Beacon desde que se presentó la solicitud de retiro.
-Esto puede llevar a la finalización a una tasa inferior a 1:1 si la pérdida es lo suficientemente alta como para no ser cubierta con las recompensas diarias (nunca ha sucedido antes)
+  Esto puede llevar a la finalización a una tasa inferior a 1:1 si la pérdida es lo suficientemente alta como para no ser cubierta con las recompensas diarias (nunca ha sucedido antes)
 
 :::note
 
@@ -165,12 +165,9 @@ function ownerOf(uint256 _requestId) view returns (address owner)
 
 :::note
 
-Requisitos:
-    - La solicitud `_requestId` debe existir.
-    - La solicitud `_requestId` no debe estar reclamada.
+Requisitos: - La solicitud `_requestId` debe existir. - La solicitud `_requestId` no debe estar reclamada.
 
 :::
-
 
 ### approve()
 
@@ -184,10 +181,7 @@ function approve(address _to, uint256 _requestId)
 
 :::note
 
-Requisitos:
-    - El llamante debe poseer el token o ser un operador aprobado.
-    - `_requestId` debe existir.
-    - `_to` no debe ser el propietario.
+Requisitos: - El llamante debe poseer el token o ser un operador aprobado. - `_requestId` debe existir. - `_to` no debe ser el propietario.
 
 :::
 
@@ -273,7 +267,7 @@ Requisitos:
 - `_to` no puede ser la dirección cero.
 - El token `_requestId` debe ser propiedad de `_from`.
 - Si el llamante no es `_from`, debe tener aprobación para mover este token mediante `approve()` o `setApprovalForAll()`.
-:::
+  :::
 
 ### getBaseUri()
 
@@ -349,7 +343,7 @@ Requisitos:
 - El saldo de `wstETH` de `msg.sender` debe ser mayor o igual a la suma de todos los `_amounts`.
 - Debe haber aprobación de `msg.sender` a esta dirección del contrato para la transferencia total de tokens `wstETH`.
 - Cada cantidad en `_amounts` debe tener `getPooledEthByShares(amount)` siendo mayor que `MIN_STETH_WITHDRAWAL_AMOUNT`
-y menor que `MAX_STETH_WITHDRAWAL_AMOUNT`.
+  y menor que `MAX_STETH_WITHDRAWAL_AMOUNT`.
 
 :::
 
@@ -426,7 +420,7 @@ Requisitos:
 - El saldo de `wstETH` de `msg.sender` debe ser mayor o igual a la suma de todos los `_amounts`.
 - El permiso debe tener una firma válida, un `value` mayor que la suma de todos los `_amounts` y que no haya expirado el `deadline`.
 - Cada cantidad en `_amounts` debe tener `getPooledEthByShares(amount)` siendo mayor que `MIN_STETH_WITHDRAWAL_AMOUNT`
-y menor que `MAX_STETH_WITHDRAWAL_AMOUNT`.
+  y menor que `MAX_STETH_WITHDRAWAL_AMOUNT`.
 
 :::
 
@@ -708,7 +702,7 @@ donde
   ```
 
   - **`remainingEthBudget`** — la cantidad actual restante de ether. Debe establecerse en todo el presupuesto de
-  la finalización en la primera llamada.
+    la finalización en la primera llamada.
   - **`finished`** — la bandera que se establece en `true` si se iteran todas las solicitudes.
   - **`batches`** — la matriz resultante de lotes, cada uno representado por el id de la última solicitud en el lote.
   - **`batchesLength`** — la longitud de la parte llena de la matriz `batches`.
@@ -750,7 +744,7 @@ Devuelve
 - **RESUME_ROLE** — rol para reanudar el retiro después de haber sido pausado.
 - **ORACLE_ROLE** — rol para proporcionar los datos relacionados con el oráculo necesarios, como la última marca de tiempo del informe y si el protocolo está en modo bunker.
 - **MANAGE_TOKEN_URI_ROLE** — rol para establecer los parámetros para construir el URI del token: el URI base
-o la dirección de `NFTDescriptor`.
+  o la dirección de `NFTDescriptor`.
 
 ### finalize()
 
@@ -917,7 +911,7 @@ function setNFTDescriptorAddress(address _nftDescriptorAddress) onlyRole(MANAGE_
 where
 
 - **`_nftDescriptorAddress`** — is the address of `NFTDescriptor` contract,
-which must support the `INFTDescriptor` interface:
+  which must support the `INFTDescriptor` interface:
 
 ```sol
 interface INFTDescriptor {

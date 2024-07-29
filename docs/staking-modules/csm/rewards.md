@@ -1,7 +1,9 @@
 # Recompensas
+
 ![rewards-1](../../../static/img/csm/rewards-1.png)
 
 Hay dos tipos de recompensas para los Operadores de Nodo de CSM:
+
 - **Recompensas del Operador de Nodo;**
 - **Recompensas de bono;**
 
@@ -22,6 +24,7 @@ Además, cualquier bono en exceso se tratará como una recompensa.
 ![rewards-4](../../../static/img/csm/rewards-4.png)
 
 ## Oráculo de Rendimiento
+
 El Oráculo de Rendimiento crea un árbol de Merkle con la asignación de las recompensas de participación y entrega la raíz en la cadena. Para hacer que el árbol original esté disponible para los usuarios, se publica en [IPFS](https://ipfs.tech/) y [GitHub](https://github.com/). En lugar de almacenar múltiples raíces, cada nuevo árbol consta de todas las recompensas del Operador de Nodo adquiridas alguna vez por los Operadores de Nodo de CSM. Por lo tanto, solo se requiere el árbol más reciente para determinar la asignación de recompensas en cualquier momento. La cantidad de recompensas disponibles para reclamar se puede calcular como `recompensasAcumuladasTotales - recompensasReclamadas`.
 
 El Oráculo de Rendimiento utiliza la tasa de attestations exitosas `attestacionesExitosas / totalAttestationsAsignadas` como un proxy para el rendimiento general de un validador. Se utiliza un umbral de rendimiento para determinar la asignación de las recompensas reales del Operador de Nodo. Los validadores con rendimiento por encima del umbral se incluyen en el grupo de asignación, mientras que los demás no lo son. Los eventos de activación y salida se tienen en cuenta durante el cálculo de la parte del Operador de Nodo. Una vez formado el grupo de asignación, a cada validador se le asigna una parte de las recompensas de participación de `recompensasTotalesAcumuladas / totalValidadoresEnGrupoDeAsignación`. Esto significa efectivamente que todas las recompensas adquiridas por el módulo se distribuirán entre los que tienen un buen desempeño. Luego, las acciones del validador se asignan a los Operadores de Nodo correspondientes, y cada Operador puede reclamar las recompensas de todos sus validadores de una sola vez.

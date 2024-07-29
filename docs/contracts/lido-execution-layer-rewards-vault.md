@@ -35,9 +35,9 @@ function withdrawRewards(uint256 _maxAmount) external returns (uint256 amount)
 
 #### Parámetros:
 
-| Nombre       | Tipo      | Descripción                           |
-| ------------ | --------- | ------------------------------------- |
-| `_maxAmount` | `uint256` | Cantidad máxima de ETH a retirar      |
+| Nombre       | Tipo      | Descripción                      |
+| ------------ | --------- | -------------------------------- |
+| `_maxAmount` | `uint256` | Cantidad máxima de ETH a retirar |
 
 ### recoverERC20()
 
@@ -52,10 +52,10 @@ function recoverERC20(address _token, uint256 _amount) external
 
 #### Parámetros:
 
-| Nombre      | Tipo      | Descripción              |
-| ----------- | --------- | ------------------------ |
-| `_token`    | `address` | Token compatible con ERC20 |
-| `_amount`   | `uint256` | Cantidad de tokens a recuperar |
+| Nombre    | Tipo      | Descripción                    |
+| --------- | --------- | ------------------------------ |
+| `_token`  | `address` | Token compatible con ERC20     |
+| `_amount` | `uint256` | Cantidad de tokens a recuperar |
 
 ### recoverERC721()
 
@@ -70,7 +70,7 @@ function recoverERC721(address _token, uint256 _tokenId) external
 
 #### Parámetros:
 
-| Nombre      | Tipo      | Descripción              |
-| ----------- | --------- | ------------------------ |
-| `_token`    | `address` | Token compatible con ERC721 |
-| `_tokenId`  | `uint256` | ID del token minteado    |
+| Nombre     | Tipo      | Descripción                 |
+| ---------- | --------- | --------------------------- |
+| `_token`   | `address` | Token compatible con ERC721 |
+| `_tokenId` | `uint256` | ID del token minteado       |

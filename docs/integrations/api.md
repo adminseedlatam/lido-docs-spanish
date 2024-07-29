@@ -116,10 +116,12 @@ El servicio es útil para los stakers, proporcionando información desde el mome
 Consulta la [explicación detallada](https://github.com/lidofinance/withdrawals-api/blob/develop/how-estimation-works.md).
 
 ### Casos de Uso
+
 - Estimación antes de la solicitud: los usuarios pueden estimar el tiempo de espera antes de realizar una solicitud de retiro.
 - Seguimiento de la solicitud existente: los usuarios pueden rastrear el tiempo de espera estimado para la solicitud ya realizada.
 
 ### Calcula el tiempo para las solicitudes de retiros:
+
 ```
 https://wq-api.lido.fi/v2/request-time?ids=1&ids=2
 ```
@@ -127,11 +129,13 @@ https://wq-api.lido.fi/v2/request-time?ids=1&ids=2
 El esquema de respuesta y ejemplos están disponibles en la [documentación de la API de Swagger](https://wq-api.lido.fi/api#/Request%20Time/RequestTimeController_requestsTime)
 
 ### Calcular el tiempo para la cola de retiro actual:
+
 ```
 https://wq-api.lido.fi/v2/request-time/calculate
 ```
 
 ### Calcula el tiempo para el retiro de la cantidad de stETH:
+
 ```
 https://wq-api.lido.fi/v2/request-time/calculate?amount=32
 ```
@@ -143,4 +147,5 @@ El esquema de respuesta y ejemplos están disponibles en la [documentación de l
 ```
 https://wq-api-holesky.testnet.fi/v2/request-time?ids=1&ids=2
 ```
+
 El esquema de respuesta y ejemplos están disponibles en la [documentación de la API de Swagger](https://wq-api-holesky.testnet.fi/api#/Request%20Time/RequestTimeController_requestsTime)

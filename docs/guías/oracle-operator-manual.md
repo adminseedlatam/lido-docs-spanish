@@ -124,24 +124,24 @@ Para preparar el informe, el Oráculo recupera hasta 10 días de eventos antigu
 
 os, realiza solicitudes históricas de datos de saldo y genera informes simulados en bloques históricos. Esto requiere un nodo de ejecución archivado con al menos dos semanas de datos archivados.
 
-| Cliente                                          | Probado | Notas                                                                                                                                                                                 |
-|--------------------------------------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [Geth](https://geth.ethereum.org/)               |         | `--gcmode=archive` <br/> `--syncmode=snap` <br/><br/>O<br/><br/>`--gcmode=archive`<br/>`--syncmode=full`                                                                              |
-| [Nethermind](https://nethermind.io/)             |         | No probado aún                                                                                                                                                                         |
-| [Besu](https://besu.hyperledger.org/en/stable/)  |         | Usar <br/> `--rpc-max-logs-range=100000` <br/> `--sync-mode=FULL` <br/> `--data-storage-format="FOREST"` <br/> `--pruning-enabled` <br/>`--pruning-blocks-retained=100000` <br/> parámetros |
-| [Erigon](https://github.com/ledgerwatch/erigon)  |         | Usar <br/> `--prune=htc` <br/> `--prune.h.before=100000` <br/> `--prune.t.before=100000` <br/> `--prune.c.before=100000` <br/> parámetros                                                 |
+| Cliente                                         | Probado | Notas                                                                                                                                                                                       |
+| ----------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Geth](https://geth.ethereum.org/)              |         | `--gcmode=archive` <br/> `--syncmode=snap` <br/><br/>O<br/><br/>`--gcmode=archive`<br/>`--syncmode=full`                                                                                    |
+| [Nethermind](https://nethermind.io/)            |         | No probado aún                                                                                                                                                                              |
+| [Besu](https://besu.hyperledger.org/en/stable/) |         | Usar <br/> `--rpc-max-logs-range=100000` <br/> `--sync-mode=FULL` <br/> `--data-storage-format="FOREST"` <br/> `--pruning-enabled` <br/>`--pruning-blocks-retained=100000` <br/> parámetros |
+| [Erigon](https://github.com/ledgerwatch/erigon) |         | Usar <br/> `--prune=htc` <br/> `--prune.h.before=100000` <br/> `--prune.t.before=100000` <br/> `--prune.c.before=100000` <br/> parámetros                                                   |
 
 ### Nodo Cliente de Consenso
 
 Para calcular algunas métricas para el modo búnker, Oráculo necesita un nodo de consenso archivado.
 
-| Cliente                                            | Probado | Notas                                                                                                                                               |
-|----------------------------------------------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| [Lighthouse](https://lighthouse.sigmaprime.io/)    |         | Usar el parámetro `--reconstruct-historic-states`.                                                                                                           |
-| [Lodestar](https://nethermind.io/)                 |         | No probado aún                                                                                                                                      |
-| [Nimbus](https://nimbus.guide/quick-start.html)    |         | No probado aún                                                                                                                                      |
-| [Prysm](https://github.com/ledgerwatch/erigon)     |         | Usar <br/> `--grpc-max-msg-size=104857600` <br/> `--enable-historical-state-representation=true` <br/> `--slots-per-archive-point=1024` <br/> parámetros |
-| [Teku](https://docs.teku.consensys.net)            |         | Usar <br/> `--data-storage-mode=archive` <br/>`--data-storage-archive-frequency=1024`<br/> `--reconstruct-historic-states=true`<br/> parámetros          |
+| Cliente                                         | Probado | Notas                                                                                                                                                    |
+| ----------------------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Lighthouse](https://lighthouse.sigmaprime.io/) |         | Usar el parámetro `--reconstruct-historic-states`.                                                                                                       |
+| [Lodestar](https://nethermind.io/)              |         | No probado aún                                                                                                                                           |
+| [Nimbus](https://nimbus.guide/quick-start.html) |         | No probado aún                                                                                                                                           |
+| [Prysm](https://github.com/ledgerwatch/erigon)  |         | Usar <br/> `--grpc-max-msg-size=104857600` <br/> `--enable-historical-state-representation=true` <br/> `--slots-per-archive-point=1024` <br/> parámetros |
+| [Teku](https://docs.teku.consensys.net)         |         | Usar <br/> `--data-storage-mode=archive` <br/>`--data-storage-archive-frequency=1024`<br/> `--reconstruct-historic-states=true`<br/> parámetros          |
 
 ### Servicio de API de Keys
 

@@ -106,9 +106,9 @@ function canDeposit(uint256 stakingModuleId) external view returns (bool)
 
 #### Parámetros
 
-| Nombre             | Tipo      | Descripción                  |
-| ------------------ | --------- | ---------------------------- |
-| `stakingModuleId`  | `uint256` | Id del módulo de staking     |
+| Nombre            | Tipo      | Descripción              |
+| ----------------- | --------- | ------------------------ |
+| `stakingModuleId` | `uint256` | Id del módulo de staking |
 
 ## Métodos
 
@@ -125,12 +125,12 @@ Revierte si alguna de las siguientes condiciones es verdadera:
 
 - `msg.sender` no es el propietario;
 - `newValue` es la dirección cero.
-:::
+  :::
 
 #### Parámetros
 
-| Nombre     | Tipo      | Descripción            |
-| ---------- | --------- | ---------------------- |
+| Nombre     | Tipo      | Descripción                     |
+| ---------- | --------- | ------------------------------- |
 | `newValue` | `address` | Nueva dirección del propietario |
 
 ### setPauseIntentValidityPeriodBlocks()
@@ -146,12 +146,12 @@ Revierte si alguna de las siguientes condiciones es verdadera:
 
 - `msg.sender` no es el propietario;
 - `newValue` es 0 (cero).
-:::
+  :::
 
 #### Parámetros
 
-| Nombre     | Tipo      | Descripción                                      |
-| ---------- | --------- | ------------------------------------------------ |
+| Nombre     | Tipo      | Descripción                                                           |
+| ---------- | --------- | --------------------------------------------------------------------- |
 | `newValue` | `uint256` | Número de bloques después de los cuales el mensaje se vuelve inválido |
 
 ### setMaxDeposits()
@@ -168,12 +168,12 @@ function setMaxDeposits(uint256 newValue)
 Revierte si alguna de las siguientes condiciones es verdadera:
 
 - `msg.sender` no es el propietario.
-:::
+  :::
 
 #### Parámetros
 
-| Nombre     | Tipo      | Descripción                                  |
-| ---------- | --------- | -------------------------------------------- |
+| Nombre     | Tipo      | Descripción                                   |
+| ---------- | --------- | --------------------------------------------- |
 | `newValue` | `uint256` | Nuevo valor del parámetro maxDepositsPerBlock |
 
 ### setMinDepositBlockDistance()
@@ -190,12 +190,12 @@ function setMinDepositBlockDistance(uint256 newValue)
 Revierte si alguna de las siguientes condiciones es verdadera:
 
 - `msg.sender` no es el propietario.
-:::
+  :::
 
 #### Parámetros
 
-| Nombre     | Tipo      | Descripción                                  |
-| ---------- | --------- | -------------------------------------------- |
+| Nombre     | Tipo      | Descripción                                       |
+| ---------- | --------- | ------------------------------------------------- |
 | `newValue` | `uint256` | Nuevo valor del parámetro minDepositBlockDistance |
 
 ### setGuardianQuorum()
@@ -210,12 +210,12 @@ function setGuardianQuorum(uint256 newValue)
 Revierte si alguna de las siguientes condiciones es verdadera:
 
 - `msg.sender` no es el propietario;
-:::
+  :::
 
 #### Parámetros
 
-| Nombre     | Tipo      | Descripción      |
-| ---------- | --------- | ---------------- |
+| Nombre     | Tipo      | Descripción            |
+| ---------- | --------- | ---------------------- |
 | `newValue` | `uint256` | Nuevo valor del quórum |
 
 ### addGuardian()
@@ -231,12 +231,12 @@ Revierte si alguna de las siguientes condiciones es verdadera:
 
 - `msg.sender` no es el propietario;
 - `addr` ya es un guardián.
-:::
+  :::
 
 #### Parámetros
 
-| Nombre      | Tipo      | Descripción        |
-| ----------- | --------- | ------------------ |
+| Nombre      | Tipo      | Descripción            |
+| ----------- | --------- | ---------------------- |
 | `addr`      | `address` | Dirección del guardián |
 | `newQuorum` | `uint256` | Nuevo valor del quórum |
 
@@ -253,14 +253,14 @@ Revierte si alguna de las siguientes condiciones es verdadera:
 
 - `msg.sender` no es el propietario;
 - cualquiera de las `addresses` ya es un guardián.
-:::
+  :::
 
 #### Parámetros
 
-| Nombre      | Tipo        | Descripción                    |
-| ----------- | ----------- | ------------------------------ |
+| Nombre      | Tipo        | Descripción                        |
+| ----------- | ----------- | ---------------------------------- |
 | `addresses` | `address[]` | Array de direcciones de guardianes |
-| `newQuorum` | `uint256`   | Nuevo valor del quórum         |
+| `newQuorum` | `uint256`   | Nuevo valor del quórum             |
 
 ### removeGuardian()
 
@@ -275,14 +275,14 @@ Revierte si alguna de las siguientes condiciones es verdadera:
 
 - `msg.sender` no es el propietario;
 - `addr` no es un guardián.
-:::
+  :::
 
 ### Parámetros
 
-| Nombre               | Tipo         | Descripción                                                                 |
-| -------------------- | ------------ | --------------------------------------------------------------------------- |
-| `addr`               | `address`    | Dirección del guardián                                                     |
-| `newQuorum`          | `uint256`    | Nuevo valor de quórum                                                       |
+| Nombre      | Tipo      | Descripción            |
+| ----------- | --------- | ---------------------- |
+| `addr`      | `address` | Dirección del guardián |
+| `newQuorum` | `uint256` | Nuevo valor de quórum  |
 
 ### pauseDeposits()
 
@@ -305,11 +305,11 @@ function pauseDeposits(uint256 blockNumber, uint256 stakingModuleId, Signature m
 
 ### Parámetros
 
-| Nombre            | Tipo         | Descripción                                                                           |
-| ----------------- | ------------ | ------------------------------------------------------------------------------------- |
-| `blockNumber`     | `uint256`    | Número de bloque donde se han observado pre-depósitos maliciosos por el guardián      |
-| `stakingModuleId` | `uint256`    | Id del módulo de staking para pausar los depósitos                                    |
-| `sig`             | `Signature`  | Firma corta de guardianes ECDSA como se define en [EIP-2098](https://eips.ethereum.org/EIPS/eip-2098) |
+| Nombre            | Tipo        | Descripción                                                                                           |
+| ----------------- | ----------- | ----------------------------------------------------------------------------------------------------- |
+| `blockNumber`     | `uint256`   | Número de bloque donde se han observado pre-depósitos maliciosos por el guardián                      |
+| `stakingModuleId` | `uint256`   | Id del módulo de staking para pausar los depósitos                                                    |
+| `sig`             | `Signature` | Firma corta de guardianes ECDSA como se define en [EIP-2098](https://eips.ethereum.org/EIPS/eip-2098) |
 
 ### unpauseDeposits()
 
@@ -324,13 +324,13 @@ function unpauseDeposits(uint256 stakingModuleId)
 Revoca si alguna de las siguientes condiciones es verdadera:
 
 - `msg.sender` no es el propietario.
-:::
+  :::
 
 ### Parámetros
 
-| Nombre            | Tipo         | Descripción                  |
-| ----------------- | ------------ | ---------------------------- |
-| `stakingModuleId` | `uint256`    | Id del módulo de staking     |
+| Nombre            | Tipo      | Descripción              |
+| ----------------- | --------- | ------------------------ |
+| `stakingModuleId` | `uint256` | Id del módulo de staking |
 
 ### depositBufferedEther()
 
@@ -345,7 +345,7 @@ Revoca si alguna de las siguientes condiciones es verdadera:
 4. Se recibió una firma no válida o no de un guardián;
 5. `block.number - StakingModule.getLastDepositBlock() < minDepositBlockDistance`;
 6. `blockhash(blockNumber) != blockHash`.
-:::
+   :::
 
 Las firmas deben estar ordenadas en orden ascendente por el índice del guardián. Cada firma debe ser producida para el hash `keccak256` del siguiente mensaje (cada componente tomando 32 bytes):
 
@@ -365,12 +365,12 @@ function depositBufferedEther(
 
 ### Parámetros
 
-| Nombre                       | Tipo             | Descripción                                                                                      |
-| ---------------------------- | ---------------- | ------------------------------------------------------------------------------------------------ |
-| `blockNumber`                | `uint256`        | Número del bloque de depósito actual                                                              |
-| `blockHash`                  | `bytes32`        | Hash del bloque de depósito actual                                                                |
-| `depositRoot`                | `bytes32`        | Raíz de depósito del contrato de depósito Ethereum                                                |
-| `stakingModuleId`            | `uint256`        | Id del módulo de staking para realizar el depósito                                                |
-| `nonce`                      | `uint256`        | Nonce de las operaciones clave del módulo de staking                                              |
-| `depositCalldata`            | `bytes`          | Datos de calldata del depósito del módulo de staking                                               |
-| `sortedGuardianSignatures`   | `Signature[]`    | Firmas cortas de guardianes ECDSA según se define en [EIP-2098](https://eips.ethereum.org/EIPS/eip-2098) |
+| Nombre                     | Tipo          | Descripción                                                                                              |
+| -------------------------- | ------------- | -------------------------------------------------------------------------------------------------------- |
+| `blockNumber`              | `uint256`     | Número del bloque de depósito actual                                                                     |
+| `blockHash`                | `bytes32`     | Hash del bloque de depósito actual                                                                       |
+| `depositRoot`              | `bytes32`     | Raíz de depósito del contrato de depósito Ethereum                                                       |
+| `stakingModuleId`          | `uint256`     | Id del módulo de staking para realizar el depósito                                                       |
+| `nonce`                    | `uint256`     | Nonce de las operaciones clave del módulo de staking                                                     |
+| `depositCalldata`          | `bytes`       | Datos de calldata del depósito del módulo de staking                                                     |
+| `sortedGuardianSignatures` | `Signature[]` | Firmas cortas de guardianes ECDSA según se define en [EIP-2098](https://eips.ethereum.org/EIPS/eip-2098) |

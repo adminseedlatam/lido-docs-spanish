@@ -27,8 +27,8 @@ En el punto final, se enviará un JSON con la siguiente estructura:
 
 ```json
 {
-	"validatorIndex": "123",
-	"validatorPubkey": "0x123"
+  "validatorIndex": "123",
+  "validatorPubkey": "0x123"
 }
 ```
 
@@ -55,10 +55,12 @@ El primer endpoint devuelve una lista de validadores para un Operador de Nodo es
 Devuelve datos:
 
 ```json
-[{
-	"validatorIndex": 123,
-	"key": "0x123"
-}]
+[
+  {
+    "validatorIndex": 123,
+    "key": "0x123"
+  }
+]
 ```
 
 Además, también hay un segundo endpoint que calcula los mismos datos, pero devuelve mensajes de salida listos para firmar:
@@ -73,10 +75,12 @@ Puedes encontrar el formato esperado en la sección [¿Qué son los Mensajes de 
 Devuelve datos:
 
 ```json
-[{
-	"validator_index": "123",
-	"epoch": "123"
-}]
+[
+  {
+    "validator_index": "123",
+    "epoch": "123"
+  }
+]
 ```
 
 Además, ambos endpoints permiten configuración adicional a través de parámetros de consulta:

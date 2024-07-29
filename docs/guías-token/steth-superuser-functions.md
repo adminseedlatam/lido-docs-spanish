@@ -19,10 +19,10 @@ StETH puede ser detenido mediante votación de la DAO. Ninguna operación que ca
 
 TODO: Rol `BURN_ROLE` desactualizado
 
-El contrato de StETH especifica el `PAUSE_ROLE` (dirección que puede pausar el protocolo) y el `BURN_ROLE` (dirección que puede quemar tokens stETH):
+El contrato de StETH espscdecifica el `PAUSE_ROLE` (dirección que puede pausar el protocolo) y el `BURN_ROLE` (dirección que puede quemar tokens stETH):
 
-* El `PAUSE_ROLE` está asignado únicamente al contrato de Votación de la DAO [https://etherscan.io/address/0x2e59a20f205bb85a89c53f1936454680651e618e](https://etherscan.io/address/0x2e59a20f205bb85a89c53f1936454680651e618e).
-* El `BURN_ROLE` está asignado al contrato [`Burner`](/contracts/burner), con parámetros ACL adicionales que permiten quemar tokens stETH solo desde el balance propio del contrato. Los tokens solo pueden ser quemados por solicitud directa de la DAO.
+- El `PAUSE_ROLE` está asignado únicamente al contrato de Votación de la DAO [https://etherscan.io/address/0x2e59a20f205bb85a89c53f1936454680651e618e](https://etherscan.io/address/0x2e59a20f205bb85a89c53f1936454680651e618e).
+- El `BURN_ROLE` está asignado al contrato [`Burner`](/contracts/burner), con parámetros ACL adicionales que permiten quemar tokens stETH solo desde el balance propio del contrato. Los tokens solo pueden ser quemados por solicitud directa de la DAO.
 
 Es importante destacar que hay otros roles para la gestión de la DAO, pero no afectan las acciones del token. Estos roles son `MANAGE_FEE` (establecer la cantidad de tarifa de staking), `MANAGE_WITHDRAWAL_KEY` (establecer credenciales de retiro del protocolo), y `MANAGE_PROTOCOL_CONTRACTS_ROLE` (establecer dirección del contrato del Oracle, dirección de tesorería de DAO para enviar tarifas, dirección de seguro de DAO para enviar tarifas). Los roles y direcciones se detallan en el siguiente [informe](https://github.com/lidofinance/audits/?tab=readme-ov-file#10-2023-statemind-lido-roles-analysis) independiente a finales de 2023.
 

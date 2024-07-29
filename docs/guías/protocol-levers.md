@@ -127,9 +127,11 @@ Existe un límite adicional para prevenir eventos drásticos de rebase de tokens
 Consulte el siguiente problema: [`#405`](https://github.com/lidofinance/lido-dao/issues/405)
 
 - Modificador: `setELRewardsVault()`
+
   - Permiso requerido: `SET_EL_REWARDS_VAULT_ROLE`
 
 - Modificador: `setELRewardsWithdrawalLimit()`
+
   - Permiso requerido: `SET_EL_REWARDS_WITHDRAWAL_LIMIT_ROLE`
 
 - Accesores:
@@ -155,9 +157,11 @@ Esquema de explicación de límite:
 ```
 
 - Modificadores: `resumeStaking()`, `setStakingLimit(uint256, uint256)`, `removeStakingLimit()`
+
   - Permiso requerido: `STAKING_CONTROL_ROLE`
 
 - Modificador: `pauseStaking()`
+
   - Permiso requerido: `STAKING_PAUSE_ROLE`
 
 - Accesores:

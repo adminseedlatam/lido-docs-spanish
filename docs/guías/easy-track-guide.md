@@ -66,11 +66,11 @@ Tan pronto como la transacción se confirme, la moción habrá comenzado y podr�
 Una moción puede tener tres resultados posibles:
 
 1. **Moción aprobada.**
-En caso de que no se haya alcanzado el umbral mínimo de objeciones del 0.5% del suministro total de LDO, se considera que la moción ha sido aprobada y puede ser implementada. Esta operación es sin permisos, lo que significa que cualquiera puede implementar una moción aprobada. Ten en cuenta que todavía es posible objetar una moción no implementada incluso después del bloqueo de tiempo de 72 horas. La moción implementada se desactivará automáticamente y se colocará en el archivo de mociones disponible en la sección 'Mociones archivadas' de la interfaz de Easy Track.
+   En caso de que no se haya alcanzado el umbral mínimo de objeciones del 0.5% del suministro total de LDO, se considera que la moción ha sido aprobada y puede ser implementada. Esta operación es sin permisos, lo que significa que cualquiera puede implementar una moción aprobada. Ten en cuenta que todavía es posible objetar una moción no implementada incluso después del bloqueo de tiempo de 72 horas. La moción implementada se desactivará automáticamente y se colocará en el archivo de mociones disponible en la sección 'Mociones archivadas' de la interfaz de Easy Track.
 2. **Moción rechazada.**
-En caso de que se haya alcanzado el umbral mínimo de objeciones del 0.5% del suministro total de LDO, se considera que la moción ha sido rechazada. Se desactivará automáticamente y se colocará en el archivo de mociones disponible en la sección 'Mociones archivadas' de la interfaz de Easy Track.
+   En caso de que se haya alcanzado el umbral mínimo de objeciones del 0.5% del suministro total de LDO, se considera que la moción ha sido rechazada. Se desactivará automáticamente y se colocará en el archivo de mociones disponible en la sección 'Mociones archivadas' de la interfaz de Easy Track.
 3. **Moción cancelada.**
-En caso de que descubras que cometiste un error al iniciar la moción (por ejemplo, no quieres aumentar tus límites de staking aún o hiciste un clic incorrecto al especificar el nuevo valor del límite, etc.), puedes cancelar la moción en cualquier momento antes de que se haya implementado. Para hacerlo, haz clic en la moción para ver la vista detallada de la moción y presiona el botón 'Cancelar' en la esquina superior derecha. Ten en cuenta que esta es una acción en cadena y deberás firmar una transacción para completarla (aplican costos de gas).
+   En caso de que descubras que cometiste un error al iniciar la moción (por ejemplo, no quieres aumentar tus límites de staking aún o hiciste un clic incorrecto al especificar el nuevo valor del límite, etc.), puedes cancelar la moción en cualquier momento antes de que se haya implementado. Para hacerlo, haz clic en la moción para ver la vista detallada de la moción y presiona el botón 'Cancelar' en la esquina superior derecha. Ten en cuenta que esta es una acción en cadena y deberás firmar una transacción para completarla (aplican costos de gas).
 
 ## Guía para LEGO sobre Easy Track
 
@@ -88,12 +88,14 @@ A continuación, dirígete a [la billetera multi-sig de LEGO Committee Gnosis sa
 /0x12a43b049A7D330cB8aEAB5113032D18AE9a9030) y conecta tu billetera haciendo clic en el botón 'Conectar tu billetera' en la esquina superior derecha.
 Abre la sección 'APPS' en el menú lateral y encuentra la aplicación Wallet Connect Safe en la lista.
 Pega el código en el campo a la izquierda. Ahora la multi-sig de LEGO Committee Gnosis está conectada a la aplicación Easy Track.
+
 > Debes mantener la pestaña de la aplicación Wallet Connect Safe abierta en tu navegador para que las solicitudes de transacción aparezcan. No recibirás solicitudes de transacción si no la tienes abierta.
 
 En el menú de encabezado de la interfaz de Easy Track, haz clic en el botón 'Iniciar moción'. Verás la interfaz de creación de mociones. El tipo de moción que buscas es 'Top up LEGO'.
 Completa el formulario (todos los campos son obligatorios).
 Elige el token con el que deseas aumentar el programa LEGO.
 Especifica la cantidad de tokens con la que deseas aumentar el programa LEGO.
+
 > Puedes agregar múltiples asignaciones de tokens en una sola moción haciendo clic en 'Un token más' debajo del formulario.
 
 Presiona el botón 'Enviar' debajo del formulario y firma la transacción en la página de la aplicación Wallet Connect safe (aplican costos de gas).
@@ -105,11 +107,11 @@ Tan pronto como la transacción se confirme, la moción habrá comenzado y podr�
 Una moción puede tener tres resultados posibles:
 
 1. **Moción aprobada.**
-En caso de que no se haya alcanzado el umbral mínimo de objeciones del 0.5% del suministro total de LDO, se considera que la moción ha sido aprobada y puede ser implementada. Esta operación es sin permisos, lo que significa que cualquiera puede implementar una moción aprobada. Ten en cuenta que todavía es posible objetar una moción no implementada incluso después del bloqueo de tiempo de 72 horas. La moción implementada se desactivará automáticamente y se colocará en el archivo de mociones disponible en la sección 'Mociones archivadas' de la interfaz de Easy Track.
+   En caso de que no se haya alcanzado el umbral mínimo de objeciones del 0.5% del suministro total de LDO, se considera que la moción ha sido aprobada y puede ser implementada. Esta operación es sin permisos, lo que significa que cualquiera puede implementar una moción aprobada. Ten en cuenta que todavía es posible objetar una moción no implementada incluso después del bloqueo de tiempo de 72 horas. La moción implementada se desactivará automáticamente y se colocará en el archivo de mociones disponible en la sección 'Mociones archivadas' de la interfaz de Easy Track.
 2. **Moción rechazada.**
-En caso de que se haya alcanzado el umbral mínimo de objeciones del 0.5% del suministro total de LDO, se considera que la moción ha sido rechazada. Se desactivará automáticamente y se colocará en el archivo de mociones disponible en la sección 'Mociones archivadas' de la interfaz de Easy Track.
+   En caso de que se haya alcanzado el umbral mínimo de objeciones del 0.5% del suministro total de LDO, se considera que la moción ha sido rechazada. Se desactivará automáticamente y se colocará en el archivo de mociones disponible en la sección 'Mociones archivadas' de la interfaz de Easy Track.
 3. **Moción cancelada.**
-En caso de que descubras que cometiste un error al iniciar la moción (por ejemplo, no quieres aumentar el programa LEGO aún o hiciste un clic incorrecto al especificar la cantidad de tokens a transferir, etc.), puedes cancelar la moción en cualquier momento antes de que se haya implementado. Para hacerlo, haz clic en la moción para ver la vista detallada de la moción y presiona el botón 'Cancelar' en la esquina superior derecha. Ten en cuenta que esta es una acción en cadena y deberás firmar una transacción en Gnosis safe para completarla (aplican costos de gas).
+   En caso de que descubras que cometiste un error al iniciar la moción (por ejemplo, no quieres aumentar el programa LEGO aún o hiciste un clic incorrecto al especificar la cantidad de tokens a transferir, etc.), puedes cancelar la moción en cualquier momento antes de que se haya implementado. Para hacerlo, haz clic en la moción para ver la vista detallada de la moción y presiona el botón 'Cancelar' en la esquina superior derecha. Ten en cuenta que esta es una acción en cadena y deberás firmar una transacción en Gnosis safe para completarla (aplican costos de gas).
 
 ## Guía del Laboratorio de Observación de Liquidez para Easy Track
 
@@ -128,14 +130,16 @@ Elija la opción 'Wallet Connect', verá el código QR. Cópielo haciendo clic e
 A continuación, diríjase a [la multi-sig del Laboratorio de Observación de Liquidez en Gnosis Safe](https://gnosis-safe.io/app/eth:0x87D93d9B2C672bf9c9642d853a8682546a5012B5/balances) y conecte su billetera haciendo clic en el botón 'Connect your wallet' en la parte superior derecha.
 Abra la sección APPS en el menú del cajón a la izquierda y encuentre la aplicación Wallet Connect Safe en la lista.
 Pegue el código en el campo de la izquierda. Ahora la multi-sig del Laboratorio de Observación de Liquidez en Gnosis está conectada a la aplicación Easy Track.
+
 > Necesita mantener la pestaña de la aplicación Wallet Connect Safe abierta en su navegador para que las transacciones aparezcan. No recibirá solicitudes de transacción si no la tiene abierta.
 
 En el menú superior de la interfaz de Easy Track, haga clic en el botón 'Start motion'. Verá la interfaz de creación de mociones. El tipo de moción que busca es 'Add reward program'.
 Complete el formulario (todos los campos son obligatorios).
 El título debe ser una descripción legible del programa de recompensas (por ejemplo, 'Curve ETH:stETH LP incentives').
 Ingrese la dirección de Ethereum del programa de recompensas (podría ser un contrato de recompensas o un contrato de gestión de recompensas dependiendo del programa) en el campo 'Address'.
+
 > Al crear una moción para eliminar un programa de recompensas de la lista o para recargar un programa previamente agregado, podrá elegir un programa por el título del programa, en lugar de pegar la dirección de Ethereum.
-> La interfaz para recargar el programa de recompensas toma tokens completos como entrada (por lo tanto, las cantidades están en X LDOs, no en X*1e18 LDO Weis).
+> La interfaz para recargar el programa de recompensas toma tokens completos como entrada (por lo tanto, las cantidades están en X LDOs, no en X\*1e18 LDO Weis).
 
 Presione el botón 'Submit' debajo del formulario y firme la transacción en la página de la aplicación Wallet Connect Safe (se aplican costos de gas).
 A continuación, necesitará que otro propietario de la multi-sig del Laboratorio de Observación de Liquidez en Gnosis confirme la transacción en Gnosis Safe.
@@ -146,11 +150,11 @@ Tan pronto como se confirme la transacción, la moción se habrá iniciado y pod
 Una moción puede tener tres posibles resultados:
 
 1. **Moción aprobada.**
-En caso de que no se alcance el umbral mínimo de objeciones del 0.5% del suministro total de LDO, se considera que la moción ha sido aprobada y puede ser implementada. Esta operación es sin permiso, lo que significa que cualquiera puede implementar una moción aprobada. Tenga en cuenta que todavía es posible objetar una moción no implementada incluso después del período de bloqueo de 72 horas. La moción implementada se desactivará automáticamente y se archivará en la sección 'Archive motions' de la interfaz de Easy Track.
+   En caso de que no se alcance el umbral mínimo de objeciones del 0.5% del suministro total de LDO, se considera que la moción ha sido aprobada y puede ser implementada. Esta operación es sin permiso, lo que significa que cualquiera puede implementar una moción aprobada. Tenga en cuenta que todavía es posible objetar una moción no implementada incluso después del período de bloqueo de 72 horas. La moción implementada se desactivará automáticamente y se archivará en la sección 'Archive motions' de la interfaz de Easy Track.
 2. **Moción rechazada.**
-En caso de que se alcance el umbral mínimo de objeciones del 0.5% del suministro total de LDO, la moción se considera rechazada. Se desactivará automáticamente y se archivará en la sección 'Archive motions' de la interfaz de Easy Track.
+   En caso de que se alcance el umbral mínimo de objeciones del 0.5% del suministro total de LDO, la moción se considera rechazada. Se desactivará automáticamente y se archivará en la sección 'Archive motions' de la interfaz de Easy Track.
 3. **Moción cancelada.**
-En caso de que descubra que ha cometido un error al iniciar la moción (por ejemplo, ha agregado la dirección incorrecta para el nuevo programa de recompensas o ha hecho clic por error al especificar la cantidad de tokens a asignar, etc.), puede cancelar la moción en cualquier momento antes de que se haya implementado. Para hacerlo, haga clic en la moción para ver la vista detallada de la moción y presione el botón 'Cancel' en la parte superior derecha. Tenga en cuenta que esta es una acción en la cadena y deberá firmar una transacción a través de la aplicación Wallet Connect Safe, así como una confirmación de otro propietario de la multi-sig del equipo de finanzas para completarla (se aplican costos de gas).
+   En caso de que descubra que ha cometido un error al iniciar la moción (por ejemplo, ha agregado la dirección incorrecta para el nuevo programa de recompensas o ha hecho clic por error al especificar la cantidad de tokens a asignar, etc.), puede cancelar la moción en cualquier momento antes de que se haya implementado. Para hacerlo, haga clic en la moción para ver la vista detallada de la moción y presione el botón 'Cancel' en la parte superior derecha. Tenga en cuenta que esta es una acción en la cadena y deberá firmar una transacción a través de la aplicación Wallet Connect Safe, así como una confirmación de otro propietario de la multi-sig del equipo de finanzas para completarla (se aplican costos de gas).
 
 ### Verificación de los detalles de la moción desde la interfaz Multisig de Gnosis
 

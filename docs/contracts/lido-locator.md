@@ -158,4 +158,3 @@ function oracleReportComponentsForLido() view returns(
     address postTokenRebaseReceiver
 )
 ```
-

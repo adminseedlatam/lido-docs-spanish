@@ -51,10 +51,10 @@ function recoverERC20(address _token, uint256 _amount) external
 
 #### Parámetros:
 
-| Nombre     | Tipo      | Descripción               |
-| ---------- | --------- | ------------------------- |
-| `_token`   | `address` | Token compatible con ERC20 |
-| `_amount`  | `uint256` | Cantidad de tokens a recuperar |
+| Nombre    | Tipo      | Descripción                    |
+| --------- | --------- | ------------------------------ |
+| `_token`  | `address` | Token compatible con ERC20     |
+| `_amount` | `uint256` | Cantidad de tokens a recuperar |
 
 ### recoverERC721()
 
@@ -68,7 +68,7 @@ function recoverERC721(address _token, uint256 _tokenId) external
 
 #### Parámetros:
 
-| Nombre     | Tipo      | Descripción               |
-| ---------- | --------- | ------------------------- |
+| Nombre     | Tipo      | Descripción                 |
+| ---------- | --------- | --------------------------- |
 | `_token`   | `address` | Token compatible con ERC721 |
-| `_tokenId` | `uint256` | ID del token acuñado      |
+| `_tokenId` | `uint256` | ID del token acuñado        |

@@ -12,13 +12,13 @@ También puede encontrar la dirección en la página de [Contratos Desplegados],
 
 Los clientes de Beacon Chain ofrecen una variedad de métodos para configurar el receptor de tarifas. Algunos clientes permiten configurar el receptor de tarifas a nivel de clave por validador (por ejemplo, para Teku esto se puede lograr a través de [la configuración del proponedor](https://docs.teku.consensys.net/en/latest/Reference/CLI/CLI-Syntax/#validators-proposer-config)). Consulte la documentación para cada cliente para obtener instrucciones específicas.
 
-| Cliente de Consenso | Opción CLI                                               | Página de referencia CLI                |
-| ------------------- | --------------------------------------------------------- | --------------------------------------- |
-| Teku                | `--validators-proposer-default-fee-recipient=<DIRECCIÓN>` | [Opciones CLI de Teku]                  |
+| Cliente de Consenso | Opción CLI                                                | Página de referencia CLI                             |
+| ------------------- | --------------------------------------------------------- | ---------------------------------------------------- |
+| Teku                | `--validators-proposer-default-fee-recipient=<DIRECCIÓN>` | [Opciones CLI de Teku]                               |
 | Lighthouse          | `--suggested-fee-recipient=<DIRECCIÓN>`                   | [Configuración de Receptor de Tarifas de Lighthouse] |
-| Nimbus              | `--suggested-fee-recipient=<DIRECCIÓN>`                   | [Información de Receptor de Tarifas de Nimbus] |
-| Prysm               | `--suggested-fee-recipient=<DIRECCIÓN>`                   | [Opciones CLI de Prysm]                 |
-| Lodestar            | `--chain.defaultFeeRecipient=<DIRECCIÓN>`                 | [Opciones CLI de Lodestar]              |
+| Nimbus              | `--suggested-fee-recipient=<DIRECCIÓN>`                   | [Información de Receptor de Tarifas de Nimbus]       |
+| Prysm               | `--suggested-fee-recipient=<DIRECCIÓN>`                   | [Opciones CLI de Prysm]                              |
+| Lodestar            | `--chain.defaultFeeRecipient=<DIRECCIÓN>`                 | [Opciones CLI de Lodestar]                           |
 
 [opciones cli de teku]: https://docs.teku.consensys.net/en/latest/Reference/CLI/CLI-Syntax/#validators-proposer-default-fee-recipient
 [información de receptor de tarifas de nimbus]: https://nimbus.guide/suggested-fee-recipient.html
@@ -28,13 +28,13 @@ Los clientes de Beacon Chain ofrecen una variedad de métodos para configurar el
 
 ## Opciones relacionadas con MEV-Boost para varios clientes de Beacon Chain
 
-| Cliente de Consenso | Opción CLI                                           | Página de referencia CLI           |
-| ------------------- | ---------------------------------------------------- | ---------------------------------- |
-| Teku                | `--builder-endpoint=<URL>`                           | [Integración MEV de Teku]          |
-| Lighthouse          | BN: `--builder=<URL>` VC: `--builder-proposals`      | [Integración MEV de Lighthouse]    |
-| Nimbus              | `--payload-builder=true --payload-builder-url=<URL>` | [Integración MEV de Nimbus]        |
-| Prysm               | `--http-mev-relay=<URL>`                             | [Integración MEV de Prysm]         |
-| Lodestar            | BN: `--builder --builder.urls=<URL>` VC: `--builder` | [Integración MEV de Lodestar]      |
+| Cliente de Consenso | Opción CLI                                           | Página de referencia CLI        |
+| ------------------- | ---------------------------------------------------- | ------------------------------- |
+| Teku                | `--builder-endpoint=<URL>`                           | [Integración MEV de Teku]       |
+| Lighthouse          | BN: `--builder=<URL>` VC: `--builder-proposals`      | [Integración MEV de Lighthouse] |
+| Nimbus              | `--payload-builder=true --payload-builder-url=<URL>` | [Integración MEV de Nimbus]     |
+| Prysm               | `--http-mev-relay=<URL>`                             | [Integración MEV de Prysm]      |
+| Lodestar            | BN: `--builder --builder.urls=<URL>` VC: `--builder` | [Integración MEV de Lodestar]   |
 
 [integración mev de teku]: https://docs.teku.consensys.net/en/latest/Reference/CLI/CLI-Syntax/#builder-endpoint
 [integración mev de nimbus]: https://nimbus.guide/external-block-builder.html

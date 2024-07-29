@@ -265,15 +265,15 @@ Para la configuración de roles en las pruebas, consulte [la prueba de permisos]
 
 Denotación de ACL de contratos:
 
-- El marcado "*Aragon app*" significa que el contrato es una aplicación Aragon que utiliza el [modelo ACL de Aragon](https://hack.aragon.org/developers/tools/aragonos/reference-documentation).
-- El marcado "*OZ*" significa que el contrato utiliza el [modelo ACL de OpenZeppelin](https://github.com/lidofinance/lido-dao/blob/feature/shapella-upgrade/contracts/0.8.9/utils/access/AccessControlEnumerable.sol).
-- El marcado "*Proxy*" significa que el contrato está desplegado detrás de un proxy y tiene un modelo adicional de [ACL relacionado con el proxy](https://github.com/lidofinance/lido-dao/blob/feature/shapella-upgrade/contracts/0.8.9/proxy/OssifiableProxy.sol).
-- El marcado "*Plain owner*" significa que tiene un modelo ACL simple personalizado con un único propietario y un setter para ello.
-- El marcado "*No access control*" significa que no tiene ningún ACL.
+- El marcado "_Aragon app_" significa que el contrato es una aplicación Aragon que utiliza el [modelo ACL de Aragon](https://hack.aragon.org/developers/tools/aragonos/reference-documentation).
+- El marcado "_OZ_" significa que el contrato utiliza el [modelo ACL de OpenZeppelin](https://github.com/lidofinance/lido-dao/blob/feature/shapella-upgrade/contracts/0.8.9/utils/access/AccessControlEnumerable.sol).
+- El marcado "_Proxy_" significa que el contrato está desplegado detrás de un proxy y tiene un modelo adicional de [ACL relacionado con el proxy](https://github.com/lidofinance/lido-dao/blob/feature/shapella-upgrade/contracts/0.8.9/proxy/OssifiableProxy.sol).
+- El marcado "_Plain owner_" significa que tiene un modelo ACL simple personalizado con un único propietario y un setter para ello.
+- El marcado "_No access control_" significa que no tiene ningún ACL.
 
 ### **Lido**
 
-*Aragon app*
+_Aragon app_
 
 **New**
 
@@ -292,7 +292,7 @@ Denotación de ACL de contratos:
   - Voting
 
 **Obsolete**
-*Para ser revocado en una votación.*
+_Para ser revocado en una votación._
 
 - `MANAGE_FEE`
   - revoke from Voting
@@ -311,13 +311,13 @@ Denotación de ACL de contratos:
 
 ### **NodeOperatorsRegistry**
 
-*Aragon app*
+_Aragon app_
 
 **New**
 
 - `STAKING_ROUTER_ROLE`
   - StakingRouter (set in voting script)
-      *To be granted at voting.*
+    _To be granted at voting._
 - `MANAGE_NODE_OPERATOR_ROLE`
   - None
 
@@ -330,7 +330,7 @@ Denotación de ACL de contratos:
   - Easytrack EVMScriptExecutor
 
 **Obsolete**
-*To be revoked at voting.*
+_To be revoked at voting._
 
 - `ADD_NODE_OPERATOR_ROLE`
 - `SET_NODE_OPERATOR_ACTIVE_ROLE`
@@ -340,7 +340,7 @@ Denotación de ACL de contratos:
 
 ### **LegacyOracle (former LidoOracle)**
 
-*Aragon app*
+_Aragon app_
 
 **New**
 None
@@ -349,7 +349,7 @@ None
 None
 
 **Obsolete**
-*To be revoked at voting.*
+_To be revoked at voting._
 
 - `MANAGE_MEMBERS`
 - `MANAGE_QUORUM`
@@ -359,7 +359,7 @@ None
 
 ### **AccountingOracle**
 
-*OZ, Proxy*
+_OZ, Proxy_
 
 - PROXY ADMIN
   - Before vote start:
@@ -380,7 +380,7 @@ None
 
 ### **Burner**
 
-*OZ, No Proxy*
+_OZ, No Proxy_
 
 - `DEFAULT_ADMIN_ROLE`
   - Before vote start:
@@ -398,7 +398,7 @@ None
 
 ### **LidoLocator**
 
-*OZ, Proxy*
+_OZ, Proxy_
 
 - PROXY ADMIN
   - Before vote start:
@@ -408,7 +408,7 @@ None
 
 ### **StakingRouter**
 
-*OZ, Proxy*
+_OZ, Proxy_
 
 - PROXY ADMIN
   - Before vote start:
@@ -437,7 +437,7 @@ None
 
 ### **HashConsensus for AccountingOracle**
 
-*OZ, No Proxy*
+_OZ, No Proxy_
 
 - `DEFAULT_ADMIN_ROLE`
   - Before vote start:
@@ -459,11 +459,11 @@ None
     - None
   - After enactment:
     - Current LidoOracle Committee
-           See [0x442af784A788A5bd6F42A01Ebe9F287a871243fb#readProxyContract#F28](https://etherscan.io/address/0x442af784A788A5bd6F42A01Ebe9F287a871243fb#readProxyContract#F28])
+      See [0x442af784A788A5bd6F42A01Ebe9F287a871243fb#readProxyContract#F28](https://etherscan.io/address/0x442af784A788A5bd6F42A01Ebe9F287a871243fb#readProxyContract#F28])
 
 ### **DepositSecurityModule**
 
-*Este Plain Owner, No Proxy*
+_Este Plain Owner, No Proxy_
 
 - owner
   - Before vote start:
@@ -475,11 +475,11 @@ None
     - None
   - After enactment:
     - Current DSM guardians committee
-           See [0x710B3303fB508a84F10793c1106e32bE873C24cd#readContract#F8](https://etherscan.io/address/0x710B3303fB508a84F10793c1106e32bE873C24cd#readContract#F8)
+      See [0x710B3303fB508a84F10793c1106e32bE873C24cd#readContract#F8](https://etherscan.io/address/0x710B3303fB508a84F10793c1106e32bE873C24cd#readContract#F8)
 
 ### **HashConsensus for ValidatorsExitBusOracle**
 
-*OZ, Sin Proxy*
+_OZ, Sin Proxy_
 
 - `DEFAULT_ADMIN_ROLE`
   - Before vote start:
@@ -501,11 +501,11 @@ None
     - None
   - After enactment:
     - Current LidoOracle Committee
-          See [0x442af784A788A5bd6F42A01Ebe9F287a871243fb#readProxyContract#F28](https://etherscan.io/address/0x442af784A788A5bd6F42A01Ebe9F287a871243fb#readProxyContract#F28)
+      See [0x442af784A788A5bd6F42A01Ebe9F287a871243fb#readProxyContract#F28](https://etherscan.io/address/0x442af784A788A5bd6F42A01Ebe9F287a871243fb#readProxyContract#F28)
 
 ### **OracleDaemonConfig**
 
-*OZ, Sin Proxy*
+_OZ, Sin Proxy_
 
 - `DEFAULT_ADMIN_ROLE`
   - Agent
@@ -514,7 +514,7 @@ None
 
 ### **OracleReportSanityChecker**
 
-*OZ, Sin Proxy*
+_OZ, Sin Proxy_
 
 - `DEFAULT_ADMIN_ROLE` (set in constructor)
   - Agent
@@ -532,7 +532,7 @@ None
 
 ### **ValidatorsExitBusOracle**
 
-*OZ, Proxy*
+_OZ, Proxy_
 
 - PROXY ADMIN
   - Before vote start:
@@ -560,7 +560,7 @@ None
 
 ### **WithdrawalQueueERC721**
 
-*OZ, Proxy*
+_OZ, Proxy_
 
 - PROXY ADMIN
   - Before vote start:
@@ -594,7 +594,7 @@ None
 
 ### **WithdrawalVault**
 
-*Sin control de acceso, Proxy*
+_Sin control de acceso, Proxy_
 
 - PROXY ADMIN
   - Voting

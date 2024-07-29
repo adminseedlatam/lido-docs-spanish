@@ -1,4 +1,5 @@
 # Cómo reclamar el airdrop para los primeros stakers de Lido (LDO)
+
 Este es el proceso para reclamar el airdrop para los primeros stakers de Lido utilizando la interfaz de Etherscan.
 
 El airdrop LDO puede ser reclamado por los primeros stakers de Lido. Puedes verificar si eres elegible y reclamar tu airdrop siguiendo estos pasos:
@@ -42,14 +43,15 @@ Si obtienes `true` como resultado de este paso, significa que este airdrop ya fu
 3.2 Conecta tu cartera a Etherscan con MetaMask o WalletConnect
 
 3.3 Completa los campos del método `Claim` con los datos de [aquí](https://github.com/lidofinance/airdrop-data/blob/main/early_stakers_airdrop.csv)
+
 - índice (uint256)
 - cuenta (address)
 - cantidad (uint256)
 - merkleProof (bytes32[])
 
-3.4 Presiona el botón “Write” y confirma la transacción en tu cartera
+  3.4 Presiona el botón “Write” y confirma la transacción en tu cartera
 
-3.5 Espera a que la transacción sea exitosa
+  3.5 Espera a que la transacción sea exitosa
 
 :::note
 En caso de que la entrada sea inválida, la transacción puede revertirse.

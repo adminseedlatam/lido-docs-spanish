@@ -31,10 +31,10 @@ function hashTypedDataV4(address _stETH, bytes32 _structHash) returns (bytes32)
 
 #### Parámetros
 
-| Nombre         | Tipo      | Descripción                           |
-| -------------- | --------- | ------------------------------------- |
-| `_stETH`       | `address` | Dirección del token `stETH` desplegado |
-| `_structHash`  | `bytes32` | Hash de la estructura de datos         |
+| Nombre        | Tipo      | Descripción                            |
+| ------------- | --------- | -------------------------------------- |
+| `_stETH`      | `address` | Dirección del token `stETH` desplegado |
+| `_structHash` | `bytes32` | Hash de la estructura de datos         |
 
 Para un caso de uso específico, consulta la implementación de [StETHPermit.permit()](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.4.24/StETHPermit.sol#L99-L112).
 
@@ -53,25 +53,25 @@ function eip712Domain(address _stETH) returns (
 
 #### Parámetros
 
-| Nombre     | Tipo      | Descripción                           |
-| ---------- | --------- | ------------------------------------- |
-| `_stETH`   | `address` | Dirección del token `stETH` desplegado |
+| Nombre   | Tipo      | Descripción                            |
+| -------- | --------- | -------------------------------------- |
+| `_stETH` | `address` | Dirección del token `stETH` desplegado |
 
 #### Devoluciones
 
-| Nombre             | Tipo       | Descripción                   |
-| ------------------ | ---------- | ----------------------------- |
-| `name`             | `string`   | Nombre del token              |
-| `version`          | `string`   | Versión del token             |
-| `chainId`          | `uint256`  | Identificador de la cadena    |
-| `verifyingContract`| `address`  | Dirección del contrato del token |
+| Nombre              | Tipo      | Descripción                      |
+| ------------------- | --------- | -------------------------------- |
+| `name`              | `string`  | Nombre del token                 |
+| `version`           | `string`  | Versión del token                |
+| `chainId`           | `uint256` | Identificador de la cadena       |
+| `verifyingContract` | `address` | Dirección del contrato del token |
 
 :::note
 Dada la dirección `_stETH` [desplegada](/deployed-contracts) correcta, devuelve:
 
 - ("Liquid staked Ether 2.0", "2", 1, 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84) para Mainnet.
 - ("Liquid staked Ether 2.0", "2", 5, 0x1643E812aE58766192Cf7D2Cf9567dF2C37e9B7F) para Görli.
-:::
+  :::
 
 Este método facilita la construcción del separador de dominio en el lado del cliente, como en una cartera o widget:
 
@@ -86,8 +86,8 @@ function makeDomainSeparator(name, version, chainId, verifyingContract) {
         web3.utils.keccak256(version),
         chainId,
         verifyingContract,
-      ]
-    )
+      ],
+    ),
   )
 }
 ```
@@ -97,4 +97,3 @@ function makeDomainSeparator(name, version, chainId, verifyingContract) {
 - [La magia de las firmas digitales en Ethereum](https://medium.com/mycrypto/the-magic-of-digital-signatures-on-ethereum-98fe184dc9c7)
 - [ERC-2612: La guía definitiva para aprobaciones ERC-20 sin gas](https://medium.com/frak-defi/erc-2612-the-ultimate-guide-to-gasless-erc-20-approvals-2cd32ddee534)
 - [Metamask sign-data](https://docs.metamask.io/wallet/how-to/sign-data/#use-eth_signtypeddata_v4)
-

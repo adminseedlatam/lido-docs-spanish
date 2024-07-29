@@ -33,6 +33,7 @@ function renounceOwnership() public pure override;
 ### transferERC1155()
 
 Transfiere un único token ERC1155 con el ID especificado en la cantidad especificada a una entidad desde el saldo del contrato. El receptor del contrato debe implementar `ERC1155TokenReceiver` de acuerdo con [EIP-1155](https://eips.ethereum.org/EIPS/eip-1155) para recibir tokens de manera segura.
+
 - revierte si `msg.sender` no es el `owner`;
 - revierte si `_recipient` es la dirección cero;
 - revierte si el saldo del contrato es insuficiente;
@@ -44,12 +45,12 @@ function transferERC1155(address _token, address _recipient, uint256 _tokenId, u
 
 #### Parámetros
 
-| Nombre       | Tipo      | Descripción         |
-| ------------ | --------- | ------------------- |
-| `_token`     | `address` | token ERC1155       |
-| `_recipient` | `address` | entidad receptora   |
-| `_tokenId`   | `uint256` | identificador token |
-| `_amount`    | `uint256` | cantidad a transferir |
+| Nombre       | Tipo      | Descripción                                           |
+| ------------ | --------- | ----------------------------------------------------- |
+| `_token`     | `address` | token ERC1155                                         |
+| `_recipient` | `address` | entidad receptora                                     |
+| `_tokenId`   | `uint256` | identificador token                                   |
+| `_amount`    | `uint256` | cantidad a transferir                                 |
 | `_data`      | `bytes`   | secuencia de bytes para el gancho `onERC1155Received` |
 
 :::info
@@ -59,6 +60,7 @@ Nota: `transferERC1155` no soporta transferencias en lote de múltiples tokens.
 ### transferERC20()
 
 Transfiere un token ERC20 a una entidad en la cantidad especificada desde el saldo del contrato.
+
 - revierte si `msg.sender` no es el `owner`;
 - revierte si `_recipient` es la dirección cero;
 - revierte si el saldo del contrato es insuficiente;
@@ -70,15 +72,16 @@ function transferERC20(address _token, address _recipient, uint256 _amount) exte
 
 #### Parámetros
 
-| Nombre       | Tipo      | Descripción         |
-| ------------ | --------- | ------------------- |
-| `_token`     | `address` | token ERC20         |
-| `_recipient` | `address` | entidad receptora   |
+| Nombre       | Tipo      | Descripción           |
+| ------------ | --------- | --------------------- |
+| `_token`     | `address` | token ERC20           |
+| `_recipient` | `address` | entidad receptora     |
 | `_amount`    | `uint256` | cantidad a transferir |
 
 ### transferERC721()
 
 Transfiere un único token ERC721 con el ID especificado a una entidad desde el saldo del contrato. El receptor del contrato debe implementar `ERC721TokenReceiver` de acuerdo con [EIP-721](https://eips.ethereum.org/EIPS/eip-721) para recibir tokens de manera segura.
+
 - revierte si `msg.sender` no es el `owner`;
 - revierte si `_recipient` es la dirección cero;
 - emite `ERC721Transferred(address indexed _token, address indexed _recipient, uint256 _tokenId, bytes _data)`.
@@ -89,16 +92,17 @@ function transferERC721(address _token, address _recipient, uint256 _tokenId, by
 
 #### Parámetros
 
-| Nombre       | Tipo      | Descripción         |
-| ------------ | --------- | ------------------- |
-| `_token`     | `address` | token ERC721        |
-| `_recipient` | `address` | entidad receptora   |
-| `_tokenId`   | `uint256` | identificador token |
+| Nombre       | Tipo      | Descripción                                          |
+| ------------ | --------- | ---------------------------------------------------- |
+| `_token`     | `address` | token ERC721                                         |
+| `_recipient` | `address` | entidad receptora                                    |
+| `_tokenId`   | `uint256` | identificador token                                  |
 | `_data`      | `bytes`   | secuencia de bytes para el gancho `onERC721Received` |
 
 ### transferEther()
 
 Transfiere ether a una entidad desde el saldo del contrato.
+
 - revierte si `msg.sender` no es el `owner`;
 - revierte si `_recipient` es la dirección cero;
 - revierte si el saldo del contrato es insuficiente;
@@ -111,9 +115,9 @@ function transferEther(address _recipient, uint256 _amount) external;
 
 #### Parámetros
 
-| Nombre       | Tipo      | Descripción         |
-| ------------ | --------- | ------------------- |
-| `_recipient` | `address` | entidad receptora   |
+| Nombre       | Tipo      | Descripción           |
+| ------------ | --------- | --------------------- |
+| `_recipient` | `address` | entidad receptora     |
 | `_amount`    | `uint256` | cantidad a transferir |
 
 ### transferOwnership()
@@ -130,6 +134,6 @@ function transferOwnership(address newOwner) public;
 
 #### Parámetros
 
-| Nombre     | Tipo      | Descripción |
-| ---------- | --------- | ----------- |
+| Nombre     | Tipo      | Descripción                                                          |
+| ---------- | --------- | -------------------------------------------------------------------- |
 | `newOwner` | `address` | entidad que tendrá acceso a todas las operaciones mutables de estado |

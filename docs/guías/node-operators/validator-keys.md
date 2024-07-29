@@ -125,7 +125,8 @@ De lo contrario, prepare un JSON con la siguiente estructura y péguelo en el á
   }
 ]
 ```
-```
+
+````
 
 Esta herramienta dividirá automáticamente las claves en fragmentos y enviará las transacciones a su billetera para su aprobación. Las transacciones vendrán una por una para ser firmadas. Desafortunadamente, no podemos enviar un gran número de claves en una sola transacción. Actualmente, el tamaño del fragmento es de 50 claves, cerca del límite de gas por bloque.
 
@@ -165,7 +166,7 @@ docker run --rm -it \
  --network "$TESTNET_NAME" \
  --datadir /root/.lighthouse/data \
  --directory /root/validator_keys
-```
+````
 
 ## Verificación de las Claves de Todos los Operadores de Nodo de Lido
 
@@ -212,5 +213,3 @@ Es urgente notificar al equipo de Lido y a otros Operadores de Nodo lo antes pos
 Una vez que las nuevas claves estén presentes y sean válidas, se puede proponer una moción para aumentar el límite de staking para el Operador de Nodo.
 
 [Guía de Operadores de Nodo para Easy Track](https://docs.lido.fi/guides/easy-track-guide#node-operators-guide-to-easy-track)
-
-

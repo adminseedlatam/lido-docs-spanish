@@ -103,7 +103,6 @@ Dado que los saldos de todos los titulares de tokens cambian cuando cambia la ca
 
 :::
 
-
 ## Informe de Oráculo
 
 Uno de los pilares del protocolo Lido es el informe de oráculo, que generalmente (aunque no está garantizado) proporciona al protocolo, una vez al día, datos que no pueden ser fácilmente accedidos en cadena, pero que son necesarios para una contabilidad precisa. Incluye estadísticas de Beacon Chain, así como valores correspondientes del lado de ejecución (EL) que son válidos en el bloque de reporte y los datos de decisión necesarios para cumplir con las solicitudes pendientes de retiro.
@@ -182,8 +181,8 @@ Ver [https://lido.fi/referral](https://lido.fi/referral) para detalles del progr
 function submit(address _referral) payable returns (uint256)
 ```
 
-| Parámetro   | Tipo      | Descripción               |
-| ----------- | --------- | ------------------------- |
+| Parámetro   | Tipo      | Descripción                    |
+| ----------- | --------- | ------------------------------ |
 | `_referral` | `address` | Dirección de referido opcional |
 
 Devuelve el número de participaciones `StETH` generadas.
@@ -225,7 +224,7 @@ Valores especiales de retorno:
 
 - `2^256 - 1` si el staking es ilimitado;
 - `0` si el staking está pausado o si el límite está agotado.
-:::
+  :::
 
 ### getStakeLimitFullInfo()
 
@@ -243,15 +242,15 @@ function getStakeLimitFullInfo() view returns (
 )
 ```
 
-| Nombre                        | Tipo      | Descripción                                                             |
-| ----------------------------- | --------- | ----------------------------------------------------------------------- |
-| `isStakingPaused`             | `bool`    | Estado de pausa de staking (equivalente al retorno de `isStakingPaused()`) |
-| `isStakingLimitSet`           | `bool`    | Si el límite de stake está establecido o no                               |
-| `currentStakeLimit`           | `uint256` | Límite de stake actual (equivalente al retorno de `getCurrentStakeLimit()`)  |
-| `maxStakeLimit`               | `uint256` | Límite máximo de stake                                                   |
-| `maxStakeLimitGrowthBlocks`   | `uint256` | Bloques necesarios para restaurar el límite máximo de stake desde el estado completamente agotado |
-| `prevStakeLimit`              | `uint256` | Límite de stake alcanzado previamente                                     |
-| `prevStakeBlockNumber`        | `uint256` | Número de bloque visto previamente                                        |
+| Nombre                      | Tipo      | Descripción                                                                                       |
+| --------------------------- | --------- | ------------------------------------------------------------------------------------------------- |
+| `isStakingPaused`           | `bool`    | Estado de pausa de staking (equivalente al retorno de `isStakingPaused()`)                        |
+| `isStakingLimitSet`         | `bool`    | Si el límite de stake está establecido o no                                                       |
+| `currentStakeLimit`         | `uint256` | Límite de stake actual (equivalente al retorno de `getCurrentStakeLimit()`)                       |
+| `maxStakeLimit`             | `uint256` | Límite máximo de stake                                                                            |
+| `maxStakeLimitGrowthBlocks` | `uint256` | Bloques necesarios para restaurar el límite máximo de stake desde el estado completamente agotado |
+| `prevStakeLimit`            | `uint256` | Límite de stake alcanzado previamente                                                             |
+| `prevStakeBlockNumber`      | `uint256` | Número de bloque visto previamente                                                                |
 
 ## Métodos relacionados con el depósito
 
@@ -265,11 +264,11 @@ Solo puede ser llamado por el contrato [DepositSecurityModule](./deposit-securit
 function deposit(uint256 _maxDeposits, uint256 _stakingModuleId, bytes _depositCalldata)
 ```
 
-| Parámetro           | Tipo      | Descripción                              |
-| ------------------- | --------- | ---------------------------------------- |
-| `_maxDeposits`      | `uint256` | Número máximo de llamadas de depósito     |
-| `_stakingModuleId`  | `uint256` | ID del módulo de staking a depositar     |
-| `_depositCalldata`  | `bytes`   | Calldata del módulo                      |
+| Parámetro          | Tipo      | Descripción                           |
+| ------------------ | --------- | ------------------------------------- |
+| `_maxDeposits`     | `uint256` | Número máximo de llamadas de depósito |
+| `_stakingModuleId` | `uint256` | ID del módulo de staking a depositar  |
+| `_depositCalldata` | `bytes`   | Calldata del módulo                   |
 
 ### getDepositableEther()
 
@@ -287,7 +286,7 @@ Devuelve `true` si se permite depositar ether del buffer a la capa de consenso.
 function canDeposit() view returns (bool)
 ```
 
-## Métodos relacionados con la contabilidad**
+## Métodos relacionados con la contabilidad\*\*
 
 ### handleOracleReport()
 
@@ -327,26 +326,26 @@ function handleOracleReport(
 ) returns (uint256[4] postRebaseAmounts)
 ```
 
-| Parámetro                        | Tipo        | Descripción                                                       |
-| -------------------------------- | ----------- | ----------------------------------------------------------------- |
-| `_reportTimestamp`               | `uint256`   | Momento del cálculo del informe del oráculo                       |
-| `_timeElapsed`                   | `uint256`   | Segundos transcurridos desde el cálculo del informe anterior      |
-| `_clValidators`                  | `uint256`   | Número de validadores de Lido en la Capa de Consenso              |
-| `_clBalance`                     | `uint256`   | Suma de todos los saldos de los validadores de Lido en la Capa de Consenso |
-| `_withdrawalVaultBalance`        | `uint256`   | Saldo del vault de retiros en la Capa de Ejecución                |
-| `_elRewardsVaultBalance`         | `uint256`   | Saldo del vault de recompensas de la Capa de Ejecución            |
-| `_sharesRequestedToBurn`         | `uint256`   | Shares solicitados para quemar a través de Burner                  |
+| Parámetro                        | Tipo        | Descripción                                                                      |
+| -------------------------------- | ----------- | -------------------------------------------------------------------------------- |
+| `_reportTimestamp`               | `uint256`   | Momento del cálculo del informe del oráculo                                      |
+| `_timeElapsed`                   | `uint256`   | Segundos transcurridos desde el cálculo del informe anterior                     |
+| `_clValidators`                  | `uint256`   | Número de validadores de Lido en la Capa de Consenso                             |
+| `_clBalance`                     | `uint256`   | Suma de todos los saldos de los validadores de Lido en la Capa de Consenso       |
+| `_withdrawalVaultBalance`        | `uint256`   | Saldo del vault de retiros en la Capa de Ejecución                               |
+| `_elRewardsVaultBalance`         | `uint256`   | Saldo del vault de recompensas de la Capa de Ejecución                           |
+| `_sharesRequestedToBurn`         | `uint256`   | Shares solicitados para quemar a través de Burner                                |
 | `_withdrawalFinalizationBatches` | `uint256[]` | Arreglo ordenado de forma ascendente de IDs de solicitudes de retiro a finalizar |
-| `_simulatedShareRate`            | `uint256`   | Tasa de shares simulada por el oráculo (precisión de 1e27)        |
+| `_simulatedShareRate`            | `uint256`   | Tasa de shares simulada por el oráculo (precisión de 1e27)                       |
 
 Devuelve un array fijo de 4 valores que representa los cambios realizados durante el informe.
 
-| Nombre                   | Tipo      | Descripción                                                 |
-| ------------------------ | --------- | ----------------------------------------------------------- |
-| `postRebaseAmounts[0]`   | `uint256` | Cantidad de ether `postTotalPooledEther` en el protocolo    |
-| `postRebaseAmounts[1]`   | `uint256` | Cantidad de shares `postTotalShares` en el protocolo        |
-| `postRebaseAmounts[2]`   | `uint256` | `withdrawals` retirados del vault de retiros                |
-| `postRebaseAmounts[3]`   | `uint256` | `elRewards` retirados del vault de recompensas de la Capa de Ejecución |
+| Nombre                 | Tipo      | Descripción                                                            |
+| ---------------------- | --------- | ---------------------------------------------------------------------- |
+| `postRebaseAmounts[0]` | `uint256` | Cantidad de ether `postTotalPooledEther` en el protocolo               |
+| `postRebaseAmounts[1]` | `uint256` | Cantidad de shares `postTotalShares` en el protocolo                   |
+| `postRebaseAmounts[2]` | `uint256` | `withdrawals` retirados del vault de retiros                           |
+| `postRebaseAmounts[3]` | `uint256` | `elRewards` retirados del vault de recompensas de la Capa de Ejecución |
 
 ### getTotalPooledEther()
 
@@ -380,11 +379,11 @@ function getBeaconStat() view returns (
 )
 ```
 
-| Nombre                  | Tipo      | Descripción                                                                    |
-| ----------------------- | --------- | ------------------------------------------------------------------------------ |
-| `depositedValidators`   | `uint256` | Número de validadores que han depositado alguna vez en Lido                       |
-| `beaconValidators`      | `uint256` | Número de validadores de Lido visibles en el estado de Beacon, reportados por oráculos   |
-| `beaconBalance`         | `uint256` | Total de ether del lado de Beacon (suma de todos los saldos de los validadores de Lido) |
+| Nombre                | Tipo      | Descripción                                                                             |
+| --------------------- | --------- | --------------------------------------------------------------------------------------- |
+| `depositedValidators` | `uint256` | Número de validadores que han depositado alguna vez en Lido                             |
+| `beaconValidators`    | `uint256` | Número de validadores de Lido visibles en el estado de Beacon, reportados por oráculos  |
+| `beaconBalance`       | `uint256` | Total de ether del lado de Beacon (suma de todos los saldos de los validadores de Lido) |
 
 :::note
 `depositedValidators` siempre es mayor o igual que `beaconValidators`.
@@ -480,9 +479,9 @@ Esquema de explicación del límite:
 function setStakingLimit(uint256 _maxStakeLimit, uint256 _stakeLimitIncreasePerBlock)
 ```
 
-| Parámetro                      | Tipo      | Descripción                           |
-| ----------------------------- | --------- | ------------------------------------- |
-| `_maxStakeLimit`              | `uint256` | Valor máximo del límite de staking    |
+| Parámetro                     | Tipo      | Descripción                              |
+| ----------------------------- | --------- | ---------------------------------------- |
+| `_maxStakeLimit`              | `uint256` | Valor máximo del límite de staking       |
 | `_stakeLimitIncreasePerBlock` | `uint256` | Aumento del límite de staking por bloque |
 
 :::note
@@ -492,7 +491,7 @@ Revoca si:
 - `_maxStakeLimit` >= 2^96
 - `_maxStakeLimit` < `_stakeLimitIncreasePerBlock`
 - `_maxStakeLimit` / `_stakeLimitIncreasePerBlock` >= 2^32 (solo si `_stakeLimitIncreasePerBlock` != 0)
-:::
+  :::
 
 ### removeStakingLimit()
 
@@ -513,9 +512,9 @@ Puede ser necesario al incorporar validadores externos a Lido (es decir, que hay
 
 Solo puede ser llamado por el portador del `UNSAFE_CHANGE_DEPOSITED_VALIDATORS_ROLE`
 
-| Parámetro                      | Tipo      | Descripción                                    |
-| ----------------------------- | --------- | ----------------------------------------------|
-| `_newDepositedValidators`     | `uint256` | Nuevo valor para el contador de validadores depositados|
+| Parámetro                 | Tipo      | Descripción                                             |
+| ------------------------- | --------- | ------------------------------------------------------- |
+| `_newDepositedValidators` | `uint256` | Nuevo valor para el contador de validadores depositados |
 
 :::warning
 El método podría romper el estado interno del protocolo si se aplica incorrectamente.
@@ -592,10 +591,10 @@ Devuelve el número restante de tokens que `_spender` está autorizado a gastar 
 function allowance(address _owner, address _spender) view returns (uint256)
 ```
 
-| Parámetro   | Tipo      | Descripción        |
-| ----------- | --------- | ------------------ |
-| `_owner`    | `address` | Dirección del propietario |
-| `_spender`  | `address` | Dirección del gastador   |
+| Parámetro  | Tipo      | Descripción               |
+| ---------- | --------- | ------------------------- |
+| `_owner`   | `address` | Dirección del propietario |
+| `_spender` | `address` | Dirección del gastador    |
 
 :::note
 Este valor cambia cuando se llama a `approve()` o `transferFrom()`, a menos que la asignación sea infinita (2^256).
@@ -609,10 +608,10 @@ Establece `_amount` como la asignación de `_spender` sobre los tokens del llama
 function approve(address _spender, uint256 _amount) returns (bool)
 ```
 
-| Parámetro   | Tipo      | Descripción        |
-| ----------- | --------- | ------------------ |
-| `_spender`  | `address` | Dirección del gastador |
-| `_amount`   | `uint256` | Cantidad de tokens   |
+| Parámetro  | Tipo      | Descripción            |
+| ---------- | --------- | ---------------------- |
+| `_spender` | `address` | Dirección del gastador |
+| `_amount`  | `uint256` | Cantidad de tokens     |
 
 Devuelve un valor booleano que indica si la operación fue exitosa.
 
@@ -621,7 +620,7 @@ Requisitos:
 
 - `_spender` no puede ser la dirección cero.
 - El contrato no debe estar pausado.
-:::
+  :::
 
 ### increaseAllowance()
 
@@ -633,10 +632,10 @@ Esta es una alternativa a `approve()` que puede ser utilizada como mitigación p
 function increaseAllowance(address _spender, uint256 _addedValue) returns (bool)
 ```
 
-| Parámetro       | Tipo      | Descripción                            |
-| --------------- | --------- | -------------------------------------- |
-| `_spender`      | `address` | Dirección del gastador                 |
-| `_addedValue`   | `uint256` | Cantidad de tokens para aumentar la asignación |
+| Parámetro     | Tipo      | Descripción                                    |
+| ------------- | --------- | ---------------------------------------------- |
+| `_spender`    | `address` | Dirección del gastador                         |
+| `_addedValue` | `uint256` | Cantidad de tokens para aumentar la asignación |
 
 Devuelve un valor booleano que indica si la operación fue exitosa.
 
@@ -645,7 +644,7 @@ Requisitos:
 
 - La dirección `_spender` no puede ser cero.
 - El contrato no debe estar pausado.
-:::
+  :::
 
 ### decreaseAllowance()
 
@@ -658,9 +657,9 @@ los problemas descritos [aquí](https://github.com/OpenZeppelin/openzeppelin-con
 function decreaseAllowance(address _spender, uint256 _subtractedValue) returns (bool)
 ```
 
-| Parámetro          | Tipo      | Descripción                            |
-| ------------------ | --------- | -------------------------------------- |
-| `_spender`         | `address` | Dirección del gastador                 |
+| Parámetro          | Tipo      | Descripción                                     |
+| ------------------ | --------- | ----------------------------------------------- |
+| `_spender`         | `address` | Dirección del gastador                          |
 | `_subtractedValue` | `uint256` | Cantidad de tokens para disminuir la asignación |
 
 Devuelve un valor booleano que indica si la operación fue exitosa.
@@ -671,7 +670,7 @@ Requisitos:
 - `_spender` no puede ser la dirección cero.
 - `_spender` debe tener una asignación para el llamador de al menos `_subtractedValue`.
 - El contrato no debe estar pausado.
-:::
+  :::
 
 ### transfer()
 
@@ -681,10 +680,10 @@ Transfiere `_amount` tokens desde la cuenta del llamador a la cuenta `_recipient
 function transfer(address _recipient, uint256 _amount) returns (bool)
 ```
 
-| Parámetro       | Tipo      | Descripción                  |
-| --------------- | --------- | ---------------------------- |
-| `_recipient`    | `address` | Dirección del destinatario de tokens  |
-| `_amount`       | `uint256` | Cantidad de tokens a transferir |
+| Parámetro    | Tipo      | Descripción                          |
+| ------------ | --------- | ------------------------------------ |
+| `_recipient` | `address` | Dirección del destinatario de tokens |
+| `_amount`    | `uint256` | Cantidad de tokens a transferir      |
 
 Devuelve un valor booleano que indica si la operación fue exitosa.
 
@@ -694,7 +693,7 @@ Requisitos:
 - `_recipient` no puede ser la dirección cero ni el contrato stETH.
 - El llamador debe tener un saldo de al menos `_amount`.
 - El contrato no debe estar pausado.
-:::
+  :::
 
 ### transferFrom()
 
@@ -708,11 +707,11 @@ function transferFrom(
 ) returns (bool)
 ```
 
-| Parámetro      | Tipo      | Descripción          |
-| -------------- | --------- | -------------------- |
-| `_sender`      | `address` | Dirección del gastador   |
-| `_recipient`   | `address` | Dirección del receptor |
-| `_amount`      | `uint256` | Cantidad de tokens     |
+| Parámetro    | Tipo      | Descripción            |
+| ------------ | --------- | ---------------------- |
+| `_sender`    | `address` | Dirección del gastador |
+| `_recipient` | `address` | Dirección del receptor |
+| `_amount`    | `uint256` | Cantidad de tokens     |
 
 Devuelve un valor booleano que indica si la operación fue exitosa.
 
@@ -724,7 +723,7 @@ Requisitos:
 - `_sender` debe tener un saldo de al menos `_amount`.
 - El llamador debe tener una asignación para los tokens de `_sender` de al menos `_amount`.
 - El contrato no debe estar pausado.
-:::
+  :::
 
 ## Métodos relacionados con Shares
 
@@ -768,10 +767,10 @@ Transfiere shares de tokens desde la cuenta del llamador a la cuenta proporciona
 function transferShares(address _recipient, uint256 _sharesAmount) returns (uint256)
 ```
 
-| Parámetro        | Tipo      | Descripción                  |
-| ---------------- | --------- | ---------------------------- |
-| `_recipient`     | `address` | Dirección del receptor de shares  |
-| `_sharesAmount`  | `uint256` | Cantidad de shares a transferir |
+| Parámetro       | Tipo      | Descripción                      |
+| --------------- | --------- | -------------------------------- |
+| `_recipient`    | `address` | Dirección del receptor de shares |
+| `_sharesAmount` | `uint256` | Cantidad de shares a transferir  |
 
 Devuelve la cantidad de tokens transferidos.
 
@@ -781,7 +780,7 @@ Requisitos:
 - `_recipient` no puede ser la dirección cero ni el contrato stETH.
 - El llamador debe tener al menos `_sharesAmount` shares.
 - El contrato no debe estar pausado.
-:::
+  :::
 
 ### transferSharesFrom()
 
@@ -795,11 +794,11 @@ function transferSharesFrom(
 ) returns (uint256)
 ```
 
-| Parámetro        | Tipo      | Descripción                  |
-| ---------------- | --------- | ---------------------------- |
-| `_sender`        | `address` | Dirección del gastador       |
-| `_recipient`     | `address` | Dirección del receptor       |
-| `_sharesAmount`  | `uint256` | Cantidad de shares a transferir |
+| Parámetro       | Tipo      | Descripción                     |
+| --------------- | --------- | ------------------------------- |
+| `_sender`       | `address` | Dirección del gastador          |
+| `_recipient`    | `address` | Dirección del receptor          |
+| `_sharesAmount` | `uint256` | Cantidad de shares a transferir |
 
 Devuelve la cantidad de tokens transferidos.
 
@@ -811,7 +810,7 @@ Requisitos:
 - `_sender` debe tener al menos `_sharesAmount` shares.
 - El llamador debe tener una asignación para los tokens de `_sender` de al menos `getPooledEthByShares(_sharesAmount)`.
 - El contrato no debe estar pausado.
-:::
+  :::
 
 ## Métodos relacionados con `ERC-2612`
 
@@ -841,15 +840,15 @@ Emite un evento Approval.
 function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
 ```
 
-| Parámetro    | Tipo      | Descripción                    |
-| ------------ | --------- | -------------------------------|
-| `owner`      | `address` | Dirección del propietario      |
-| `spender`    | `address` | Dirección del gastador         |
-| `value`      | `uint256` | Asignación a establecer        |
-| `deadline`   | `uint256` | Tiempo de expiración del permiso |
-| `v`          | `uint8`   | firma `secp256k1` extendida   |
-| `r`          | `bytes32` | firma `secp256k1` extendida   |
-| `s`          | `bytes32` | firma `secp256k1` extendida   |
+| Parámetro  | Tipo      | Descripción                      |
+| ---------- | --------- | -------------------------------- |
+| `owner`    | `address` | Dirección del propietario        |
+| `spender`  | `address` | Dirección del gastador           |
+| `value`    | `uint256` | Asignación a establecer          |
+| `deadline` | `uint256` | Tiempo de expiración del permiso |
+| `v`        | `uint8`   | firma `secp256k1` extendida      |
+| `r`        | `bytes32` | firma `secp256k1` extendida      |
+| `s`        | `bytes32` | firma `secp256k1` extendida      |
 
 :::note
 Requisitos:
@@ -857,9 +856,9 @@ Requisitos:
 - `spender` no puede ser la dirección cero.
 - `deadline` debe ser una marca de tiempo en el futuro.
 - `v`, `r` y `s` deben ser una firma `secp256k1` válida de `owner`
-sobre los argumentos de función formateados según EIP712.
+  sobre los argumentos de función formateados según EIP712.
 - La firma debe usar el nonce actual de `owner` (ver `nonces`).
-:::
+  :::
 
 ## Métodos relacionados con `ERC-712`
 
@@ -906,8 +905,8 @@ Sobrescribe el comportamiento predeterminado de AragonApp para evitar la recuper
 function transferToVault(address _token)
 ```
 
-| Parámetro | Tipo      | Descripción                        |
-| --------- | --------- | ---------------------------------- |
+| Parámetro | Tipo      | Descripción                                |
+| --------- | --------- | ------------------------------------------ |
 | `_token`  | `address` | Token a enviar al depósito de recuperación |
 
 :::note

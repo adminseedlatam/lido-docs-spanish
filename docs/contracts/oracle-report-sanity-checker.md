@@ -101,7 +101,8 @@ function checkAccountingOracleReport(
 - **`_withdrawalVaultBalance`** — saldo del depósito de retiros en la Capa de Ejecución para el slot de referencia del informe
 - **`_elRewardsVaultBalance`** — saldo
 
- del depósito de recompensas EL en la Capa de Ejecución para el slot de referencia del informe
+del depósito de recompensas EL en la Capa de Ejecución para el slot de referencia del informe
+
 - **`_sharesRequestedToBurn`** — acciones solicitadas para quemar para el slot de referencia del informe
 - **`_preCLValidators`** — validadores participantes de Lido en el lado de la CL antes del informe actual del oráculo
 - **`_postCLValidators`** — validadores participantes de Lido en el lado de la CL después del informe actual del oráculo
@@ -241,7 +242,7 @@ Devuelve la lista de límites utilizada para las comprobaciones de integridad co
 function getOracleReportLimits() returns (LimitsList memory)
 ```
 
-```markdown
+````markdown
 ### getMaxPositiveTokenRebase()
 
 Devuelve el valor máximo de rebase positivo de tokens con precisión de 1e9 (por ejemplo, `1e6` — 0.1%; `1e9` — 100%):
@@ -259,6 +260,7 @@ Obtiene el máximo rebase positivo permitido por informe de oráculo único. El 
 ```solidity
 function getMaxPositiveTokenRebase() returns (uint256)
 ```
+````
 
 ### smoothenTokenRebase()
 

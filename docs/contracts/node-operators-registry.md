@@ -78,9 +78,9 @@ function getRewardsDistribution(uint256 _totalRewardShares) returns (
 )
 ```
 
-| Nombre                | Tipo      | Descripción                                 |
-| --------------------- | --------- | ------------------------------------------- |
-| `_totalRewardShares`  | `uint256` | Cantidad total de shares de recompensa para distribuir |
+| Nombre               | Tipo      | Descripción                                            |
+| -------------------- | --------- | ------------------------------------------------------ |
+| `_totalRewardShares` | `uint256` | Cantidad total de shares de recompensa para distribuir |
 
 ### getActiveNodeOperatorsCount()
 
@@ -106,24 +106,24 @@ function getNodeOperator(uint256 _nodeOperatorId, bool _fullInfo) returns (
 )
 ```
 
-| Nombre               | Tipo      | Descripción                            |
-| -------------------- | --------- | -------------------------------------- |
-| `_nodeOperatorId`    | `uint256` | Id del operador de nodo                |
-| `_fullInfo`          | `bool`    | Si es verdadero, también se devolverá el nombre |
+| Nombre            | Tipo      | Descripción                                     |
+| ----------------- | --------- | ----------------------------------------------- |
+| `_nodeOperatorId` | `uint256` | Id del operador de nodo                         |
+| `_fullInfo`       | `bool`    | Si es verdadero, también se devolverá el nombre |
 
 ### getTotalSigningKeyCount()
 
 Devuelve el
 
- número total de claves de firma del operador de nodo.
+número total de claves de firma del operador de nodo.
 
 ```sol
 function getTotalSigningKeyCount(uint256 _nodeOperatorId) returns (uint256)
 ```
 
-| Nombre               | Tipo      | Descripción      |
-| -------------------- | --------- | ---------------- |
-| `_nodeOperatorId`    | `uint256` | Id del operador de nodo |
+| Nombre            | Tipo      | Descripción             |
+| ----------------- | --------- | ----------------------- |
+| `_nodeOperatorId` | `uint256` | Id del operador de nodo |
 
 ### getUnusedSigningKeyCount()
 
@@ -133,9 +133,9 @@ Devuelve el número de claves de firma utilizables del operador de nodo.
 function getUnusedSigningKeyCount(uint256 _nodeOperatorId) returns (uint256)
 ```
 
-| Nombre               | Tipo      | Descripción      |
-| -------------------- | --------- | ---------------- |
-| `_nodeOperatorId`    | `uint256` | Id del operador de nodo |
+| Nombre            | Tipo      | Descripción             |
+| ----------------- | --------- | ----------------------- |
+| `_nodeOperatorId` | `uint256` | Id del operador de nodo |
 
 ### getSigningKey()
 
@@ -149,18 +149,18 @@ function getSigningKey(uint256 _nodeOperatorId, uint256 _index) returns (
 )
 ```
 
-| Nombre               | Tipo      | Descripción                       |
-| -------------------- | --------- | --------------------------------- |
-| `_nodeOperatorId`    | `uint256` | Id del operador de nodo           |
-| `_index`             | `uint256` | Índice de la clave, comenzando en 0 |
+| Nombre            | Tipo      | Descripción                         |
+| ----------------- | --------- | ----------------------------------- |
+| `_nodeOperatorId` | `uint256` | Id del operador de nodo             |
+| `_index`          | `uint256` | Índice de la clave, comenzando en 0 |
 
 Devuelve:
 
-| Nombre               | Tipo    | Descripción                                           |
-| -------------------- | ------- | ----------------------------------------------------- |
-| `key`                | `bytes` | Clave                                                 |
-| `depositSignature`   | `bytes` | Firma necesaria para una llamada `depositContract.deposit` |
-| `used`               | `bool`  | Indicación si la clave fue utilizada en el stakeo     |
+| Nombre             | Tipo    | Descripción                                                |
+| ------------------ | ------- | ---------------------------------------------------------- |
+| `key`              | `bytes` | Clave                                                      |
+| `depositSignature` | `bytes` | Firma necesaria para una llamada `depositContract.deposit` |
+| `used`             | `bool`  | Indicación si la clave fue utilizada en el stakeo          |
 
 ### getSigningKeys()
 
@@ -175,19 +175,19 @@ function getSigningKeys(uint256 _nodeOperatorId, uint256 _offset, uint256 _limit
 )
 ```
 
-| Nombre               | Tipo      | Descripción                                                                                 |
-| -------------------- | --------- | ------------------------------------------------------------------------------------------- |
-| `_nodeOperatorId`    | `uint256` | Id del operador de nodo                                                                      |
-| `_offset`            | `uint256` | Desplazamiento de la clave en el conjunto de todas las claves del operador de nodo (`0` significa la primera clave, `1` la segunda, etc.) |
-| `_limit`             | `uint256` | Número de claves a devolver                                                                  |
+| Nombre            | Tipo      | Descripción                                                                                                                               |
+| ----------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `_nodeOperatorId` | `uint256` | Id del operador de nodo                                                                                                                   |
+| `_offset`         | `uint256` | Desplazamiento de la clave en el conjunto de todas las claves del operador de nodo (`0` significa la primera clave, `1` la segunda, etc.) |
+| `_limit`          | `uint256` | Número de claves a devolver                                                                                                               |
 
 Devuelve:
 
-| Nombre               | Tipo     | Descripción                                                                                                |
-| -------------------- | -------- | ---------------------------------------------------------------------------------------------------------- |
-| `pubkeys`            | `bytes`  | Claves concatenadas en el conjunto de bytes: `[ 48 bytes key \| 48 bytes key \| ... ]`                          |
-| `signatures`         | `bytes`  | Firmas necesarias para una llamada `deposit_contract.deposit`, concatenadas como `[ 96 bytes \| 96 bytes \| ... ]` |
-| `used`               | `bool[]` | Array de indicadores de si la clave fue utilizada en el stakeo                                                |
+| Nombre       | Tipo     | Descripción                                                                                                        |
+| ------------ | -------- | ------------------------------------------------------------------------------------------------------------------ |
+| `pubkeys`    | `bytes`  | Claves concatenadas en el conjunto de bytes: `[ 48 bytes key \| 48 bytes key \| ... ]`                             |
+| `signatures` | `bytes`  | Firmas necesarias para una llamada `deposit_contract.deposit`, concatenadas como `[ 96 bytes \| 96 bytes \| ... ]` |
+| `used`       | `bool[]` | Array de indicadores de si la clave fue utilizada en el stakeo                                                     |
 
 ### getNodeOperatorsCount()
 
@@ -196,10 +196,10 @@ Devuelve el número total de operadores de nodo.
 ```sol
 function getNodeOperatorsCount() returns (uint256)
 ```
+
 ### getNonce()
 
 Devuelve un contador que se incrementa cada vez que cambia el conjunto de datos de depósito. Específicamente, se incrementa cada vez que para un operador de nodo:
-
 
 - cambia el límite de participación;
 - cambia el límite de validadores objetivo;
@@ -234,11 +234,11 @@ function getStakingModuleSummary() view returns (
 )
 ```
 
-| Nombre                        | Tipo      | Descripción                                         |
-| ----------------------------- | --------- | --------------------------------------------------- |
-| `totalExitedValidators`       | `uint256` | Número total de validadores que han salido          |
-| `totalDepositedValidators`    | `uint256` | Número total de validadores depositados            |
-| `depositableValidatorsCount`  | `uint256` | Número de validadores que pueden ser depositados   |
+| Nombre                       | Tipo      | Descripción                                      |
+| ---------------------------- | --------- | ------------------------------------------------ |
+| `totalExitedValidators`      | `uint256` | Número total de validadores que han salido       |
+| `totalDepositedValidators`   | `uint256` | Número total de validadores depositados          |
+| `depositableValidatorsCount` | `uint256` | Número de validadores que pueden ser depositados |
 
 ### getNodeOperatorIsActive()
 
@@ -248,9 +248,9 @@ Devuelve si el operador de nodo con el ID dado está activo.
 function getNodeOperatorIsActive(uint256 _nodeOperatorId) view returns (bool)
 ```
 
-| Nombre               | Tipo      | Descripción             |
-| -------------------- | --------- | ----------------------- |
-| `_nodeOperatorId`    | `uint256` | ID del operador de nodo |
+| Nombre            | Tipo      | Descripción             |
+| ----------------- | --------- | ----------------------- |
+| `_nodeOperatorId` | `uint256` | ID del operador de nodo |
 
 ### getNodeOperatorIds()
 
@@ -261,10 +261,10 @@ function getNodeOperatorIds(uint256 _offset, uint256 _limit) view
     returns (uint256[] memory nodeOperatorIds)
 ```
 
-| Nombre       | Tipo      | Descripción                              |
-| ------------ | --------- | ---------------------------------------- |
-| `_offset`    | `uint256` | Desplazamiento del primer elemento del rango |
-| `_limit`     | `uint256` | Máximo número de IDs de operadores de nodo a devolver |
+| Nombre    | Tipo      | Descripción                                           |
+| --------- | --------- | ----------------------------------------------------- |
+| `_offset` | `uint256` | Desplazamiento del primer elemento del rango          |
+| `_limit`  | `uint256` | Máximo número de IDs de operadores de nodo a devolver |
 
 ### getNodeOperatorSummary()
 
@@ -283,16 +283,16 @@ function getNodeOperatorSummary(uint256 _nodeOperatorId) view returns (
 )
 ```
 
-| Nombre                        | Tipo      | Descripción                                                                                      |
-| ----------------------------- | --------- | ------------------------------------------------------------------------------------------------ |
-| `isTargetLimitActive`         | `bool`    | Indica si está activo el límite de validadores objetivo para el operador de nodo                 |
-| `targetValidatorsCount`       | `uint256` | Número objetivo de validadores, para una descripción completa ver [sección de parámetros](#parámetros-del-operador-de-nodo) |
-| `stuckValidatorsCount`        | `uint256` | Número de claves bloqueadas según el informe del oráculo                                            |
-| `refundedValidatorsCount`     | `uint256` | Número de claves reembolsadas                                                                       |
-| `stuckPenaltyEndTimestamp`    | `uint256` | Tiempo de penalización adicional después de que se reembolsen las claves bloqueadas                |
-| `totalExitedValidators`       | `uint256` | Número de claves en estado `EXITED` del operador de nodo a lo largo del tiempo                       |
-| `totalDepositedValidators`    | `uint256` | Número de claves del operador de nodo que estuvieron en estado `DEPOSITED` a lo largo del tiempo    |
-| `depositableValidatorsCount`  | `uint256` | Número de validadores que pueden ser depositados                                                     |
+| Nombre                       | Tipo      | Descripción                                                                                                                 |
+| ---------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `isTargetLimitActive`        | `bool`    | Indica si está activo el límite de validadores objetivo para el operador de nodo                                            |
+| `targetValidatorsCount`      | `uint256` | Número objetivo de validadores, para una descripción completa ver [sección de parámetros](#parámetros-del-operador-de-nodo) |
+| `stuckValidatorsCount`       | `uint256` | Número de claves bloqueadas según el informe del oráculo                                                                    |
+| `refundedValidatorsCount`    | `uint256` | Número de claves reembolsadas                                                                                               |
+| `stuckPenaltyEndTimestamp`   | `uint256` | Tiempo de penalización adicional después de que se reembolsen las claves bloqueadas                                         |
+| `totalExitedValidators`      | `uint256` | Número de claves en estado `EXITED` del operador de nodo a lo largo del tiempo                                              |
+| `totalDepositedValidators`   | `uint256` | Número de claves del operador de nodo que estuvieron en estado `DEPOSITED` a lo largo del tiempo                            |
+| `depositableValidatorsCount` | `uint256` | Número de validadores que pueden ser depositados                                                                            |
 
 ### getStuckPenaltyDelay()
 
@@ -341,16 +341,16 @@ function addNodeOperator(
 ) returns (uint256 id)
 ```
 
-| Nombre             | Tipo      | Descripción                                            |
-| ------------------ | --------- | ------------------------------------------------------ |
-| `_name`            | `string`  | Nombre legible por humanos                             |
-| `_rewardAddress`   | `address` | Dirección que recibe las recompensas de stETH para este operador |
+| Nombre           | Tipo      | Descripción                                                      |
+| ---------------- | --------- | ---------------------------------------------------------------- |
+| `_name`          | `string`  | Nombre legible por humanos                                       |
+| `_rewardAddress` | `address` | Dirección que recibe las recompensas de stETH para este operador |
 
 Devuelve:
 
-| Nombre | Tipo      | Descripción                        |
-| ------ | --------- | ---------------------------------- |
-| `id`   | `uint256` | Clave única del operador agregado  |
+| Nombre | Tipo      | Descripción                       |
+| ------ | --------- | --------------------------------- |
+| `id`   | `uint256` | Clave única del operador agregado |
 
 ### activateNodeOperator()
 
@@ -366,9 +366,9 @@ Incrementa el nonce de las claves de los validadores
 function activateNodeOperator(uint256 _nodeOperatorId)
 ```
 
-| Nombre              | Tipo      | Descripción      |
-| ------------------- | --------- | ---------------- |
-| `_nodeOperatorId`   | `uint256` | ID del operador de nodo |
+| Nombre            | Tipo      | Descripción             |
+| ----------------- | --------- | ----------------------- |
+| `_nodeOperatorId` | `uint256` | ID del operador de nodo |
 
 ### deactivateNodeOperator()
 
@@ -384,9 +384,9 @@ Incrementa el nonce de las claves de los validadores
 function deactivateNodeOperator(uint256 _nodeOperatorId)
 ```
 
-| Nombre              | Tipo      | Descripción      |
-| ------------------- | --------- | ---------------- |
-| `_nodeOperatorId`   | `uint256` | ID del operador de nodo |
+| Nombre            | Tipo      | Descripción             |
+| ----------------- | --------- | ----------------------- |
+| `_nodeOperatorId` | `uint256` | ID del operador de nodo |
 
 ### setNodeOperatorName()
 
@@ -398,10 +398,10 @@ Ejecutado en nombre del titular del rol `MANAGE_NODE_OPERATOR_ROLE`.
 function setNodeOperatorName(uint256 _nodeOperatorId, string _name)
 ```
 
-| Nombre              | Tipo      | Descripción           |
-| ------------------- | --------- | --------------------- |
-| `_nodeOperatorId`   | `uint256` | ID del operador de nodo |
-| `_name`             | `string`  | Nombre legible por humanos |
+| Nombre            | Tipo      | Descripción                |
+| ----------------- | --------- | -------------------------- |
+| `_nodeOperatorId` | `uint256` | ID del operador de nodo    |
+| `_name`           | `string`  | Nombre legible por humanos |
 
 ### setNodeOperatorRewardAddress()
 
@@ -413,10 +413,10 @@ Ejecutado en nombre del titular del rol `MANAGE_NODE_OPERATOR_ROLE`.
 function setNodeOperatorRewardAddress(uint256 _nodeOperatorId, address _rewardAddress)
 ```
 
-| Nombre              | Tipo      | Descripción         |
-| ------------------- | --------- | ------------------- |
-| `_nodeOperatorId`   | `uint256` | ID del operador de nodo |
-| `_rewardAddress`    | `address` | Nueva dirección de recompensa |
+| Nombre            | Tipo      | Descripción                   |
+| ----------------- | --------- | ----------------------------- |
+| `_nodeOperatorId` | `uint256` | ID del operador de nodo       |
+| `_rewardAddress`  | `address` | Nueva dirección de recompensa |
 
 ### setNodeOperatorStakingLimit()
 
@@ -439,10 +439,10 @@ Incrementa el nonce de las claves de los validadores
 function setNodeOperatorStakingLimit(uint256 _nodeOperatorId, uint64 _vettedSigningKeysCount)
 ```
 
-| Nombre                      | Tipo      | Descripción                               |
-| --------------------------- | --------- | ----------------------------------------- |
-| `_nodeOperatorId`           | `uint256` | ID del operador de nodo para establecer el límite de participación |
-| `_vettedSigningKeysCount`   | `address` | Nuevo límite de participación del operador de nodo |
+| Nombre                    | Tipo      | Descripción                                                        |
+| ------------------------- | --------- | ------------------------------------------------------------------ |
+| `_nodeOperatorId`         | `uint256` | ID del operador de nodo para establecer el límite de participación |
+| `_vettedSigningKeysCount` | `address` | Nuevo límite de participación del operador de nodo                 |
 
 ### addSigningKeys()
 
@@ -469,12 +469,12 @@ function addSigningKeys(
 )
 ```
 
-| Nombre              | Tipo      | Descripción                                                                                                                                    |
-| ------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `_nodeOperatorId`   | `uint256` | ID del operador de nodo                                                                                                                        |
-| `_keysCount`        | `uint256` | Número de claves de firma proporcionadas                                                                                                        |
-| `_publicKeys`       | `bytes`   | Varias claves públicas de firma de validadores concatenadas                                                                                     |
-| `_signatures`       | `bytes`   | Varias firmas concatenadas para los mensajes del contrato de depósito, consulta la [sección de claves en la guía de NO] |
+| Nombre            | Tipo      | Descripción                                                                                                             |
+| ----------------- | --------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `_nodeOperatorId` | `uint256` | ID del operador de nodo                                                                                                 |
+| `_keysCount`      | `uint256` | Número de claves de firma proporcionadas                                                                                |
+| `_publicKeys`     | `bytes`   | Varias claves públicas de firma de validadores concatenadas                                                             |
+| `_signatures`     | `bytes`   | Varias firmas concatenadas para los mensajes del contrato de depósito, consulta la [sección de claves en la guía de NO] |
 
 [sección de claves en la guía de NO]: /guías/node-operators/validator-keys.md#generación-de-claves-de-firma
 
@@ -494,11 +494,11 @@ Incrementa el nonce de las claves de los validadores
 function removeSigningKeys(uint256 _nodeOperatorId, uint256 _fromIndex, uint256 _keysCount)
 ```
 
-| Nombre              | Tipo      | Descripción                       |
-| ------------------- | --------- | --------------------------------- |
-| `_nodeOperatorId`   | `uint256` | ID del operador de nodo          |
-| `_fromIndex`        | `uint256` | Índice de la clave, comenzando desde 0 |
-| `_keysCount`        | `uint256` | Número de claves a eliminar      |
+| Nombre            | Tipo      | Descripción                            |
+| ----------------- | --------- | -------------------------------------- |
+| `_nodeOperatorId` | `uint256` | ID del operador de nodo                |
+| `_fromIndex`      | `uint256` | Índice de la clave, comenzando desde 0 |
+| `_keysCount`      | `uint256` | Número de claves a eliminar            |
 
 ### invalidateReadyToDepositKeysRange()
 
@@ -509,10 +509,10 @@ Ejecutado en nombre del titular del rol `MANAGE_NODE_OPERATOR_ROLE`.
 function invalidateReadyToDepositKeysRange(uint256 _indexFrom, uint256 _indexTo)
 ```
 
-| Nombre         | Tipo      | Descripción                                                  |
-| -------------- | --------- | ------------------------------------------------------------ |
-| `_indexFrom`   | `uint256` | Primer índice (inclusive) del NO para invalidar las claves    |
-| `_indexTo`     | `uint256` | Último índice (inclusive) del NO para invalidar las claves    |
+| Nombre       | Tipo      | Descripción                                                |
+| ------------ | --------- | ---------------------------------------------------------- |
+| `_indexFrom` | `uint256` | Primer índice (inclusive) del NO para invalidar las claves |
+| `_indexTo`   | `uint256` | Último índice (inclusive) del NO para invalidar las claves |
 
 ### clearNodeOperatorPenalty()
 
@@ -525,9 +525,9 @@ Puede ser llamado por cualquier persona.
 function clearNodeOperatorPenalty(uint256 _nodeOperatorId) external returns (bool)
 ```
 
-| Nombre              | Tipo      | Descripción         |
-| ------------------- | --------- | ------------------- |
-| `_nodeOperatorId`   | `uint256` | ID del operador de nodo |
+| Nombre            | Tipo      | Descripción             |
+| ----------------- | --------- | ----------------------- |
+| `_nodeOperatorId` | `uint256` | ID del operador de nodo |
 
 ### setStuckPenaltyDelay()
 
@@ -540,6 +540,6 @@ Ejecutado en nombre del titular del rol `MANAGE_NODE_OPERATOR_ROLE`.
 function setStuckPenaltyDelay(uint256 _delay)
 ```
 
-| Nombre     | Tipo      | Descripción                    |
-| ---------- | --------- | ------------------------------ |
-| `_delay`   | `uint256` | Retraso de penalización por bloqueo en segundos |
+| Nombre   | Tipo      | Descripción                                     |
+| -------- | --------- | ----------------------------------------------- |
+| `_delay` | `uint256` | Retraso de penalización por bloqueo en segundos |

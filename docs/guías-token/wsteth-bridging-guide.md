@@ -132,6 +132,7 @@ Para enviar fuentes para su verificación en el explorador, por favor use la ent
 Para acelerar el proceso y hacerlo más robusto, por favor proporcione los artefactos (es decir, Pull Requests abiertos) para las herramientas automatizadas:
 
 - verificar las fuentes a través de [diffyscan](https://github.com/lidofinance/diffyscan), ejemplos:
+
   - [wstETH en Scroll](https://github.com/lidofinance/diffyscan/pull/35)
   - [wstETH en Linea](https://github.com/lidofinance/diffyscan/pull/29)
   - [wstETH en Mode](https://github.com/lidofinance/diffyscan/pull/41)
@@ -190,6 +191,7 @@ Para proporcionar la capacidad de reaccionar rápidamente y reducir pérdidas en
 Los contratos de punto final del puente deben tener la capacidad de establecer roles de resumen y pausa caso por caso. Para el rol de pausa, debe haber al menos dos titulares posibles para poder asignar el Multisig de Emergencia dedicado, ratificado por Lido DAO, como segundo titular del rol.
 
 Para limitar el poder del Multisig, se propone utilizar el mecanismo "Gate Seals". Este mecanismo limita la duración de la pausa y restringe la capacidad de pausar a un solo uso. Para otorgar la capacidad repetidamente, se requiere un voto de Lido DAO. El mecanismo ha sido implementado, por ejemplo, para retiros en el protocolo Lido en Ethereum en dos partes:
+
 - pausador desechable de un solo uso [Gate Seals](https://github.com/lidofinance/gate-seals);
 - contrato [PausableUntil](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/utils/PausableUntil.sol) (heredado por [WithdrawalQueue](https://github.com/lidofinance/lido-dao/blob/master/contracts/0.8.9/WithdrawalQueue.sol)).
 
@@ -245,6 +247,7 @@ Notación utilizada:
 - `Emergency Brakes L2 Multisig` - Multisig de Emergencia en L2 (los mismos participantes pero usando la instancia de L2 Safe).
 
 **Punto Final del Puente Personalizado en L1**
+
 - Actualizable
   - El administrador del proxy es `Lido Agent`
 - Admin es `Lido Agent`
@@ -264,6 +267,7 @@ Notación utilizada:
 - El único remitente de ejecución de L1 permitido en la lista blanca es `Lido Agent` (obtenido mediante `getEthereumExecutor()`)
 
 **Punto Final del Puente Personalizado en L2**
+
 - Actualizable
   - El administrador del proxy es `Ejecutor de Gobernanza L2`
 - Admin es `Ejecutor de Gobernanza L2`
@@ -279,6 +283,7 @@ Notación utilizada:
   - `Ejecutor de Gobernanza L2`
 
 **Token Puenteador en L2**
+
 - Actualizable
   - El administrador del proxy es `Ejecutor de Gobernanza L2`
 - La emisión está permitida solo por `Punto Final del Puente Personalizado en L2`
@@ -356,26 +361,26 @@ Para obtener comentarios rápidos sobre la posibilidad de que wstETH sea reconoc
 
 En la sección de comentarios, proporcione los detalles relevantes: artefactos, si los hay, y/o una descripción de por qué no se sigue o se sigue parcialmente la recomendación, etc.
 
-| Pregunta                                                                                                                                     | ¿Se sigue y/o comentario? |
-| -------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
-| ¿Se ha puentado wstETH?                                                                                                                     | sí/no                      |
-| Si está puentado, ¿cuánta adopción ha tenido el token?                                                                                       | sí/no                      |
-| R-1: Código auditado y despliegue verificable                                                                                               | sí/no/parcialmente         |
-| R-2: Mecánica de puente de bloqueo y mint                                                                                                   | sí/no                      |
-| R-3: Uso de puente canónico                                                                                                                 | sí/no                      |
-| R-4: Token wstETH en L2 actualizable                                                                                                         | sí/no/parcialmente         |
-| R-5: Decisiones de puenteador L1 Lido DAO                                                                                                   | sí/no/parcialmente         |
-| R-6: Instancias de puente actualizables dedicadas                                                                                            | sí/no/parcialmente         |
-| R-7: Depósitos y retiros pausables                                                                                                           | sí/no/parcialmente         |
-| R-8: Soporte para permiso ERC-2612 mejorado con EIP-1271                                                                                     | sí/no/parcialmente         |
-| R-9: Estado del token/puente antes de la votación de snapshot                                                                                 | sí/no/parcialmente         |
-| R-10: Mecánicas de upgradabilidad                                                                                                            | sí/no/parcialmente         |
-| R-11: Usar AccessControlEnumerable para ACL                                                                                                  | sí/no/parcialmente         |
-| R-12: Compartir los artefactos de despliegue                                                                                                 | sí/no/parcialmente         |
-| R-13: No usar direcciones de contrato iguales                                                                                                 | sí/no                      |
-| Los puentes son complicados en que la transacción puede tener éxito en un lado y fallar en el otro. ¿Cuál es el mecanismo de manejo para este problema? |                            |
-| ¿Hay un script de despliegue que configure todos los parámetros y autoridades correctamente?                                                  |                            |
-| ¿Hay un script de verificación posterior al despliegue que, dado un despliegue, verifique que todos los parámetros y autoridades estén configurados correctamente?                  |                            |
+| Pregunta                                                                                                                                                           | ¿Se sigue y/o comentario? |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------- |
+| ¿Se ha puentado wstETH?                                                                                                                                            | sí/no                     |
+| Si está puentado, ¿cuánta adopción ha tenido el token?                                                                                                             | sí/no                     |
+| R-1: Código auditado y despliegue verificable                                                                                                                      | sí/no/parcialmente        |
+| R-2: Mecánica de puente de bloqueo y mint                                                                                                                          | sí/no                     |
+| R-3: Uso de puente canónico                                                                                                                                        | sí/no                     |
+| R-4: Token wstETH en L2 actualizable                                                                                                                               | sí/no/parcialmente        |
+| R-5: Decisiones de puenteador L1 Lido DAO                                                                                                                          | sí/no/parcialmente        |
+| R-6: Instancias de puente actualizables dedicadas                                                                                                                  | sí/no/parcialmente        |
+| R-7: Depósitos y retiros pausables                                                                                                                                 | sí/no/parcialmente        |
+| R-8: Soporte para permiso ERC-2612 mejorado con EIP-1271                                                                                                           | sí/no/parcialmente        |
+| R-9: Estado del token/puente antes de la votación de snapshot                                                                                                      | sí/no/parcialmente        |
+| R-10: Mecánicas de upgradabilidad                                                                                                                                  | sí/no/parcialmente        |
+| R-11: Usar AccessControlEnumerable para ACL                                                                                                                        | sí/no/parcialmente        |
+| R-12: Compartir los artefactos de despliegue                                                                                                                       | sí/no/parcialmente        |
+| R-13: No usar direcciones de contrato iguales                                                                                                                      | sí/no                     |
+| Los puentes son complicados en que la transacción puede tener éxito en un lado y fallar en el otro. ¿Cuál es el mecanismo de manejo para este problema?            |                           |
+| ¿Hay un script de despliegue que configure todos los parámetros y autoridades correctamente?                                                                       |                           |
+| ¿Hay un script de verificación posterior al despliegue que, dado un despliegue, verifique que todos los parámetros y autoridades estén configurados correctamente? |                           |
 
 ## Referencias
 
@@ -390,4 +395,3 @@ En la sección de comentarios, proporcione los detalles relevantes: artefactos, 
 - Propuesta de reconocimiento de Lido DAO para wstETH en Linea https://research.lido.fi/t/wsteth-on-linea-ownership-acceptance-by-lido-dao/5961
 - Propuesta de reconocimiento de Lido DAO para wstETH en Scroll https://research.lido.fi/t/wsteth-deployment-on-scroll/6603
 - Propuesta de reconocimiento de Lido DAO para wstETH en Mode https://research.lido.fi/t/wsteth-deployment-on-mode/7365
-
